@@ -1,0 +1,431 @@
+﻿
+
+@using Facturafast.Models
+@{
+    tbc_Usuarios usuario = Session["tbc_Usuarios"] as tbc_Usuarios;
+}
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Responsive Bootstrap 5 Admin &amp; Dashboard Template">
+    <meta name="author" content="Bootlab">
+
+    <title>Facturafast</title>
+
+    <link rel="canonical" href="https://cfdi.facturafast.mx/" />
+    <link rel="shortcut icon" href="~/img/favicon.png">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <!-- Choose your prefered color scheme -->
+    <!-- <link href="css/light.css" rel="stylesheet"> -->
+    <!-- <link href="css/dark.css" rel="stylesheet"> -->
+    <!-- BEGIN SETTINGS -->
+    <!-- Remove this after purchasing -->
+    <link class="js-stylesheet" href="~/css/light.css" rel="stylesheet">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+    <link href="~/css/interno.css" rel="stylesheet" />
+    <script src="~/js/settings.js"></script>
+   
+
+    <!-- END SETTINGS -->
+    @*<script>
+            (function (h, o, t, j, a, r) {
+                h.hj = h.hj || function () { (h.hj.q = h.hj.q || []).push(arguments) };
+                h._hjSettings = { hjid: 2120269, hjsv: 6 };
+                a = o.getElementsByTagName('head')[0];
+                r = o.createElement('script'); r.async = 1;
+                r.src = t + h._hjSettings.hjid + j + h._hjSettings.hjsv;
+                a.appendChild(r);
+            })(window, document, 'https://static.hotjar.com/c/hotjar-', '.js?sv=');
+        </script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q3ZYEKLQ68"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() { dataLayer.push(arguments); }
+            gtag('js', new Date());
+
+            gtag('config', 'G-Q3ZYEKLQ68');
+        </script>*@
+
+</head>
+<!--
+  HOW TO USE:
+  data-theme: default (default), dark, light
+  data-layout: fluid (default), boxed
+  data-sidebar-position: left (default), right
+  data-sidebar-behavior: sticky (default), fixed, compact
+-->
+
+<body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-behavior="sticky">
+    <div class="wrapper">
+        <nav id="sidebar" class="sidebar">
+            <div class="sidebar-content js-simplebar">
+                @*<a class="sidebar-brand" href="index.html">
+
+
+                        <span class="align-middle me-3">LOGO</span>
+                    </a>*@
+                <br /><br /><br />
+                <ul class="sidebar-nav">
+
+                    <li class="sidebar-header">
+                        Principal
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="@Url.Action("Inicio","Panel")">
+                            <i class="align-middle" data-feather="layout"></i> <span class="align-middle">Inicio</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a data-bs-target="#documentos" data-bs-toggle="collapse" class="sidebar-link collapsed">
+                            <i class="align-middle" data-feather="file"></i> <span class="align-middle">Documentos</span>
+                        </a>
+                        <ul id="documentos" class="sidebar-dropdown list-unstyled collapse " data-bs-parent="#sidebar">
+                            <li class="sidebar-item"><a class="sidebar-link" href="@Url.Action("NotasVentas","Panel")">Notas de Venta</a></li>
+                            <li class="sidebar-item">
+                                <a data-bs-target="#facturas" data-bs-toggle="collapse" class="sidebar-link collapsed">
+                                    Comprobantes
+                                </a>
+                                <ul id="facturas" class="sidebar-dropdown list-unstyled collapse">
+                                    <li class="sidebar-item"><a class="sidebar-link" href="@Url.Action("ListaFactura","Facturacion")">Factura</a></li>
+                                    <li class="sidebar-item"><a class="sidebar-link" href="@Url.Action("ListaComplemento","Facturacion")">Complemento de Pago</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a data-bs-target="#catalogos" data-bs-toggle="collapse" class="sidebar-link collapsed">
+                            <i class="align-middle" data-feather="folder"></i> <span class="align-middle">Catálogos</span>
+                        </a>
+                        <ul id="catalogos" class="sidebar-dropdown list-unstyled collapse " data-bs-parent="#sidebar">
+                            <li class="sidebar-item"><a class="sidebar-link" href="@Url.Action("Clientes","Catalogos")">Clientes</a></li>
+                            <li class="sidebar-item"><a class="sidebar-link" href="@Url.Action("Productos","Catalogos")">Productos y Servicios</a></li>
+                            <li class="sidebar-item"><a class="sidebar-link" href="@Url.Action("Empleados","Catalogos")">Empleados</a></li>
+                            <li class="sidebar-item"><a class="sidebar-link" href="@Url.Action("CuentasBancarias","Catalogos")">Cuentas Bancarias</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a data-bs-target="#cartaporte" data-bs-toggle="collapse" class="sidebar-link collapsed">
+                            <i class="align-middle" data-feather="truck"></i> <span class="align-middle">Carta Porte</span>
+                        </a>
+                        <ul id="cartaporte" class="sidebar-dropdown list-unstyled collapse " data-bs-parent="#sidebar">
+                            <li class="sidebar-item"><a class="sidebar-link" href="@Url.Action("Mercancias","CartaPorte")">Mercancías</a></li>
+                            <li class="sidebar-item"><a class="sidebar-link" href="@Url.Action("Ubicaciones","CartaPorte")">Ubicaciones</a></li>
+                            <li class="sidebar-item"><a class="sidebar-link" href="@Url.Action("Figuras","CartaPorte")">Figuras</a></li>
+                            @*<li class="sidebar-item">
+                                    <a data-bs-target="#figuras" data-bs-toggle="collapse" class="sidebar-link collapsed">
+                                        Figuras
+                                    </a>
+                                    <ul id="figuras" class="sidebar-dropdown list-unstyled collapse">
+                                        <li class="sidebar-item">
+                                            <a class="sidebar-link" data-bs-target="#">Propietarios</a>
+                                            <a class="sidebar-link" data-bs-target="#">Operadores</a>
+                                            <a class="sidebar-link" data-bs-target="#">Arrendatario</a>
+                                            <a class="sidebar-link" data-bs-target="#">Notificado</a>
+                                        </li>
+                                    </ul>
+                                </li>*@
+                            <li class="sidebar-item">
+                                <a data-bs-target="#transportes" data-bs-toggle="collapse" class="sidebar-link collapsed">
+                                    Transportes
+                                </a>
+                                <ul id="transportes" class="sidebar-dropdown list-unstyled collapse">
+                                    <li class="sidebar-item">
+                                        <a class="sidebar-link" href="@Url.Action("AutoTransporte","CartaPorte")">Autotransporte</a>
+                                        <a class="sidebar-link" href="@Url.Action("TransporteAereo","CartaPorte")">Aereo</a>
+                                        <a class="sidebar-link" href="@Url.Action("TransporteMaritimo","CartaPorte")">Maritimo</a>
+                                        <a class="sidebar-link" href="@Url.Action("ListFerroviario","CartaPorte")">Ferroviario</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="sidebar-item">
+                                <a data-bs-target="#complementos_" data-bs-toggle="collapse" class="sidebar-link collapsed">
+                                    Complemento
+                                </a>
+                                <ul id="complementos_" class="sidebar-dropdown list-unstyled collapse">
+                                    <li class="sidebar item">
+                                        <a class="sidebar-link" href="@Url.Action("ListCarPorte","CartaPorte")">Nuevo </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a data-bs-target="#reportes" data-bs-toggle="collapse" class="sidebar-link collapsed">
+                            <i class="align-middle" data-feather="inbox"></i> <span class="align-middle">Reportes</span>
+                        </a>
+                        <ul id="reportes" class="sidebar-dropdown list-unstyled collapse " data-bs-parent="#sidebar">
+                            <li class="sidebar-item"><a class="sidebar-link" href="@Url.Action("NotasVentas","Reportes")">Notas de Venta</a></li>
+                            <li class="sidebar-item"><a class="sidebar-link" href="@Url.Action("Ingresos","Reportes")">Ingresos</a></li>
+                            <li class="sidebar-item"><a class="sidebar-link" href="@Url.Action("Gastos","Reportes")">Gastos</a></li>
+                            @*<li class="sidebar-item"><a class="sidebar-link" href="@Url.Action("Nominas","Reportes")">Nóminas</a></li>*@
+                            <li class="sidebar-item"><a class="sidebar-link" href="@Url.Action("CartaPorte","Reportes")">Carta Porte</a></li>
+                            <li class="sidebar-item"><a class="sidebar-link" href="@Url.Action("CargaXML","Reportes")">Cargar XML</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="sidebar-header">
+                        Configuración
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="@Url.Action("Firmas","Panel")">
+                            <i class="align-middle" data-feather="database"></i> <span class="align-middle">Firmas</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="@Url.Action("Pagos","Panel")">
+                            <i class="align-middle" data-feather="credit-card"></i> <span class="align-middle">Mis Compras</span>
+                        </a>
+                    </li>
+                    @*<li class="sidebar-item">
+                            <a data-bs-target="#documentacion" data-bs-toggle="collapse" class="sidebar-link collapsed">
+                                <i class="align-middle" data-feather="book-open"></i> <span class="align-middle">Documentación</span>
+                            </a>
+                            <ul id="documentacion" class="sidebar-dropdown list-unstyled collapse " data-bs-parent="#sidebar">
+                                <li class="sidebar-item"><a class="sidebar-link" href="docs-introduction.html">Introducción</a></li>
+                                <li class="sidebar-item"><a class="sidebar-link" href="docs-installation.html">Guias</a></li>
+                            </ul>
+                        </li>*@
+
+
+                    @if (usuario.id_perfil != 3)
+                    {
+                        <li class="sidebar-header">
+                            Master
+                        </li>
+
+                        <li class="sidebar-item">
+                            <a data-bs-target="#master" data-bs-toggle="collapse" class="sidebar-link collapsed">
+                                <i class="align-middle" data-feather="lock"></i> <span class="align-middle">Administración</span>
+                            </a>
+                            <ul id="master" class="sidebar-dropdown list-unstyled collapse " data-bs-parent="#sidebar">
+                                <li class="sidebar-item"><a class="sidebar-link" href="@Url.Action("Usuarios","Administracion")">Usuarios</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="sidebar-header">
+                            Administración
+                        </li>
+
+                        <li class="sidebar-item">
+                            <a data-bs-target="#administracion" data-bs-toggle="collapse" class="sidebar-link collapsed">
+                                <i class="align-middle" data-feather="user"></i> <span class="align-middle">Usuarios</span>
+                            </a>
+                            <ul id="administracion" class="sidebar-dropdown list-unstyled collapse " data-bs-parent="#sidebar">
+                                <li class="sidebar-item"><a class="sidebar-link" href="@Url.Action("Clientes","Administracion")">Clientes</a></li>
+                                <li class="sidebar-item"><a class="sidebar-link" href="@Url.Action("Vendedores","Administracion")">Vendedores</a></li>
+                            </ul>
+                            <a data-bs-target="#configuraciones" data-bs-toggle="collapse" class="sidebar-link collapsed">
+                                <i class="align-middle" data-feather="settings"></i> <span class="align-middle">Configuraciones</span>
+                            </a>
+                            <ul id="configuraciones" class="sidebar-dropdown list-unstyled collapse " data-bs-parent="#sidebar">
+                                <li class="sidebar-item"><a class="sidebar-link" href="@Url.Action("Paquetes","Administracion")">Paquetes</a></li>
+                                <li class="sidebar-item"><a class="sidebar-link" href="@Url.Action("Variables","Administracion")">Variables de Cálculo</a></li>
+                            </ul>
+                        </li>
+
+
+                        <li class="sidebar-header">
+                            Contabilidad
+                        </li>
+
+                        <li class="sidebar-item">
+                            <a data-bs-target="#administracion" data-bs-toggle="collapse" class="sidebar-link collapsed">
+                                <i class="align-middle" data-feather="user"></i> <span class="align-middle">Usuarios</span>
+                            </a>
+                            <ul id="administracion" class="sidebar-dropdown list-unstyled collapse " data-bs-parent="#sidebar">
+                                <li class="sidebar-item"><a class="sidebar-link" href="@Url.Action("Clientes","Administracion")">Clientes</a></li>
+                                <li class="sidebar-item"><a class="sidebar-link" href="@Url.Action("Vendedores","Administracion")">Vendedores</a></li>
+                            </ul>
+                            <a data-bs-target="#configuraciones" data-bs-toggle="collapse" class="sidebar-link collapsed">
+                                <i class="align-middle" data-feather="settings"></i> <span class="align-middle">Configuraciones</span>
+                            </a>
+                            <ul id="configuraciones" class="sidebar-dropdown list-unstyled collapse " data-bs-parent="#sidebar">
+                                <li class="sidebar-item"><a class="sidebar-link" href="@Url.Action("Paquetes","Administracion")">Paquetes</a></li>
+                                <li class="sidebar-item"><a class="sidebar-link" href="@Url.Action("Variables","Administracion")">Variables de Cálculo</a></li>
+                            </ul>
+                        </li>
+
+                    }
+                </ul>
+
+            </div>
+        </nav>
+        <div class="main">
+            <nav class="navbar navbar-expand navbar-light navbar-bg">
+                <a class="sidebar-toggle">
+                    <i class="hamburger align-self-center"></i>
+                </a>
+
+                <div class="d-none d-sm-inline-block">
+
+                    &nbsp;&nbsp;<img src="~/img/logo.png" />
+
+
+                </div>
+
+
+                <div class="navbar-collapse collapse">
+                    <ul class="navbar-nav navbar-align">
+
+
+                        <li class="nav-item">
+                            <a class="nav-link text-danger" href="@Url.Action("Factura","Facturacion")" role="button">
+                                <i class="align-middle" data-feather="plus-square"></i> &nbsp; Factura
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link text-primary" href="#" role="button">
+                                <i class="align-middle" data-feather="clipboard"></i> &nbsp; Nómina
+                            </a>
+                        </li>
+
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-icon dropdown-toggle d-inline-block d-sm-none" href="#" data-bs-toggle="dropdown">
+                                <i class="align-middle" data-feather="settings"></i>
+                            </a>
+
+                            <a class="nav-link dropdown-toggle d-none d-sm-inline-block" href="#" data-bs-toggle="dropdown">
+                                <span class="text-dark">@usuario.nombre_razon</span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end">
+                                <a class="dropdown-item" href="@Url.Action("Perfil","Panel")"><i class="align-middle me-1" data-feather="user"></i> Perfil</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="pages-settings.html">Aviso de Privacidad</a>
+                                <a class="dropdown-item" href="#">Ayuda</a>
+                                <a class="dropdown-item" href="@Url.Action("CerrarSesion","Sesion")">Cerrar Sesión</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <main class="content">
+                @RenderBody()
+            </main>
+
+            <footer class="footer">
+                <div class="container-fluid">
+                    <div class="row text-muted">
+                        <div class="col-6 text-start">
+                            <ul class="list-inline">
+                                <li class="list-inline-item">
+                                    <a class="text-muted" href="#">Soporte</a>
+                                </li>
+                                <li class="list-inline-item">
+                                    <a class="text-muted" href="#">Ayuda</a>
+                                </li>
+                                <li class="list-inline-item">
+                                    <a class="text-muted" href="#">Aviso de Privacidad</a>
+                                </li>
+                                <li class="list-inline-item">
+                                    <a class="text-muted" href="#">Terminos del Servicio</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-6 text-end">
+                            <p class="mb-0">
+                                &copy; 2022 - <a href="index.html" class="text-muted">Facturafast</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script src="~/js/app.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+    <script type="text/javascript" src="~/js/jquery.timepicker.js"></script>
+    <link rel="stylesheet" type="text/css" href="~/css/jquery.timepicker.css" />
+    <script type="text/javascript" src="~/js/bootstrap-datepicker.js"></script>
+    <link rel="stylesheet" type="text/css" href="~/css/bootstrap-datepicker.css" />
+    <script src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.7/jquery.inputmask.min.js" integrity="sha512-jTgBq4+dMYh73dquskmUFEgMY5mptcbqSw2rmhOZZSJjZbD2wMt0H5nhqWtleVkyBEjmzid5nyERPSNBafG4GQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="~/js/utils.js"></script>
+    <script>
+        
+         document.addEventListener("DOMContentLoaded", function () {
+            @if (ViewBag.Mensaje != null)
+            {
+                <text>
+             notificacionAlert("@ViewBag.Mensaje", "@ViewBag.TMensaje");
+                </text>
+            }
+             $("#datetimepicker-dashboard").datepicker({
+                 disableTouchKeyboard: true,
+                 locale: 'es-es',
+                 inline: true,
+                 sideBySide: false,
+                 format: 'dd-mm-yyyy'
+             });
+             let fca_hoy = new Date();
+             let ann = fca_hoy.getFullYear();
+             let mes = fca_hoy.getMonth();
+             let dia = fca_hoy.getDate();
+
+             $('#datetimepicker-dashboard').datepicker('setDates', [new Date(ann, mes, dia), new Date(2022, 10, 15), new Date(2022, 11, 24)])
+
+             $('div tbody').on('click', 'tr > .active', function () {
+                 //alert($(this).data().day)
+                 var diaSel = $(this).data().day;
+                 notificacionAlert("Hoy celebramos a ." + diaSel, "success");
+                 console.log($(this).data());
+             });
+        });
+    </script>
+
+    <div class="modal fade" id="modalCargando" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <br />
+                    <div class="row">
+                        <div class="col-md-2">
+
+                        </div>
+                        <div class="col-md-8 text-center">
+                            <div class="spinner-grow spinner-grow-sm text-success me-2" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                            <div class="spinner-grow spinner-grow-sm text-success me-2" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                            <div class="spinner-grow spinner-grow-sm text-success me-2" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                            <div class="spinner-grow spinner-grow-sm text-success me-2" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                            <br /><br />
+                            <h3>Procesando solicitud...</h3>
+                        </div>
+                        <div class="col-md-2">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

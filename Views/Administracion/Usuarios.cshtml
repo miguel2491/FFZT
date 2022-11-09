@@ -1,0 +1,204 @@
+﻿@model IEnumerable<Facturafast.Models.tbc_Usuarios>
+@using Facturafast.Models
+@{
+    BD_FFEntities db = new BD_FFEntities();
+}
+<h1 class="h3 mb-3">Lista de Usuarios</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-actions float-end">
+
+                </div>
+                <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#modalUsuario" onclick="nuevoUsuario();"><i class="fas fa-plus"></i> Agregar Usuario</button>
+            </div>
+            <div class="card-body">
+                <table id="datatables-usuarios" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>Usuario</th>
+                            <th>Nombre</th>
+                            <th>Perfil</th>
+                            <th>Correo Electrónico</th>
+                            <th>Teléfono</th>
+                            <th>Estatus</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td></td>
+                                <td><button class="btn btn-warning btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#modalUsuario" onclick="actualizarUsuario(@item.id_usuario, '@item.usuario', '@item.nombre_razon', '@item.telefono', '@item.correo_electronico', @item.id_perfil, @item.id_estatus);"><i class="fas fa-edit"></i></button></td>
+                                <td>@item.usuario</td>
+                                <td>@item.nombre_razon</td>
+                                <td>@db.tbc_Perfiles.Where(s => s.id_perfil == item.id_perfil).First().perfil</td>
+                                <td>@item.correo_electronico</td>
+                                <td>@item.telefono</td>
+                                <td>@db.tbc_Estatus.Where(s => s.id_estatus == item.id_estatus).First().estatus</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form name="GuardarUsuario.Administracion" action="@Url.Action("GuardarUsuario","Administracion")" method="post" onsubmit="return validateForm();">
+    <div class="modal fade" id="modalUsuario" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Formulario de Usuario</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body m-3">
+                    <input type="hidden" id="txtIdUsuario" name="txtIdUsuario" />
+                    <div class="row">
+                        <div class="col-md-7">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtUsuario" name="txtUsuario" placeholder="Usuario" onkeyup="keyPress();" required>
+                                <label for="txtUsuario">Usuario</label>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbEstatus" name="cmbEstatus" aria-label="Estatus">
+                                    <option value="1">Activo</option>
+                                    <option value="2">Inactivo</option>
+                                </select>
+                                <label for="cmbEstatus">Estatus</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-floating mb-3">
+                                <textarea type="text" class="form-control form-control-lg" id="txtNombreUsuario" name="txtNombreUsuario" style="height:100px;" placeholder="Nombre" required></textarea>
+                                <label for="txtNombreUsuario">Nombre</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-7">
+                            <div class="form-floating mb-3">
+                                <input type="email" class="form-control form-control-lg" id="txtCorreoElectronicoUsuario" name="txtCorreoElectronicoUsuario" placeholder="Correo Electrónico" required>
+                                <label for="txtCorreoElectronicoUsuario">Correo Electrónico</label>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="form-floating mb-3">
+                                <input type="tel" class="form-control form-control-lg" pattern="^[0-9]{10}" id="txtTelefonoUsuario" name="txtTelefonoUsuario" placeholder="Teléfono" required>
+                                <label for="txtTelefonoUsuario">Teléfono</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-7">
+                            <div class="form-floating mb-3">
+                                <input type="password" class="form-control form-control-lg" id="txtPasswordUsuario" name="txtPasswordUsuario" placeholder="Contraseña">
+                                <label for="txtPasswordUsuario">Contraseña</label>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbPerfil" name="cmbPerfil" aria-label="Perfil">
+                                    <option value="1">Master</option>
+                                    <option value="2">Administrador</option>
+                                    <option value="4">Vendedor</option>
+                                </select>
+                                <label for="cmbPerfil">Perfil</label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i>&nbsp; Guardar Datos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        $("#datatables-usuarios").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1] }
+            ],
+            order: [[2, 'asc']]
+        });
+    });
+
+    function validateForm() {
+        let rfc = document.forms["GuardarUsuario.Administracion"]["txtUsuario"].value;
+        if (rfc != "") {
+
+            if ($("#txtUsuario").hasClass("is-invalid")) {
+                notificacionAlert("El Usuario " + $("#txtUsuario").val() + " ya existe.", "danger");                
+                return false;
+            }
+
+            if ($("#txtUsuario").hasClass("is-valid")) {
+                bootstrap.Modal.getOrCreateInstance(document.getElementById("modalUsuario")).hide();
+                abrirCargando();
+                return true;
+            }
+            else {
+                notificacionAlert("El Usuario no cumple con la validación requerida.", "danger");                
+                $("#txtUsuario").addClass("is-invalid");
+                return false;
+            }
+            
+        }
+        return false;
+    }
+
+    function nuevoUsuario() {
+        document.forms["GuardarUsuario.Administracion"].reset();
+        document.forms["GuardarUsuario.Administracion"]["txtIdUsuario"].value = 0;
+        $("#cmbPerfil").val(2);
+        $("#cmbEstatus").val(1);
+        $("#txtPasswordUsuario").prop("required", true);
+        $("#txtUsuario").removeClass("is-invalid");
+        $("#txtUsuario").removeClass("is-valid");
+    }
+
+    function actualizarUsuario(a, b, c, d, e, f, g) {
+        $("#txtPasswordUsuario").prop("required", false);
+        document.forms["GuardarUsuario.Administracion"]["txtIdUsuario"].value = a;
+        document.forms["GuardarUsuario.Administracion"]["txtUsuario"].value = b;
+        document.forms["GuardarUsuario.Administracion"]["txtNombreUsuario"].value = c;
+        document.forms["GuardarUsuario.Administracion"]["txtTelefonoUsuario"].value = d;
+        document.forms["GuardarUsuario.Administracion"]["txtCorreoElectronicoUsuario"].value = e;
+        $("#cmbPerfil").val(f);
+        $("#cmbEstatus").val(g);
+        $("#txtUsuario").removeClass("is-invalid");
+        $("#txtUsuario").removeClass("is-valid");
+        $("#txtUsuario").addClass("is-valid");
+    }
+
+    function keyPress() {
+
+        var len = $("#txtUsuario").val();
+        if (len.length > 5) {
+            $.get("@Url.Action("existeUsuario", "Administracion")?id=" + $("#txtIdUsuario").val() + "&usuario=" + len, async function (data) {
+                $Usuario = $("#txtUsuario");
+                $Usuario.removeClass("is-invalid");
+                $Usuario.removeClass("is-valid");
+                $Usuario.addClass(data);
+            });
+        }
+
+    }
+
+</script>

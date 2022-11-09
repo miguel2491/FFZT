@@ -1,0 +1,127 @@
+﻿@model IEnumerable<Facturafast.Models.tbc_Cuentas_Bancarias>
+@using Facturafast.Models
+@{
+    BD_FFEntities db = new BD_FFEntities();
+    tbc_Usuarios usuario = Session["tbc_Usuarios"] as tbc_Usuarios;
+}
+
+<h1 class="h3 mb-3">Cuentas Bancarias</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-actions float-end">
+
+                </div>
+                <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#modalCuenta" onclick="nuevaCuenta();"><i class="fas fa-plus"></i> Agregar Cuenta Bancaria</button>
+            </div>
+            <div class="card-body">
+                <table id="datatables-cuentas" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>Banco</th>
+                            <th>CLABE</th>
+                            <th>Propietario</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td></td>
+                                <td><button class="btn btn-warning btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#modalCuenta" onclick="actualizarCuenta(@item.id_cuenta_bancaria, '@item.banco', '@item.clabe', '@item.propietario');"><i class="fas fa-edit"></i></button></td>
+                                <td>@item.banco</td>
+                                <td>@item.clabe</td>
+                                <td>@item.propietario</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form name="GuardarCuenta.Catalogos" action="@Url.Action("GuardarCuenta","Catalogos")" method="post" onsubmit="return validateForm();">
+    <div class="modal fade" id="modalCuenta" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Formulario de Cuenta Bancaria</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body m-3">
+                    <input type="hidden" id="txtIdCuenta" name="txtIdCuenta" />                   
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtBanco" name="txtBanco" placeholder="Banco" required>
+                                <label for="txtBanco">Banco</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtCLABE" name="txtCLABE" placeholder="CLABE" required>
+                                <label for="txtCLABE">CLABE</label>
+                            </div>
+                        </div>                        
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtPropietario" name="txtPropietario" placeholder="Propietario" required>
+                                <label for="txtPropietario">Propietario</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i>&nbsp; Guardar Datos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        $("#datatables-cuentas").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1] }
+            ],
+            order: [[2, 'asc']]
+        });
+    });
+
+    function validateForm() {
+        let rfc = document.forms["GuardarCuenta.Catalogos"]["txtCLABE"].value;
+        if (rfc != "") {
+
+            bootstrap.Modal.getOrCreateInstance(document.getElementById("modalCuenta")).hide();
+            abrirCargando();
+
+            return true;
+        }
+        return false;
+    }
+
+    function nuevaCuenta() {
+        document.forms["GuardarCuenta.Catalogos"].reset();
+        document.forms["GuardarCuenta.Catalogos"]["txtIdCuenta"].value = 0;
+    }
+
+    function actualizarCuenta(a, b, c, d) {
+        document.forms["GuardarCuenta.Catalogos"]["txtIdCuenta"].value = a;
+        document.forms["GuardarCuenta.Catalogos"]["txtBanco"].value = b;
+        document.forms["GuardarCuenta.Catalogos"]["txtCLABE"].value = c;
+        document.forms["GuardarCuenta.Catalogos"]["txtPropietario"].value = d;
+    }
+
+</script>
+

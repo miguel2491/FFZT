@@ -1,0 +1,39 @@
+﻿
+<div class="row">
+    <div class="col-md-10 col-xl-8 mx-auto">
+        <h1 class="text-center">Estatus del Pago</h1>
+        <p class="lead text-center mb-4">@ViewBag.MensajePago</p>
+
+        <div class="row py-4">
+            <div class="col-sm-2 mb-3 mb-md-0">
+            </div>
+            <div class="col-sm-8 mb-3 mb-md-0">
+                <div class="card text-center h-100">
+                    <div class="card-body d-flex flex-column">
+                        <br />
+                        <div class="mb-4">
+                            <i class="fas fa-4x fa-@ViewBag.Icono text-@ViewBag.Tipo"></i>
+                        </div>
+
+                        <br /><br />
+                        <h3>Comentario:</h3>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                @ViewBag.Comentario
+                            </li>
+                        </ul>
+                        <br /><br /><br />
+                        <div class="mt-auto">
+                            <a href="@Url.Action("Pagos","Panel")" class="btn btn-lg btn-primary"><i class="fas fa-credit-card"></i> Mis Compras</a> &nbsp;&nbsp;&nbsp;
+                            <a href="@Url.Action("Inicio","Panel")" class="btn btn-lg btn-success"><i class="fas fa-home"></i> Volver al Inicio</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-2 mb-3 mb-md-0">
+
+            </div>
+        </div>
+
+    </div>
+</div>

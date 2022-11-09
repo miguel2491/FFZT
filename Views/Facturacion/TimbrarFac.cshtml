@@ -1,0 +1,260 @@
+﻿@using Facturafast.Models
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/js/utilsFactura.js"></script>
+<h1 class="h3 mb-3">PreFactura</h1>
+<div class="row">
+    <div class="col-md-2 col-xs-2">
+        <input type="hidden" value="@Model.id_pre_factura" id="idprefac" />
+        <button class="btn btn-danger btnEstatus mb-3" id="btnTimbrar" style="visibility:hidden" onclick="timbrarModal(@Model.id_pre_factura)">Timbrar</button><br/>
+        <a class="btn btn-warning btnEstatus mb-3" id="btnEditar" href="/Facturacion/Factura?id=@Model.id_pre_factura" style="visibility: hidden"><i class="fas fa-edit"></i> Editar</a><br />
+        <a class="btn btn-success btnTimbrar" id="btnListar" href='/Facturacion/ListaFactura' style="visibility: hidden"><i class="fas fa-file-alt"></i> Listar</a>
+    </div>
+    <div class="col-md-10 col-xs-10" id="d_prefactura" style="visibility:hidden">
+        <div class="card">
+            <div class="card-header">
+                
+            </div>
+            <div class="row rpdf">
+                
+            </div>
+        </div>
+    </div>
+</div>
+<!-- MODAL FACTS -->
+<div class="modal fade" id="modalTimbrado" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Timbrar</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body m-3">
+                <input type="hidden" id="idprefac_modal" />
+                <input type="hidden" id="correo_cliente" />
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="forma_pago">
+                            <label for="forma_pago">Forma Pago</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="metodo_pago">
+                            <label for="metodo_pago">Método Pago</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="total">
+                            <label for="total">Total</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-12">
+                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="uso_cfdi">
+                            <label for="uso_cfdi">Uso CFDI</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="rfc_receptor">
+                            <label for="rfc_emisor">RFC</label>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="razon_recpetor">
+                            <label for="razon_emisor">Razón Social</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="timbrar()" id="btnTimbre"><i class="fas fa-bell"></i>&nbsp; Timbrar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnCerrar"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const estatus = '@ViewBag.Estatus';
+    setTimeout(function () { abrirCargando(); previsualizar(); }, 1000);
+
+    var f_pdf, f_doc = "";
+
+    function previsualizar()
+    {
+        let id = $("#idprefac").val();
+        $("#d_prefactura").css("visibility", "visible");
+        //-------------------------------------------------------------------------
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            url: '/Facturacion/PreFacturar?id='+id,
+            data: JSON.stringify({ 'id': id}),
+            success: function (data) {
+                console.log(data);
+                var response = data;
+                if (response == "NG")
+                {
+                    previsualizar();
+                }
+                else
+                {
+                    f_pdf = response;
+                    setTimeout(function () {
+                        $(".rpdf").html('<iframe src="/' + response + '" style="height:100vh"></iframe>');
+                        cerrarCargando();
+                        $("#btnPreTimbrar").css("display", "none");
+                        $(".btnTimbrar").css("visibility", "visible");
+                        if (estatus == 1) {
+                            $(".btnEstatus").css("visibility", "visible");
+                            gen_xml(id);
+                        }
+                        f_doc = f_pdf.replace('PDF', 'DOCX');
+                        f_doc = f_doc.replace('.pdf', '.docx');
+
+                    }, 15000);
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                cerrarCargando();
+            }
+        });
+        //-------------------------------------------------------------------------
+    }
+
+    function timbrarModal(id)
+    {
+        $("#idprefac_modal").val(id);
+        bootstrap.Modal.getOrCreateInstance(document.getElementById("modalTimbrado")).show();
+        $.get("@Url.Action("getFacturas", "Facturacion")?id=" + id, async function (data) {
+            console.log(data);
+            $("#correo_cliente").val(data[0].correo);
+            $("#forma_pago").val(data[0].fpago);
+            $("#metodo_pago").val(data[0].metodo_pago_);
+            $("#uso_cfdi").val(data[0].u_cfdi);
+            $("#total").val(data[0].total);
+            $("#rfc_receptor").val(data[0].rfc);
+            $("#razon_recpetor").val(data[0].n_rfc);
+        });
+    }
+
+    function timbrar()
+    {
+        
+        $("#btnTimbre").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class= "sr-only">Loading...</span>');
+        $("#btnCerrar").css("disabled",true);
+       
+        let id = $("#idprefac_modal").val();
+        abrirCargando();
+        $("#btnPreTimbrar").css("display", "block");
+        $("#btnTimbrar").css("display", "none");
+        //-------------------------------------------------------------------------
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            url: '/XML/TimbrarXML?id_=' + id,
+            data: JSON.stringify({ 'id_': id, 'n_doc': 'Factura.xml', 'tipo': 'Factura' }),
+            success: function (data) {
+                var response = data.split("|");
+                console.log(response);
+                if (response[0] == "Timbrado") {
+                    notificacionAlert("Timbrado Correctamente", "success");
+                    previsualizar();
+                    setTimeout(function () {
+                        $(".modal-footer").html('<button class="btn btn-primary" onclick=sendcorreo()><i class="fas fa-envelope"></i>&nbsp; Enviar Correo</button>' +
+                            '<a target="_blank" class="btn btn-success" href="../' + f_pdf + '"><i class="fas fa-file"></i>&nbsp; Descargar PDF</button>' +
+                            '<a class="btn btn-info" href="../' + response[1] + '"><i class="fas fa-file"></i>&nbsp; Descargar XML</button>');
+                    }, 5000);
+
+                    cerrarCargando();
+                } else {
+                    notificacionAlert("Error, " + response[2] + " ,vuelva a intentar", "danger");
+                    cerrarCargando();
+                }
+                
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                cerrarCargando();
+            }
+        });
+        //-------------------------------------------------------------------------
+    }
+
+    function sendcorreo()
+    {
+        abrirCargando();
+        let correo = $("#correo_cliente").val();
+        let id = $("#idprefac_modal").val();
+        //-------------------------------------------------------------------------
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            url: '/Facturacion/EnviarCorreo',
+            data: JSON.stringify({ 'id_': id, 'correo_': correo}),
+            success: function (data) {
+                var response = data;
+                console.log(response);
+                cerrarCargando();
+                if (response == "Enviado") {
+                    notificacionAlert("Correo enviado satisfactoriamente.", "success");
+                    setTimeout(function () { window.location = '@Url.Action("ListaFactura", "Facturacion")' }, 3000);
+                } else {
+                    notificacionAlert("Ocurrio un problema al enviar el correo, intentelo mas tarde.", "danger");
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                cerrarCargando();
+            }
+        });
+        //-------------------------------------------------------------------------
+    }
+
+    function gen_xml(id)
+    {
+    //-------------------------------------------------------------------------
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            url: '/XML/GenXML?id_=' + id,
+            data: JSON.stringify({ 'id_': id }),
+            success: function (data) {
+                var response = data;
+                console.log(response);
+                if (response == "Timbrado" || response == "Timdrado") {
+                    setTimeout(function () {
+                        $(".modal-footer").html('<button class="btn btn-primary" onclick=sendcorreo()><i class="fas fa-envelope"></i>&nbsp; Enviar Correo</button>' +
+                            '<a target="_blank" class="btn btn-success" href="../' + f_pdf + '"><i class="fas fa-file"></i>&nbsp; Descargar PDF</button>' +
+                            '<a class="btn btn-info" href="../' + f_doc + '"><i class="fas fa-file"></i>&nbsp; Descargar XML</button>');
+                    }, 5000);
+                    cerrarCargando();
+                } else {
+                    //notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                    cerrarCargando();
+                }
+
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                cerrarCargando();
+            }
+        });
+        //-------------------------------------------------------------------------
+    }
+
+</script>
+
+

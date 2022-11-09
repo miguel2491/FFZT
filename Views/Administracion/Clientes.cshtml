@@ -1,0 +1,233 @@
+﻿@model IEnumerable<Facturafast.Models.tbc_Usuarios>
+@using Facturafast.Models
+@{
+    BD_FFEntities db = new BD_FFEntities();
+}
+<h1 class="h3 mb-3">Lista de Clientes</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-actions float-end">
+
+                </div>
+                <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#modalCliente" onclick="nuevoCliente();"><i class="fas fa-plus"></i> Agregar Cliente</button>
+            </div>
+            <div class="card-body">
+                <table id="datatables-clientes" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>Usuario</th>
+                            <th>Nombre / Razón Social</th>
+                            <th>RFC</th>
+                            <th>Correo Electrónico</th>
+                            <th>Teléfono</th>
+                            <th>Estatus</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                            {
+                                tbr_Vendedor_Cliente vendedor = db.tbr_Vendedor_Cliente.Where(s => s.id_cliente_usuario == item.id_usuario).Single();
+
+                            <tr>
+                                <td></td>
+                                <td>
+                                    <table>
+                                        <tr>
+                                            <td style="padding:0px 5px;">
+                                                <button class="btn btn-warning btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#modalCliente" onclick="actualizarCliente(@item.id_usuario, '@item.usuario', '@item.nombre_razon', '@item.telefono', '@item.correo_electronico', '@item.rfc', @item.id_estatus , @vendedor.id_vendedor_usuario);"><i class="fas fa-edit"></i></button> &nbsp;&nbsp;
+                                            </td>
+                                            <td style="padding:0px 5px;">
+                                                <button class="btn btn-secondary btn-sm" type="button" tabindex="0" data-bs-trigger="focus" title="Contraseña" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="top" data-bs-content="@item.password"><i class="fas fa-eye"></i></button>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    
+                                   
+                                </td>
+                                <td>@item.usuario</td>
+                                <td>@item.nombre_razon</td>
+                                <td>@item.rfc</td>
+                                <td>@item.correo_electronico</td>
+                                <td>@item.telefono</td>
+                                <td>@db.tbc_Estatus.Where(s => s.id_estatus == item.id_estatus).First().estatus</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form name="GuardarCliente.Administracion" action="@Url.Action("GuardarCliente","Administracion")" method="post" onsubmit="return validateForm();">
+    <div class="modal fade" id="modalCliente" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Formulario del Cliente</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body m-3">
+                    <input type="hidden" id="txtIdUsuario" name="txtIdUsuario" />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg text-uppercase" id="txtRFCUsuario" name="txtRFCUsuario" placeholder="RFC" onblur="copiarRFC();" required>
+                                <label for="txtRFCUsuario">RFC</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg text-uppercase" id="txtUsuario" name="txtUsuario" placeholder="Usuario" required readonly>
+                                <label for="txtUsuario">Usuario</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-floating mb-3">
+                                <textarea type="text" class="form-control form-control-lg text-uppercase" id="txtNombreUsuario" name="txtNombreUsuario" style="height:100px;" placeholder="Nombre / Razón Social" required></textarea>
+                                <label for="txtNombreUsuario">Nombre / Razón Social</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-7">
+                            <div class="form-floating mb-3">
+                                <input type="email" class="form-control form-control-lg" id="txtCorreoElectronicoUsuario" name="txtCorreoElectronicoUsuario" placeholder="Correo Electrónico" required>
+                                <label for="txtCorreoElectronicoUsuario">Correo Electrónico</label>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="form-floating mb-3">
+                                <input type="tel" class="form-control form-control-lg" pattern="^[0-9]{10}" id="txtTelefonoUsuario" name="txtTelefonoUsuario" placeholder="Teléfono" required>
+                                <label for="txtTelefonoUsuario">Teléfono</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-7">
+                            <div class="form-floating mb-3">
+                                <input type="password" class="form-control form-control-lg" id="txtPasswordUsuario" name="txtPasswordUsuario" placeholder="Contraseña">
+                                <label for="txtPasswordUsuario">Contraseña</label>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbEstatus" name="cmbEstatus" aria-label="Estatus">
+                                    <option value="1">Activo</option>
+                                    <option value="2">Inactivo</option>
+                                </select>
+                                <label for="cmbEstatus">Estatus</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbVendedor" name="cmbVendedor" aria-label="Vendedor">
+                                </select>
+                                <label for="cmbVendedor">Vendedor</label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i>&nbsp; Guardar Datos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        $("#datatables-clientes").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1] }
+            ],
+            order: [[2, 'asc']]
+        });
+
+        $.get("@Url.Action("obtenerVendedores", "Administracion")", async function (data) {
+            $("#cmbVendedor").html(data);
+        });        
+    });
+
+    function validateForm() {
+        let rfc = document.forms["GuardarCliente.Administracion"]["txtUsuario"].value;
+        if (rfc != "") {
+
+            if ($("#txtUsuario").hasClass("is-invalid")) {
+                notificacionAlert("El Usuario " + $("#txtUsuario").val() + " ya existe.", "danger");                
+                return false;
+            }
+
+            if ($("#txtUsuario").hasClass("is-valid")) {
+                bootstrap.Modal.getOrCreateInstance(document.getElementById("modalUsuario")).hide();
+                abrirCargando();
+                return true;
+            }
+            else {
+                notificacionAlert("El Usuario no cumple con la validación requerida.", "danger");                
+                $("#txtUsuario").addClass("is-invalid");
+                return false;
+            }
+        }
+        return false;
+    }
+
+    function nuevoCliente() {
+        document.forms["GuardarCliente.Administracion"].reset();
+        document.forms["GuardarCliente.Administracion"]["txtIdUsuario"].value = 0;
+        $("#cmbEstatus").val(1);
+        $("#txtPasswordUsuario").prop("required", true);
+        $("#txtUsuario").removeClass("is-invalid");
+        $("#txtUsuario").removeClass("is-valid");
+        $("#cmbVendedor").val($("#cmbVendedor option:first").val());
+    }
+
+    function actualizarCliente(a, b, c, d, e, f, g, h) {
+        $("#txtPasswordUsuario").prop("required", false);
+        document.forms["GuardarCliente.Administracion"]["txtIdUsuario"].value = a;
+        document.forms["GuardarCliente.Administracion"]["txtUsuario"].value = b;
+        document.forms["GuardarCliente.Administracion"]["txtNombreUsuario"].value = c;
+        document.forms["GuardarCliente.Administracion"]["txtTelefonoUsuario"].value = d;
+        document.forms["GuardarCliente.Administracion"]["txtCorreoElectronicoUsuario"].value = e;
+        document.forms["GuardarCliente.Administracion"]["txtRFCUsuario"].value = f
+        $("#cmbEstatus").val(g);
+        $("#cmbVendedor").val(h);
+        $("#txtUsuario").removeClass("is-invalid");
+        $("#txtUsuario").removeClass("is-valid");
+        $("#txtUsuario").addClass("is-valid");
+    }
+
+    function keyPress() {
+
+        var len = $("#txtUsuario").val();
+        if (len.length > 5) {
+            $.get("@Url.Action("existeUsuario", "Administracion")?id=" + $("#txtIdUsuario").val() + "&usuario=" + len, async function (data) {
+                $Usuario = $("#txtUsuario");
+                $Usuario.removeClass("is-invalid");
+                $Usuario.removeClass("is-valid");
+                $Usuario.addClass(data);
+            });
+        }
+    }
+
+    function copiarRFC() {
+        $("#txtUsuario").val($("#txtRFCUsuario").val());
+        keyPress();
+    }
+
+</script>

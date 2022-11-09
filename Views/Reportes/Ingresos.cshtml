@@ -1,0 +1,108 @@
+﻿@model IEnumerable<Facturafast.Models.tbd_Facturas>
+    @using Facturafast.Models
+@{ 
+    BD_FFEntities db = new BD_FFEntities();
+}
+<h1 class="h3 mb-3">Ingresos</h1>
+&nbsp;
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-actions float-end">
+
+                </div>
+                <form method="post" action="@Url.Action("Ingresos","Reportes")">
+                    <div class="row">
+                        <div class="col-md-2">
+
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control form-control-lg" id="txtFechaInicial" name="txtFechaInicial" placeholder="Fecha Inicial" value="@ViewBag.Inicio.ToString("yyyy-MM-dd")" required>
+                                <label for="txtFechaInicial">Fecha Inicial</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control form-control-lg" id="txtFechaFinal" name="txtFechaFinal" placeholder="Fecha Final" value="@ViewBag.Final.ToString("yyyy-MM-dd")" required>
+                                <label for="txtFechaFinal">Fecha Final</label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 text-center">
+                            <button type="submit" class="btn btn-success btn-lg" style="margin-top:10px;"><i class="fas fa-search"></i>&nbsp; Buscar Resultados</button>
+                        </div>
+                    </div>
+                </form>
+                <br />
+                <hr />
+            </div>
+            <div class="card-body">
+                <table id="datatables-reporte-ingresos" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Acciones</th>
+                            <th>Nombre / Razón Social</th>
+                            <th>RFC</th>
+                            <th>Folio</th>
+                            <th>Tipo</th>
+                            <th>Fecha</th>
+                            <th>Subtotal</th>
+                            <th>Total</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                            {
+                                tbc_Tipos_Comprobante comprobante = db.tbc_Tipos_Comprobante.Where(s => s.id_tipo_comprobante == item.id_tipo_comprobante).Single();
+
+                            <tr class="@(item.id_estatus == 6 ? "table-danger": "")">
+                                <td></td>
+                                <td>
+                                    <table>
+                                        <tr>
+                                            <td style="padding:0px 5px;">
+                                                <a href="#" class="btn btn-danger btn-sm"><i class="fas fa-file-pdf"></i></a>
+                                            </td>
+                                            <td style="padding:0px 5px;">
+                                                <a href="#" class="btn btn-info btn-sm"><i class="fas fa-file-archive"></i></a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td>@item.nombre_receptor</td>
+                                <td>@item.rfc_receptor</td>
+                                <td>@item.serie - @item.folio</td>
+                                <td>@comprobante.tipo_comprobante</td>
+                                <td>@item.fecha_timbrado.ToString("yyyy/MM/dd")</td>
+                                <td>@item.subtotal.ToString("c")</td>
+                                <td>@item.total.ToString("c")</td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        $("#datatables-reporte-ingresos").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1] }
+            ],
+            order: [[6, 'desc']]
+        });
+    });
+</script>

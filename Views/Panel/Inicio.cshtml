@@ -1,0 +1,623 @@
+﻿@using Facturafast.Models
+@{
+    tbc_Usuarios usuario = Session["tbc_Usuarios"] as tbc_Usuarios;
+    BD_FFEntities db = new BD_FFEntities();
+    var tbc_Timbres = db.tbc_Timbres.Where(s => s.id_usuario == usuario.id_usuario).SingleOrDefault();
+    String[] Meses = { "", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre" };
+    DateTime Hoy = DateTime.Now;
+
+    List<Decimal> Ingresos = new List<Decimal>();
+    List<Decimal> Gastos = new List<Decimal>();
+
+    Decimal MesActualIngreso = 0;
+    Decimal MesAnteriorIngreso = 0;
+    Decimal MesActualGasto = 0;
+    Decimal MesAnteriorGasto = 0;
+
+    Decimal SoyMayor = 0;
+
+    for (int i = 1; i <= 12; i++)
+    {
+        DateTime FechaInicio = new DateTime(Hoy.Year, i, 1);
+        DateTime FechaFinal = FechaInicio.AddMonths(1).AddHours(23).AddMinutes(59).AddSeconds(59).AddDays(-1);
+
+        Decimal Ing = db.tbd_Facturas.Where(s => s.rfc_emisor == usuario.rfc && s.id_estatus == 5 && s.id_tipo_comprobante == 1 && s.fecha_timbrado >= FechaInicio && s.fecha_timbrado <= FechaFinal).Select(s => s.total).DefaultIfEmpty(0).Sum();
+        Ingresos.Add(Ing);
+        Decimal Gas = db.tbd_Facturas.Where(s => s.rfc_receptor == usuario.rfc && s.id_estatus == 5 && s.id_tipo_comprobante == 1 && s.fecha_timbrado >= FechaInicio && s.fecha_timbrado <= FechaFinal).Select(s => s.total).DefaultIfEmpty(0).Sum();
+        Gastos.Add(Gas);
+
+        if (SoyMayor < Ing)
+        {
+            SoyMayor = Ing;
+        }
+        if (SoyMayor < Gas)
+        {
+            SoyMayor = Gas;
+        }
+        if (i == Hoy.Month)
+        {
+            MesActualIngreso = Ingresos[Hoy.Month - 1];
+            MesActualGasto = Gastos[Hoy.Month - 1];
+            if (Hoy.Month > 1)
+            {
+                MesAnteriorIngreso = Ingresos[Hoy.Month - 2];
+                MesAnteriorGasto = Gastos[Hoy.Month - 2];
+            }
+
+            else
+            {
+                DateTime FechaInicioAnterior = FechaInicio.AddMonths(-1);
+                DateTime FechaFinalAnterior = FechaInicio.AddHours(23).AddMinutes(59).AddSeconds(59).AddDays(-1);
+                MesAnteriorIngreso = db.tbd_Facturas.Where(s => s.rfc_emisor == usuario.rfc && s.id_estatus == 5 && s.id_tipo_comprobante == 1 && s.fecha_timbrado >= FechaInicioAnterior && s.fecha_timbrado <= FechaFinalAnterior).Select(s => s.total).DefaultIfEmpty(0).Sum();
+                MesAnteriorGasto = db.tbd_Facturas.Where(s => s.rfc_receptor == usuario.rfc && s.id_estatus == 5 && s.id_tipo_comprobante == 1 && s.fecha_timbrado >= FechaInicioAnterior && s.fecha_timbrado <= FechaFinalAnterior).Select(s => s.total).DefaultIfEmpty(0).Sum();
+            }
+        }
+    }
+    Decimal PorcentajeIngreso = 100;
+    Decimal PorcentajeGasto = 100;
+    if (MesAnteriorIngreso > 0)
+    {
+        PorcentajeIngreso = ((100 * MesActualIngreso) / MesAnteriorIngreso) - 100;
+    }
+    String ColorEtiquetaIngreso = "success";
+    if (PorcentajeIngreso < 0)
+    {
+        ColorEtiquetaIngreso = "danger";
+    }
+
+    if (MesAnteriorGasto > 0)
+    {
+        PorcentajeGasto = ((100 * MesActualGasto) / MesAnteriorGasto) - 100;
+    }
+    String ColorEtiquetaGasto = "danger";
+    if (PorcentajeGasto < 0)
+    {
+        ColorEtiquetaGasto = "success";
+    }
+
+    if (MesActualIngreso == 0 && MesAnteriorIngreso == 0)
+    {
+        PorcentajeIngreso = 0;
+        ColorEtiquetaIngreso = "success";
+    }
+
+    if (MesActualGasto == 0 && MesAnteriorGasto == 0)
+    {
+        PorcentajeGasto = 0;
+        ColorEtiquetaGasto = "success";
+    }
+}
+
+<div class="container-fluid p-0">
+    <div class="row mb-2 mb-xl-3">
+        <div class="col-auto d-none d-sm-block">
+            <h3>Información del Mes de @Meses[Hoy.Month] @Hoy.Year</h3>
+        </div>
+        <div class="col-auto ms-auto text-end mt-n1">
+            @*<div class="dropdown me-2 d-inline-block">
+                    <a class="btn btn-light bg-white shadow-sm dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-display="static">
+                        <i class="align-middle mt-n1" data-feather="calendar"></i> Today
+                    </a>
+
+                    <div class="dropdown-menu dropdown-menu-end">
+                        <h6 class="dropdown-header">Settings</h6>
+                        <a class="dropdown-item" href="#">Action</a>
+                        <a class="dropdown-item" href="#">Another action</a>
+                        <a class="dropdown-item" href="#">Something else here</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#">Separated link</a>
+                    </div>
+                </div>*@
+
+            @*<button class="btn btn-success shadow-sm">
+                    <i class="align-middle" data-feather="filter">&nbsp;</i>
+                </button>*@
+
+
+
+            @*<div class="btn-group">
+                    <button type="button" class="btn btn-success shadow-sm me-2 d-inline-block dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="align-middle" data-feather="filter">&nbsp;</i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end">
+                        <form class="px-4 py-3" style="width:240px;">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-floating mb-3">
+                                        <div class="dropdown-header">Filtro</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class='row'>
+                                <div class='col-12'>
+                                    <div class="form-floating mb-3">
+                                        <select class="form-select" id="cmbFiltroMes" aria-label="Mes">
+                                            <option value="1">Enero</option>
+                                            <option value="2">Febrero</option>
+                                            <option value="3">Marzo</option>
+                                            <option value="4">Abril</option>
+                                            <option value="5">Mayo</option>
+                                            <option value="6">Junio</option>
+                                            <option value="7">Julio</option>
+                                            <option value="8">Agosto</option>
+                                            <option value="9">Septiembre</option>
+                                            <option value="10">Octubre</option>
+                                            <option value="11">Noviembre</option>
+                                            <option value="12">Diciembre</option>
+                                        </select>
+                                        <label for="cmbFiltroMes">Mes</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class='row'>
+                                <div class='col-12'>
+                                    <div class="form-floating mb-3">
+                                        <select class="form-select" id="cmbFiltroPeriodo" aria-label="Mes">
+                                            <option value="2022">2022</option>
+                                            <option value="2021">2021</option>
+                                        </select>
+                                        <label for="cmbFiltroPeriodo">Año</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="row">
+                                <div class="col-12 text-center">
+                                    <button type="submit" class="btn btn-success"><i class="align-middle" data-feather="filter">&nbsp;</i> Aplicar</button>
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>*@
+
+            <a class="btn btn-success shadow-sm" href="@Url.Action("Inicio","Panel")">
+                <i class="align-middle" data-feather="refresh-cw">&nbsp;</i>
+            </a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-sm-6 col-xxl-3 d-flex">
+            <div class="card illustration flex-fill">
+                <div class="card-body p-0 d-flex flex-fill">
+                    <div class="row g-0 w-100">
+                        <div class="col-12">
+                            <div class="illustration-text p-3 m-1">
+                                <h2 class="illustration-text">Bienvenido(a)</h2>
+                                <h4 class="illustration-text">@usuario.nombre_razon!</h4>
+                                <h3 class="mb-0">@usuario.rfc</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xxl-3 d-flex">
+            <div class="card flex-fill">
+                <div class="card-body py-4">
+                    <div class="d-flex align-items-start">
+                        <div class="flex-grow-1">
+                            <h3 class="mb-2">@MesActualIngreso.ToString("c")</h3>
+                            <p class="mb-2">Total Ingresos del Mes</p>
+                            <div class="mb-0">
+                                <span class="badge badge-soft-@ColorEtiquetaIngreso me-2"> @(PorcentajeIngreso < 0 ? "" : "+")@PorcentajeIngreso.ToString("0.00")% </span>
+                                <span class="text-muted">Mes anterior</span>
+                            </div>
+                        </div>
+                        <div class="d-inline-block ms-3">
+                            <div class="stat">
+                                <i class="align-middle text-success" data-feather="trending-up"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xxl-3 d-flex">
+            <div class="card flex-fill">
+                <div class="card-body py-4">
+                    <div class="d-flex align-items-start">
+                        <div class="flex-grow-1">
+                            <h3 class="mb-2">@MesActualGasto.ToString("c")</h3>
+                            <p class="mb-2">Total Gastos del Mes</p>
+                            <div class="mb-0">
+                                <span class="badge badge-soft-@ColorEtiquetaGasto me-2"> @(PorcentajeGasto < 0 ? "" : "+")@PorcentajeGasto.ToString("0.00")% </span>
+                                <span class="text-muted">Mes anterior</span>
+                            </div>
+                        </div>
+                        <div class="d-inline-block ms-3">
+                            <div class="stat">
+                                <i class="align-middle text-success" data-feather="dollar-sign"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xxl-3 d-flex">
+            <div class="card flex-fill">
+                <div class="card-body py-4">
+                    <div class="d-flex align-items-start">
+                        <div class="flex-grow-1">
+                            <table style="width:100%;">
+                                <tr>
+                                    <td><h3 class="mb-2">@(tbc_Timbres != null ? tbc_Timbres.timbres_disponibles.ToString() : "-")</h3></td>
+                                    <td><p class="mb-2">Timbres Disponibles</p></td>
+                                </tr>
+                            </table>
+                            <h5 class="mb-2">@(tbc_Timbres != null ? "  vigencia " + tbc_Timbres.fecha_vigencia.ToString("dd-MM-yyyy") : "")</h5>
+
+                            <div class="mb-0">
+                                <a href="@Url.Action("ComprarTimbres","Panel")" class="btn btn-success btn-sm"><i data-feather="shopping-cart"></i>&nbsp; Comprar más timbres</a>
+                            </div>
+                        </div>
+                        <div class="d-inline-block ms-3">
+                            <div class="stat">
+                                <i class="align-middle text-danger" data-feather="shopping-bag"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-lg-9 d-flex">
+            <div class="card flex-fill w-100">
+                <div class="card-header">
+                    <div class="card-actions float-end">
+                        @*<div class="dropdown position-relative">
+                                <a href="#" data-bs-toggle="dropdown" data-bs-display="static">
+                                    <i class="align-middle" data-feather="more-horizontal"></i>
+                                </a>
+
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <a class="dropdown-item" href="#">Action</a>
+                                    <a class="dropdown-item" href="#">Another action</a>
+                                    <a class="dropdown-item" href="#">Something else here</a>
+                                </div>
+                            </div>*@
+                    </div>
+                    <h5 class="card-title mb-0">Ingresos / Gastos</h5>
+                </div>
+                <div class="card-body d-flex w-100">
+                    <div class="align-self-center chart chart-lg">
+                        <canvas id="chartjs-dashboard-bar"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-3 d-flex">
+            <div class="card flex-fill w-100">
+
+                <div class="card-header">
+                    <h5 class="card-title">Avisos</h5>
+
+                </div>
+                <div class="card-body pt-0">
+                    <div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel">
+                        <ol class="carousel-indicators">
+                            <li data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active"></li>
+                            <li data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1"></li>
+                            <li data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2"></li>
+                        </ol>
+                        <div class="carousel-inner">
+                            <div class="carousel-item active">
+                                <img class="d-block w-100" src="~/img/Avisos/Aviso1.png" alt="">
+                                <div class="carousel-caption d-none d-md-block">
+                                    @*<h5>First slide label</h5>
+                                        <p>Nulla vitae elit libero, a pharetra augue mollis interdum.</p>*@
+                                </div>
+                            </div>
+                            <div class="carousel-item">
+                                <img class="d-block w-100" src="~/img/Avisos/Aviso1.png" alt="">
+                                <div class="carousel-caption d-none d-md-block">
+                                    @*<h5>Second slide label</h5>
+                                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>*@
+                                </div>
+                            </div>
+                            <div class="carousel-item">
+                                <img class="d-block w-100" src="~/img/Avisos/Aviso1.png" alt="">
+                                <div class="carousel-caption d-none d-md-block">
+                                    @*<h5>Third slide label</h5>
+                                        <p>Praesent commodo cursus magna, vel scelerisque nisl consectetur.</p>*@
+                                </div>
+                            </div>
+                        </div>
+                        <a class="carousel-control-prev" href="#carouselExampleCaptions" role="button" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="sr-only">Previous</span>
+                        </a>
+                        <a class="carousel-control-next" href="#carouselExampleCaptions" role="button" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="sr-only">Next</span>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-xl-4 d-flex">
+            <div class="card flex-fill">
+                <div class="card-header">
+                    <div class="card-actions float-end">
+
+                    </div>
+                    <h5 class="card-title mb-0">Calendario</h5>
+                </div>
+                <div class="card-body d-flex">
+                    <div class="align-self-center w-100">
+                        <div class="chart">
+                            <div id="datetimepicker-dashboard"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-xl-8 d-xl-flex">
+            <div class="card flex-fill w-100">
+                <div class="card-header">
+                    <div class="card-actions float-end">
+
+                    </div>
+                    <h5 class="card-title mb-0">Últimos Documentos</h5>
+                </div>
+                <table id="datatables-dashboard-projects" class="table table-striped my-0">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th class="d-none d-xl-table-cell">Tipo</th>
+                            <th class="d-none d-xl-table-cell">Fecha Emisión</th>
+                            <th>Estatus</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jonathan Gamboa</td>
+                            <td class="d-none d-xl-table-cell">Factura</td>
+                            <td class="d-none d-xl-table-cell">31/06/2021</td>
+                            <td><span class="badge bg-success">Timbrada</span></td>
+                        </tr>
+                        <tr>
+                            <td>Jonathan Gamboa</td>
+                            <td class="d-none d-xl-table-cell">Factura</td>
+                            <td class="d-none d-xl-table-cell">31/06/2021</td>
+                            <td><span class="badge bg-danger">Cancelada</span></td>
+                        </tr>
+                        <tr>
+                            <td>Jonathan Gamboa</td>
+                            <td class="d-none d-xl-table-cell">Factura</td>
+                            <td class="d-none d-xl-table-cell">31/06/2021</td>
+                            <td><span class="badge bg-success">Timbrada</span></td>
+                        </tr>
+                        <tr>
+                            <td>Jonathan Gamboa</td>
+                            <td class="d-none d-xl-table-cell">Factura</td>
+                            <td class="d-none d-xl-table-cell">31/06/2021</td>
+                            <td><span class="badge bg-warning">En proceso</span></td>
+                        </tr>
+                        <tr>
+                            <td>Sofia Palacios</td>
+                            <td class="d-none d-xl-table-cell">Factura</td>
+                            <td class="d-none d-xl-table-cell">31/06/2021</td>
+                            <td><span class="badge bg-success">Timbrada</span></td>
+                        </tr>
+                        <tr>
+                            <td>Sofia Palacios</td>
+                            <td class="d-none d-xl-table-cell">Nómina</td>
+                            <td class="d-none d-xl-table-cell">31/06/2021</td>
+                            <td><span class="badge bg-success">Timbrada</span></td>
+                        </tr>
+                        <tr>
+                            <td>Danaé Zarate</td>
+                            <td class="d-none d-xl-table-cell">Factura</td>
+                            <td class="d-none d-xl-table-cell">31/06/2021</td>
+                            <td><span class="badge bg-success">Timbrada</span></td>
+                        </tr>
+                        <tr>
+                            <td>Danaé Zarate</td>
+                            <td class="d-none d-xl-table-cell">Factura</td>
+                            <td class="d-none d-xl-table-cell">31/06/2021</td>
+                            <td><span class="badge bg-warning">En proceso</span></td>
+                        </tr>
+                        <tr>
+                            <td>Danaé Zarate</td>
+                            <td class="d-none d-xl-table-cell">Nómina</td>
+                            <td class="d-none d-xl-table-cell">31/06/2021</td>
+                            <td><span class="badge bg-danger">Cancelada</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="col-12 col-xl-8 d-xl-flex">
+            <div class="card flex-fill w-100">
+                <div class="card-header">
+                    <div class="card-actions float-end">
+
+                    </div>
+                    <h5 class="card-title mb-0">Últimas Facturas</h5>
+                </div>
+                <table id="datatables-u_facturas" class="table table-striped my-0">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th class="d-none d-xl-table-cell">Tipo</th>
+                            <th class="d-none d-xl-table-cell">Fecha Emisión</th>
+                            <th>Estatus</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+    </div>
+
+    <div class="card flex-fill">
+
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        @{
+            Int32 Top = 0;
+            Int32 Entero = Convert.ToInt32(SoyMayor);
+            String Digito = Entero.ToString();
+            if (Digito.Length > 1)
+            {
+                String Dig = Digito[0].ToString();
+                Top = Convert.ToInt32(Dig) * Convert.ToInt32(Math.Pow(10, Digito.Length - 2));
+            }
+            else
+            {
+                Top = 10;
+            }
+        }
+
+
+        // Bar chart
+        new Chart(document.getElementById("chartjs-dashboard-bar"), {
+            type: "bar",
+            data: {
+                labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
+                datasets: [{
+                    label: "Ingresos",
+                    backgroundColor: window.theme.success,
+                    borderColor: window.theme.success,
+                    hoverBackgroundColor: window.theme.success,
+                    hoverBorderColor: window.theme.success,
+                    data: [@Ingresos[0], @Ingresos[1], @Ingresos[2], @Ingresos[3], @Ingresos[4], @Ingresos[5], @Ingresos[6], @Ingresos[7], @Ingresos[8], @Ingresos[9], @Ingresos[10], @Ingresos[11]],
+                    barPercentage: .8,
+                    categoryPercentage: .5,
+                    stack: 'Stack 0',
+
+                }, {
+                    label: "Gastos",
+                    backgroundColor: window.theme.primary,
+                    borderColor: window.theme.primary,
+                    hoverBackgroundColor: window.theme.primary,
+                    hoverBorderColor: window.theme.primary,
+                    data: [@Gastos[0], @Gastos[1], @Gastos[2], @Gastos[3], @Gastos[4], @Gastos[5], @Gastos[6], @Gastos[7], @Gastos[8], @Gastos[9], @Gastos[10], @Gastos[11]],
+                    barPercentage: .8,
+                    categoryPercentage: .5,
+                    stack: 'Stack 1',
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                legend: {
+                    display: false
+                },
+                scales: {
+                    yAxes: [{
+                        gridLines: {
+                            display: false
+                        },
+                        ticks: {
+                            stepSize: @Top
+                        },
+                        stacked: true,
+                    }],
+                    xAxes: [{
+                        gridLines: {
+                            color: "transparent"
+                        },
+                        stacked: true,
+                    }]
+                }
+            }
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        
+        @if (ViewBag.user != null && ViewBag.pass != null)
+        {
+            @: localStorage.setItem("usu", "@ViewBag.user");
+            @: localStorage.setItem("pass", "@ViewBag.pass");
+        }
+
+        getUFacturas();
+
+    });
+
+    function getUFacturas()
+    {
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+            url: "Facturacion/getUFacturas",
+            //data: JSON.stringify({ 'prefactura': filter, 'uuid': arrayUUid, 'concepto': arrayC, 'id_pref':id }),
+            success: function (data) {
+                var c = '';
+                for (var x = 0; x < data.length; x++)
+                {
+                    var estatus = data[x].status == 1 ? '<span class="badge bg-warning">En proceso</span>' : data[x].status == 2 ? '<span class="badge bg-success">Timbrada</span>' :'<span class="badge bg-danger">Cancelada</span>';
+                    c += '<tr><td>' + data[x].cliente + '</td><td>' + data[x].tipo+'</td><td>'+data[x].fca_emision+'</td><td>'+estatus+'</td></tr>';
+                }
+                $("#datatables-u_facturas").append(c);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                cerrarCargando();
+            }
+        });
+        //--------------------------------------------------------------------------------------------------------------------------------------------
+    }
+</script>
+<script>
+    //document.addEventListener("DOMContentLoaded", function () {
+    //    // Pie chart
+    //    new Chart(document.getElementById("chartjs-dashboard-pie"), {
+    //        type: "pie",
+    //        data: {
+    //            labels: ["Direct", "Affiliate", "E-mail", "Other"],
+    //            datasets: [{
+    //                data: [2602, 1253, 541, 1465],
+    //                backgroundColor: [
+    //                    window.theme.primary,
+    //                    window.theme.warning,
+    //                    window.theme.danger,
+    //                    "#E8EAED"
+    //                ],
+    //                borderWidth: 5,
+    //                borderColor: window.theme.white
+    //            }]
+    //        },
+    //        options: {
+    //            responsive: !window.MSInputMethodContext,
+    //            maintainAspectRatio: false,
+    //            cutoutPercentage: 70,
+    //            legend: {
+    //                display: false
+    //            }
+    //        }
+    //    });
+    //});
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        $("#datatables-dashboard-projects").DataTable({
+            pageLength: 6,
+            lengthChange: false,
+            bFilter: false,
+            autoWidth: false
+        });
+    });
+</script>
+

@@ -1,0 +1,97 @@
+﻿<h1 class="h3 mb-3">Nóminas</h1>
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-actions float-end">
+
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtFechaInicial" placeholder="Fecha Inicial">
+                            <label for="txtFechaInicial">Fecha Inicial</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtFechaFinal" placeholder="Fecha Final">
+                            <label for="txtFechaFinal">Fecha Final</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <a class="btn btn-success btn-lg" style="margin-top:10px;"><i class="fas fa-search"></i>&nbsp; Buscar Nóminas</a>
+                    </div>
+                </div>
+                <hr />
+            </div>
+            <div class="card-body">
+                <table id="datatables-reporte-gastos" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Acciones</th>
+                            <th>No. de Empleado</th>
+                            <th>Nombre del Empleado</th>
+                            <th>RFC</th>
+                            <th>CURP</th>
+                            <th>NSS</th>
+                            <th>Teléfono</th>
+                            <th>Tipo</th>
+                            <th>Fecha</th>
+                            <th>Dias Pagados</th>
+                            <th>Periodicidad</th>
+                            <th>Subtotal</th>
+                            <th>Total</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td></td>
+                            <td><a href="#" class="btn btn-danger btn-sm"><i class="fas fa-file-pdf"></i></a> &nbsp;&nbsp; <a href="#" class="btn btn-info btn-sm"><i class="fas fa-file-archive"></i></a></td>
+                            <td>Emp-001</td>
+                            <td>Rene Josec Meza Arzave</td>
+                            <td>XAXX010101000</td>
+                            <td>XAXX010101HBCZRN06</td>
+                            <td>2637483746</td>
+                            <td>2223415134</td>
+                            <td>N - Nómina</td>
+                            <td>01/02/2022</td>
+                            <td>15</td>
+                            <td>04 - Quincenal</td>
+                            <td>$100.00</td>
+                            <td>$116.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        $("#datatables-reporte-gastos").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1] }
+            ],
+            order: [[2, 'asc']]
+        });
+
+        $("input[id=\"txtFechaInicial\"]").daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true
+        });
+        $("input[id=\"txtFechaFinal\"]").daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true
+        });
+    });
+</script>

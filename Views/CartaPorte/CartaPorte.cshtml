@@ -1,0 +1,1710 @@
+﻿@using Facturafast.Models
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .text-tra {
+        text-transform: uppercase;
+    }
+</style>
+<input type="hidden" id="id" value="@ViewBag.id" />
+<input type="hidden" id="id_receptor" />
+<input type="hidden" id="txtClaveRegimen" name="txtClaveRegimen">
+<input type="hidden" id="txtClaveUCfdi" name="txtClaveUCfdi">
+<h1 class="h3">Carta Porte</h1>
+<div class="row">
+    <input type="hidden" id="id_prefactura" />
+    <input type="hidden" id="id_rfc" />
+    <input type="hidden" id="txtIdUnidad" name="txtIdUnidad">
+    <input type="hidden" id="txtIdSAT" name="txtIdSAT">
+    <input type="hidden" id="txtClaveProductoS" name="txtClaveProductoS">
+    <input type="hidden" id="txtClaveUnidad" name="txtClaveUnidad">
+    <input type="hidden" id="txtNombreServ" name="txtNombreServ">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-actions float-start">Factura</div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="input-group mb-3">
+                            <div class="form-floating form-floating-group flex-grow-1">
+                                <input type="text" class="form-control form-control-lg text-uppercase" style="text-transform:uppercase" pattern="^[a-zA-Z0-9]{12,13}" id="txtRFC" name="txtRFC" placeholder="RFC Cliente" required>
+                                <label for="txtRFC">RFC</label>
+                            </div>
+                            <button class="btn btn-success btn-lg input-group-text" data-bs-toggle="modal" data-bs-target="#modalCliente">&nbsp;<i class="fas fa-plus"></i>&nbsp;</button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg txtNombreRazonCliente" id="txtRFC" placeholder="Nombre / Razón Social del Cliente" readonly>
+                            <label for="txtRFC">Nombre / Razón Social del Cliente</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating mb-3">
+                            <select class="form-select form-select-lg" id="cmbUsoCFDI" aria-label="Uso del CFDI"></select>
+                            <label for="cmbUsoCFDI">Uso del CFDI</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg text-tra" id="txtSerie" placeholder="Serie">
+                            <label for="txtSerie">Serie</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtFolio" placeholder="Folio">
+                            <label for="txtFolio">Folio</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating mb-3">
+                            <select class="form-select form-select-lg" id="cmbTipoComprobante" aria-label="Tipo de Comprobante" onchange="t_comprobante()">
+                                <option value="I" data-cfdi-type="I" selected>Ingreso</option>
+                                <option value="T" data-cfdi-type="T">Traslado</option>
+                            </select>
+                            <label for="cmbTipoComprobante">Tipo de Comprobante</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtLugarExpedicion" maxlength="5" pattern="^[0-9]{5}" placeholder="Lugar de Expedición" value="@ViewBag.cp">
+                            <label for="txtLugarExpedicion">Lugar de Expedición</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-floating mb-3">
+                            <select class="form-select form-select-lg" id="cmbTipoFactura" aria-label="Tipo de Factura">
+                                <option value="1" data-cfdi-type="I">Factura</option>
+                                <option value="2" data-cfdi-type="E">Nota de Crédito</option>
+                                <option value="14" data-cfdi-type="P">Complemento de Pago</option>
+                            </select>
+                            <label for="cmbTipoFactura">Tipo de Factura</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating mb-3">
+                            <select class="form-select form-select-lg" id="cmbFormaPago" aria-label="Forma de Pago"></select>
+                            <label for="cmbFormaPago">Forma de Pago</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating mb-3">
+                            <select class="form-select form-select-lg" id="cmbMetodoPago" aria-label="Método de Pago">
+                            </select>
+                            <label for="cmbMetodoPago">Método de Pago</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtNumeroPedido" placeholder="Número de Pedido">
+                            <label for="txtNumeroPedido">Número de Pedido</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-floating mb-3">
+                            <select class="form-select form-select-lg" id="cmbMoneda" aria-label="Moneda" onchange="sTipoCambio()">
+                                <option value="USD">USD - Dolar Americano</option>
+                                <option value="MXN" selected="selected">MXN - Peso Mexicano</option>
+                            </select>
+                            <label for="cmbMoneda">Moneda</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtTipoCambio" placeholder="Tipo de Cambio">
+                            <label for="txtTipoCambio">Tipo de Cambio</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtFechaEmision" placeholder="Fecha de Emisión">
+                            <label for="txtFechaEmision">Fecha de Emisión</label>
+                        </div>
+                    </div>
+                </div>
+                <hr />
+                <div class="row">
+                    <div class="card-actions float-start mb-3">Concepto</div>
+                    <div class="col-md-5">
+                        <div class="input-group mb-3">
+                            <div class="form-floating form-floating-group flex-grow-1">
+                                <input type="text" class="form-control form-control-lg" id="txtConcepto" placeholder="Concepto">
+                                <label for="txtConcepto">Concepto</label>
+                            </div>
+                            <button class="btn btn-success btn-lg input-group-text" data-bs-toggle="modal" data-bs-target="#modalProductos">&nbsp;<i class="fas fa-plus"></i>&nbsp;</button>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtIDSat" placeholder="ID SAT">
+                            <label for="txtIDSat">ID SAT</label>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtClaveInterna" placeholder="Clave">
+                            <label for="txtClaveIntern">Clave (Interna)</label>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg enteros" id="txtCantidad" placeholder="Cantidad">
+                            <label for="txtCantidad">Cantidad</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtUnidad" placeholder="Unidad">
+                            <label for="txtUnidad">Unidad</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtPrecioUnitario" placeholder="Precio Unitario" onkeypress="return valideKey(event);">
+                            <label for="txtPrecioUnitario">Precio Unitario</label>
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <div class="form-floating mb-3">
+                            <select class="form-select form-select-lg" id="cmbDescuento" aria-label="Desc" onchange="selectTipoDesc()">
+                                <option value="1">%</option>
+                                <option value="2">$</option>
+                            </select>
+                            <label for="cmbDescuento">Desc</label>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtDescuento" placeholder="Descuento" onkeypress="return valideKey(event);">
+                            <input style="display:none" type="text" class="form-control form-control-lg" id="txtDescuento2" placeholder="Descuento" onkeypress="return valideKey(event);">
+                            <label for="txtDescuento">Descuento</label>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-floating mb-3">
+                            @*<input type="text" class="form-control form-control-lg" id="txtIVA" placeholder="IVA">*@
+                            <select class="form-select form-select-lg" id="cmbIVA" name="cmbIVA" aria-label="IVA">
+                            </select>
+                            <label for="txtIVA">IVA</label>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-floating mb-3">
+                            <select class="form-select form-select-lg" id="cmbIVARet" name="cmbIVARet" aria-label="IVA Ret">
+                            </select>
+                            <label for="cmbIVARet">IVA Ret</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="form-floating mb-3">
+                            <select class="form-select form-select-lg" id="cmbISR" name="cmbISR" aria-label="ISR Ret">
+                            </select>
+                            <label for="cmbISR">ISR Ret</label>
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <div class="form-floating mb-3">
+                            <select class="form-select form-select-lg" id="cmbIEPS" aria-label="Descuento" onchange="selectTipoIeps()">
+                                <option value="1">Tasa</option>
+                                <option value="2">Cuota</option>
+                            </select>
+                            <label for="cmbIEPS">IEPS</label>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtIPES" placeholder="IEPS" onkeypress="return valideKey(event);">
+                            <input style="display:none" type="text" class="form-control form-control-lg" id="txtIPES2" placeholder="IEPS" onkeypress="return valideKey(event);">
+                            <label for="txtIPES">IEPS</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-secondary btn-lg" style="margin-top:10px;" id="btn-CancelarConcepto" onclick="cancelarConcepto();"><i class="fas fa-remove"></i>&nbsp; Cancelar</button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-success btn-lg" style="margin-top:10px;" id="btn-AgregarConcepto"><i class="fas fa-plus"></i>&nbsp; Agregar Concepto</button>
+                        <button class="btn btn-warning btn-lg" style="margin-top:10px;" id="btn-EditarConcepto"><i class="fas fa-edit"></i>&nbsp; Editar Concepto</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="table-responsive">
+                        <table id="datatables-conceptos-factura" class="table table-striped table-secondary" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    <th>Clave</th>
+                                    <th>Concepto</th>
+                                    <th></th>
+                                    <th>ID SAT</th>
+                                    <th>Cantidad</th>
+                                    <th></th>
+                                    <th>Unidad</th>
+                                    <th>Precio Unitario</th>
+                                    <th>Importe</th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th>IVA</th>
+                                    <th>IVA Ret</th>
+                                    <th>ISR Ret</th>
+                                    <th></th>
+                                    <th></th>
+                                    <th>Descuento</th>
+                                    <th>Total</th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-2">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtTotalImporte" placeholder="Subtotal" value="$ 0.00" style="text-align:right;" readonly>
+                            <label for="txtTotalImporte">Subtotal</label>
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtTotalIVA" placeholder="Total IVA" value="$ 0.00" style="text-align:right;" readonly>
+                            <label for="txtTotalIVA">Total IVA</label>
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtTotalIVARet" placeholder="IVA Ret" value="$ 0.00" style="text-align:right;" readonly>
+                            <label for="txtTotalIVARet">Total IVA Ret</label>
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtTotalISRRet" placeholder="ISR Ret" value="$ 0.00" style="text-align:right;" readonly>
+                            <label for="txtTotalISRRet">Total ISR Ret</label>
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtTotalDescuento" placeholder="Descuento" value="$ 0.00" style="text-align:right;" readonly>
+                            <label for="txtTotalDescuento">Descuento</label>
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtTotal" placeholder="Total" value="$ 0.00" style="text-align:right;" readonly>
+                            <label for="txtTotal">Total</label>
+                        </div>
+                    </div>
+                </div>
+                <hr />
+            </div>
+        </div>
+    </div>
+</div>
+@*</div>*@
+
+<h1 class="h3">Complemento</h1>
+<div class="row">
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="input-group mb-3">
+                        <div class="form-floating form-floating-group flex-grow-1">
+                            <select class="form-select form-select-lg" id="cmbTipo_inter" aria-label="Desc">
+                                <option value="Sí">Si</option>
+                                <option value="No" selected>No</option>
+                            </select>
+                            <label for="cmbTipo">Transporte Internacional</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group mb-3">
+                        <div class="form-floating form-floating-group flex-grow-1">
+                            <select class="form-select form-select-lg" id="cmbTipo_es" aria-label="Desc">
+                                <option value="Entrada" selected>Entrada</option>
+                                <option value="Salida">Salida</option>
+                            </select>
+                            <label for="entrada_salida">Entrada/Salida de mercancia</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="input-group mb-3">
+                        <div class="form-floating form-floating-group flex-grow-1">
+                            <input type="text" class="form-control form-control-lg text-uppercase" style="text-transform:uppercase" id="txtPaisOrigen" name="txtPaisOrigen" placeholder="País de origen o destino">
+                            <label for="e_s">País Origen/Destino</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="input-group mb-3">
+                        <div class="form-floating form-floating-group flex-grow-1">
+                            <select class="form-select form-select-lg" id="cmbViaE-S" name="cmbViaE-S" aria-label="Tipo Servicio">
+                                <option value="01">AutoTransporte Federal</option>
+                                <option value="02">Transporte Marítimo</option>
+                                <option value="03">Transporte Aéreo</option>
+                                <option value="04">Transporte Ferroviario</option>
+                                <option value="05">Ducto</option>
+                            </select>
+                            <label for="txtViaE/S">Vía Entrada/Salida</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="input-group mb-3">
+                        <div class="form-floating form-floating-group flex-grow-1">
+                            <input type="text" class="form-control form-control-lg" id="txt_t_distancia" placeholder="Precio Unitario">
+                            <label for="txt_t_distancia">Total distancia Recorrida</label>
+                        </div>
+                    </div>
+                </div>
+                <hr />
+            </div>
+            @*Ubicación*@
+            <div class="row">
+                <input type="hidden" id="idubicacion" />
+                <a href="#" style="width:30%" data-bs-toggle="collapse" data-bs-target="#ubicacion" aria-expanded="true" aria-controls="collapseOne" class="btn btn-lg btn-success">
+                    Ubicación <i class="fas fa-arrow-down"></i>
+                </a>
+                <div id="ubicacion" class="collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample" style="">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="input-group mb-6">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <input type="text" class="form-control form-control-lg" id="nom_estacion" placeholder="Nombre de la Estación">
+                                        <label for="nom_estacion">Nombre de la Estación</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <input type="text" class="form-control form-control-lg" id="num_estacion" placeholder="Número de Estación">
+                                        <label for="num_estacion">Número de Estación</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <input type="text" class="form-control form-control-lg" id="dis_recorrida" placeholder="Distancia Recorrida (Km)">
+                                        <label for="dis_recorrida">Distancia Recorrida</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <select class="form-select form-select-lg" disabled id="cmbTipo_ubicacion" aria-label="Desc">
+                                            <option value="1" selected>Origen</option>
+                                            <option value="2">Destino</option>
+                                        </select>
+                                        <label for="tipo">Tipo</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <input type="text" class="form-control form-control-lg" disabled id="id_ubicacion" placeholder="ID Ubicación">
+                                        <label for="id_ubicacion">ID Ubicación</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <input type="text" class="form-control form-control-lg" id="txtFechaHora" placeholder="Fecha / Hora">
+                                        <label for="fca_hora">Fecha Hora de Salida</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <button class="btn btn-success btn-lg" style="margin-top:10px;" id="btnAddUbicacion">
+                                    <i class="fas fa-plus"></i>&nbsp; Agregar Ubicación
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <table id="datatables-ubicaciones" class="table table-striped table-secondary" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>ID Ubicación</th>
+                                            <th></th>
+                                            <th>Tipo</th>
+                                            <th></th>
+                                            <th>Distancia recorrida</th>
+                                            <th>Fecha/Hora</th>
+                                            <th></th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br />
+            <hr />
+            @*Mercancias*@
+            <div class="row">
+                <a href="#" style="width:30%" data-bs-toggle="collapse" data-bs-target="#mercancias" aria-expanded="true" aria-controls="collapseOne" class="btn btn-lg btn-success">
+                    Mercancias <i class="fas fa-arrow-down"></i>
+                </a>
+                <input type="hidden" id="id_mercancia" />
+                <div id="mercancias" class="collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample" style="">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <input type="text" class="form-control form-control-lg" id="mercancia" name="mercancia" placeholder="ID Mercancia">
+                                        <label for="mercancia">Mercancia</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <input type="text" class="form-control form-control-lg decimals" disabled id="p_bruto" placeholder="0.001" required>
+                                        <label for="p_bruto">Peso bruto total</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <input type="text" class="form-control form-control-lg" disabled id="Unidad_peso" placeholder="Unidad de Peso">
+                                        <label for="u_peso">Unidad de Peso</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <input type="text" class="form-control form-control-lg decimals" disabled id="p_neto" placeholder="0.001">
+                                        <label for="p_neto">Peso neto total</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <input type="text" class="form-control form-control-lg" id="n_total_mercancias" disabled placeholder="Número total de Mercancías">
+                                        <label for="n_total_mercancias">Número total de Mercancias</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3 mb-3">
+                            <div class="col-md-10"></div>
+                            <div class="col-md-2">
+                                <button class="btn btn-md btn-success btnAddMerca"><i class="fa fa-plus-circle"></i> Agregar</button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <table id="datatables-mercancia" class="table table-striped" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Acción</th>
+                                        <th>Mercancia</th>
+                                        <th>Peso Bruto total</th>
+                                        <th>Unidad de peso</th>
+                                        <th>Peso neto total</th>
+                                        <th>Número total de mercancias</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br /><hr />
+            @*Auto_Transporte*@
+            <div class="row">
+                <input type="hidden" id="id_autotrans" />
+                <a href="#" style="width:30%" data-bs-toggle="collapse" data-bs-target="#autoTransporte" aria-expanded="true" aria-controls="collapseOne" class="btn btn-lg btn-success">
+                    AutoTransporte <i class="fas fa-arrow-down"></i>
+                </a>
+                <div id="autoTransporte" class="collapse">
+                    <div class="card-body">
+                        <div class="row mt-2 mb-3" >
+                            <div class="col-md-8"></div>
+                            <div class="col-md-2 dAddAuto" style="visibility:hidden">
+                                <button class="btn btn-primary btnAddAuto"><i class="fa fa-plus-circle"></i> Agregar</button>
+                            </div>
+                            <div class="col-md-2 dRemAuto" style="visibility:hidden">
+                                <button class="btn btn-danger btnRemAuto"><i class="fa fa-minus-circle"></i> Remover</button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <input type="text" class="form-control form-control-lg text-tra" id="NumPermisoSCT" placeholder="No. Permiso SCT">
+                                        <label for="NumPermisoSCT">No. Permiso SCT</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <select class="form-select form-select-lg" id="p_sct" name="p_sct" disabled aria-label="Desc">
+                                        </select>
+                                        <label for="p_sct">Permiso SCT</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <select class="form-select form-select-lg" id="ConfigVehicular" disabled aria-label="Desc">
+                                        </select>
+                                        <label for="ConfigVehicular">Configuración Vehícular</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <input type="text" class="form-control form-control-lg text-tra" disabled id="PlacaVM" placeholder="PlacaVM">
+                                        <label for="PlacaVM">PlacaVM</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <input type="text" class="form-control form-control-lg text-tra" disabled id="AnioModeloVM" placeholder="Año/Modelo">
+                                        <label for="AnioModeloVM">Año/Modelo</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="input-group mb-6">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <input type="text" class="form-control form-control-lg" id="AseguraRespCivil" disabled placeholder="Responsabilidad Civil">
+                                        <label for="AseguraRespCivil">Asegura Responsablididad Civil</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <input type="text" class="form-control form-control-lg" id="PolizaRespCivil" disabled placeholder="Poliza Responsablidad Civil">
+                                        <label for="PolizaRespCivil">Poliza Responsabilidad Civil</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <input type="text" class="form-control form-control-lg" id="AseguraMedAmb" disabled placeholder="Seguros Ambiental">
+                                        <label for="AseguraMedAmb">Asegura Medio Ambiente</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <input type="text" class="form-control form-control-lg" id="PolizaMedAmb" disabled placeholder="123456789">
+                                        <label for="PolizaMedAmb">Poliza Medio Ambiente</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <input type="text" class="form-control form-control-lg" id="AseguraCarga" disabled placeholder="Seguro">
+                                        <label for="AseguraCarga">Asegura Carga</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <input type="text" class="form-control form-control-lg" id="PolizaCarga" disabled placeholder="Poliza Carga">
+                                        <label for="PolizaCarga">Poliza Carga</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="row">
+                            <table id="datatables-remolque" class="table table-striped" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Subtipo Remolque</th>
+                                        <th>Placa</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br /><hr />
+            @*Figura*@
+            <div class="row">
+                <input type="hidden" id="idfigura" />
+                <a href="#" style="width:30%" data-bs-toggle="collapse" data-bs-target="#figura" aria-expanded="true" aria-controls="collapseOne" class="btn btn-lg btn-success">
+                    Figura <i class="fas fa-arrow-down"></i>
+                </a>
+                <div id="figura" class="collapse">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <input type="text" class="form-control form-control-lg text-tra" id="rfc_figura" placeholder="RFC Figura">
+                                        <label for="rfc_figura">RFC Figura</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <input type="text" class="form-control form-control-lg" id="id_figura" placeholder="ID Figura">
+                                        <label for="id_figura">ID Figura</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <select class="form-select form-select-lg" id="cmbTipo_figura" aria-label="Desc">
+                                            <option value="1" selected>[01] Operador</option>
+                                            <option value="2">[02] Propietario</option>
+                                            <option value="3">[03] Arrendador</option>
+                                            <option value="4">[04] Notificado</option>
+                                        </select>
+                                        <label for="tipo_figura">Tipo de Figura</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <input type="text" class="form-control form-control-lg text-tra" disabled id="NLicencia_figura" placeholder="Número de licencia">
+                                        <label for="NLicencia_figura">Número de Licencia</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <input type="text" class="form-control form-control-lg" id="Nom_figura" disabled placeholder="Nombre de la figura de transporte">
+                                        <label for="Nom_figura">Nombre de la figura de transporte</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <input type="text" class="form-control form-control-lg" id="No_id_figura" disabled placeholder="No. de identificación o registro fiscal">
+                                        <label for="No_id_figura">No. de identificación o registro fiscal</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group mb-3">
+                                    <div class="form-floating form-floating-group flex-grow-1">
+                                        <input type="text" class="form-control form-control-lg text-tra" id="cmbResidencial_figura" placeholder="Residencia Fiscal Figura">
+                                        <label for="cmbResidencial">Residencia fiscal figura</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-10"></div>
+                            <div class="col-md-2">
+                                <button class="btn btn-success btnAddFig"><i class="fa fa-plus-circle"></i> Agregar</button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <table id="datatables-figura" class="table table-striped" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Acción</th>
+                                        <th>RFC</th>
+                                        <th>Figura</th>
+                                        <th>Número Licencia</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br /><hr />
+        </div>
+    </div>
+</div>
+<hr />
+<row class="row">
+    <div class="col-md-12 text-center">
+        <button class="btn btn-success btn-lg" style="margin-top:10px;" id="btnGCartaPorte"><i class="fas fa-save"></i>&nbsp; Guardar Carta Porte</button>
+    </div>
+</row>
+<script src="~/js/utilsFactura.js"></script>
+<script>
+    var cacheRFC = {};
+    var cachePreFac = {};
+    var cacheConcepto = {};
+    var cachePais = {};
+    var cacheUbica = {};
+    var cacheMerca = {};
+    var cachePermiso = {};
+    var cacheRFCFigura = {};
+    var cacheAutotrans = {};
+    var TableUbicacion;
+    var TableConceptos;
+    var TableAutoTrans;
+    var TableFiguras;
+    var TableMercancias;
+
+    var id = '@ViewBag.id';
+    document.addEventListener("DOMContentLoaded", function () {
+        abrirCargando();
+        //===Autocomplete===
+        $("#txtRFC").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtRFC").removeClass("is-invalid");
+                    $("#txtRFC").removeClass("is-valid");
+                    $("#txtRFC").addClass("is-invalid");
+                    if (term in cacheRFC) {
+                        response(cacheRFC[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerRFCCliente", "Catalogos")", request, function (data, status, xhr) {
+                        cacheRFC[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtRFC").removeClass("is-invalid");
+                    $("#txtRFC").removeClass("is-valid");
+                    $("#txtRFC").addClass("is-invalid");
+                    response([]);
+                }
+
+            },
+            select: function (event, ui) {
+                getInfoCli(ui.item.value);
+                $("#txtRFC").val(ui.item.rfc);
+                $(".txtNombreRazonCliente").val(ui.item.name);
+                $("#id_receptor").val(ui.item.value);
+                $("#txtRFC").removeClass("is-invalid");
+                $("#txtRFC").removeClass("is-valid");
+                $("#txtRFC").addClass("is-valid");
+                return false;
+            }
+        });
+
+        $("#txtSerie").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+
+                if (term.length > 0) {
+                    $("#txtSerie").removeClass("is-invalid");
+                    $("#txtSerie").removeClass("is-valid");
+                    $("#txtSerie").addClass("is-invalid");
+                    if (term in cachePreFac) {
+                        response(cachePreFac[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("getPreFactura", "Facturacion")", request, function (data, status, xhr) {
+                        cachePreFac[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtSerie").removeClass("is-invalid");
+                    $("#txtSerie").removeClass("is-valid");
+                    $("#txtSerie").addClass("is-invalid");
+                    response([]);
+                }
+
+            },
+            select: function (event, ui) {
+                $("#txtSerie").val(ui.item.name);
+                $("#txtFolio").val(ui.item.folio);
+                $("#txtSerie").removeClass("is-invalid");
+                $("#txtSerie").removeClass("is-valid");
+                $("#txtSeries").addClass("is-valid");
+                var id = ui.item.value;
+                $.get("@Url.Action("getFacturas", "Facturacion")?id=" + id, async function (data) {
+                    var id_pago = id;
+                    $("#txtLugarExpedicion").val(data[0].lugar_expedicion);
+                    $("#cmbFormaPago").val(data[0].id_fpago);
+                    $("#cmbMetodoPago").val(data[0].metodo_pago);
+                    $("#cmbUsoCFDI").val(data[0].c_uso_cfdi);
+                    $("#id_prefactura").val(data[0].id);
+                    $("#txtTotalImporte").val(data[0].subtotal);
+                    $("#txtTotalIVA").val(data[0].total_iva);
+                    $("#txtTotalIVARet").val(data[0].total_iva_ret);
+                    $("#txtTotalISRRet").val(data[0].total_isr_ret);
+                    $("#txtTotalDescuento").val(data[0].descuento);
+                    $("#txtTotal").val(data[0].total);
+                    $.get("@Url.Action("getFacturasConPreFac", "Facturacion")?id=" + id_pago, async function (data) {
+                        var t = TableConceptos;
+                        for (var x = 0; x < data.length; x++)
+                    {
+                        var importe = parseFloat(data[x].importe);
+                        importe = importe.toFixed(2);
+                        var p_unitario = parseFloat(data[x].p_unitario);
+                        p_unitario = p_unitario.toFixed(2);
+                        t.row.add(
+                            {
+                                "seleccion": "",
+                                "acciones": '<a href="#" class="btn btn-warning btn-sm icon-editar" title="Editar Concepto"><i class="fas fa-edit"></i></a> &nbsp;&nbsp; <a href="#" class="btn btn-danger btn-sm icon-delete" title="Eliminar Concepto"><i class="fas fa-trash"></i></a>',
+                                "clave": data[x].c_sat,
+                                "concepto": data[x].concepto,
+                                "id_sat": data[x].d_sat,
+                                "clave_sat": "[" + data[x].c_sat + "]" + data[x].d_sat,
+                                "cantidad": data[x].cantidad,
+                                "id_unidad_medida": "",
+                                "unidad": data[x].unidad,
+                                "precio_unitario": data[x].p_unitario,
+                                "importe": data[x].importe,
+                                "id_iva": data[x].iva_tasa_impuesto,
+                                "v_iva": 0,
+                                "id_iva_ret": 0,
+                                "v_iva_ret": 0,
+                                "id_isr": 0,
+                                "v_isr_ret": 0,
+                                "total_iva": data[x].iva_tasa_impuesto,
+                                "total_iva_ret": 0,
+                                "total_isr": 0,
+                                "tipo_descuento": 0,
+                                "descuento": data[x].descuento,
+                                "total_descuento": 0,
+                                "total": data[x].total,
+                                "id_detalle_nota_venta": 0,
+                                "id_nota_venta": 0
+                            }
+                        );
+                        t.columns.adjust().draw(false);
+                    }
+                    });
+                });
+                return false;
+            }
+        });
+
+        $("#txtConcepto").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+
+                if (term.length > 3) {
+                    if (term in cacheConcepto) {
+                        response(cacheConcepto[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerProductos", "Catalogos")", request, function (data, status, xhr) {
+                        cacheConcepto[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    response([]);
+                }
+
+            },
+            select: function (event, ui) {
+                //console.log(ui);
+                var c_unidad = ui.item.c_sat;
+                c_unidad = c_unidad.split("]");
+                var n_ser = c_unidad[1];
+                c_unidad = c_unidad[0].split("[");
+                var id_unidad = ui.item.unidad;
+                id_unidad = id_unidad.split("]");
+                id_unidad = id_unidad[0].split("[");
+                //console.log("------>" + id_unidad);
+                $("#txtConcepto").val(ui.item.label);
+                $("#txtClaveUnidad").val(c_unidad[1]);
+                $("#txtNombreServ").val(n_ser);
+                $("#txtIdUnidad").val(ui.item.id_unidad);
+                $("#txtUnidad").val(ui.item.unidad);
+                $("#txtIdSAT").val(ui.item.id_sat);
+                $("#txtIDSat").val(ui.item.c_sat);
+                $("#txtClaveProductoS").val(id_unidad[1]);
+                $("#txtClaveInterna").val(ui.item.clave);
+                //----------------------------------------------
+                if ($("#cmbTipoComprobante option:selected").val() == "I") {
+                    $("#txtPrecioUnitario").val(ui.item.precio);
+                    $("#cmbIVA").val(ui.item.id_iva);
+                    $("#cmbIVARet").val(ui.item.id_iva_ret);
+                    $("#cmbISR").val(ui.item.id_isr_ret);
+                }
+
+                //----------------------------------------------
+                $("#txtUnidad").addClass("is-valid");
+                $("#txtUnidad").removeClass("ui-autocomplete-loading");
+
+                $("#txtIDSat").addClass("is-valid");
+                $("#txtIDSat").removeClass("ui-autocomplete-loading");
+
+                return false;
+            }
+        });
+
+        $("#txtPaisOrigen").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 1) {
+                    if (term in cachePais) {
+                        response(cachePais[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerPais", "Catalogos")", request, function (data, status, xhr) {
+                        cachePais[term] = data;
+                        response(data);
+                    });
+                }
+                else
+                {
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtPaisOrigen").val(ui.item.name);
+                //----------------------------------------------
+                $("#txtPaisOrigen").addClass("is-valid");
+                $("#txtPaisOrigen").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+
+        $("#nom_estacion").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    if (term in cacheUbica) {
+                        response(cacheUbica[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerUbica", "CartaPorte")", request, function (data, status, xhr) {
+                        cacheUbica[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#idubicacion").val(ui.item.value);
+                $("#id_ubicacion").val(ui.item.id_ubicacion);
+                $("#nom_estacion").val(ui.item.name);
+                $("#cmbTipo_ubicacion").val(ui.item.tipo);
+                $("#nom_estacion").addClass("is-valid");
+                $("#nom_estacion").removeClass("is-invalid");
+                $("#num_estacion").focus();
+                return false;
+            }
+        });
+
+        $("#mercancia").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+
+                if (term.length > 2) {
+                    $("#mercancia").removeClass("is-invalid");
+                    $("#mercancia").removeClass("is-valid");
+                    $("#mercancia").addClass("is-invalid");
+                    if (term in cacheMerca) {
+                        response(cacheMerca[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerMercancia", "CartaPorte")", request, function (data, status, xhr) {
+                        cacheMerca[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#mercancia").removeClass("is-invalid");
+                    $("#mercancia").removeClass("is-valid");
+                    $("#mercancia").addClass("is-invalid");
+                    response([]);
+                }
+
+            },
+            select: function (event, ui) {
+                $("#id_mercancia").val(ui.item.value);
+                $("#mercancia").val(ui.item.name);
+
+                var id_ = ui.item.value;
+                $.get("@Url.Action("getMercancia", "CartaPorte")?id=" + id_, async function (data) {
+                    $("#p_bruto").val(data[0].peso_bruto);
+                    $("#Unidad_peso").val(data[0].u_medida);
+                    $("#p_neto").val(data[0].peso_neto);
+                    $("#n_total_mercancias").val(data[0].t_mercancia);
+                });
+                $("#mercancia").removeClass("is-invalid");
+                $("#mercancia").removeClass("is-valid");
+                $("#mercancia").addClass("is-valid");
+                return false;
+            }
+        });
+
+        $("#rfc_figura").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+
+                if (term.length > 2) {
+                    $("#rfc_figura").removeClass("is-invalid");
+                    $("#rfc_figura").removeClass("is-valid");
+                    $("#rfc_figura").addClass("is-invalid");
+                    if (term in cacheRFCFigura) {
+                        response(cacheRFCFigura[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerFigura", "CartaPorte")", request, function (data, status, xhr) {
+                        cacheRFCFigura[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#rfc_figura").removeClass("is-invalid");
+                    $("#rfc_figura").removeClass("is-valid");
+                    $("#rfc_figura").addClass("is-invalid");
+                    response([]);
+                }
+
+            },
+            select: function (event, ui) {
+                $("#idfigura").val(ui.item.value);
+                var id_ = ui.item.value;
+                console.log(id_);
+                //$("#rfc_figura").val(ui.item.name);
+                $("#rfc_figura").removeClass("is-invalid");
+                $("#rfc_figura").removeClass("is-valid");
+                $("#rfc_figura").addClass("is-valid");
+                $.get("@Url.Action("getFigura", "CartaPorte")?id=" + id_, async function (data) {
+                    console.log(data);
+                    $("#id_figura").val(data[0].id_figura);
+                    $("#NLicencia_figura").val(data[0].n_licencia);
+                    $("#Nom_figura").val(data[0].n_figura);
+                    $("#rfc_figura").val(data[0].rfc_figura);
+                    $("#No_id_figura").val(data[0].no_id_fiscal);
+                });
+                return false;
+            }
+        });
+
+        $("#NumPermisoSCT").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+
+                if (term.length > 2) {
+                    if (term in cacheAutotrans) {
+                        response(cacheAutotrans[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerNumPermiso", "Catalogos")", request, function (data, status, xhr) {
+                        cacheAutotrans[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    response([]);
+                }
+
+            },
+            select: function (event, ui) {
+                var id_ = ui.item.value;
+                $("#id_autotrans").val(id_);
+                $("#NumPermisoSCT").val(ui.item.name);
+                $("#NumPermisoSCT").addClass("is-valid");
+                $("#NumPermisoSCT").removeClass("ui-autocomplete-loading");
+                $.get("@Url.Action("getAutoTransporte", "CartaPorte")?id=" + id_, async function (data) {
+                    let id_auto = data.id;
+                    $("#p_sct").val(data.id_permiso_sct);
+                    $("#ConfigVehicular").val(data.id_conf_vehicular);
+                    $("#PlacaVM").val(data.placa_vm);
+                    $("#AnioModeloVM").val(data.ano_modelo);
+                    $("#AseguraRespCivil").val(data.asegura_resp_civil);
+                    $("#PolizaRespCivil").val(data.poliza_resp_civil);
+                    $("#AseguraMedAmb").val(data.asegura_medio_amb);
+                    $("#PolizaMedAmb").val(data.poliza_medio_amb);
+                    $("#AseguraCarga").val(data.asegura_carga);
+                    $("#PolizaCarga").val(data.poliza_carga);
+                    $(".dAddAuto").css('visibility','visible');
+                    $.get("@Url.Action("getRemolqueById", "CartaPorte")?id=" + id_auto, async function (data) {
+                        var t = TableAutoTrans;
+                        t.clear().draw(false);
+                        if (data == "Sin Resultados") {
+                            //
+                        } else {
+                            
+                            for (var a = 0; a < data.length; a++) {
+                                t.row.add(
+                                    {
+                                        "st_remolque": data[a].id_remolque_sub,
+                                        "placa": data[a].placa
+                                    }
+                                );
+                            }
+                            t.columns.adjust().draw(false);
+                        }
+                    });
+
+                });
+                return false;
+            }
+        });
+
+        $("input[id=\"txtFechaEmision\"]").daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true,
+            timePicker: true,
+            locale: {
+                format: "DD/MM/YYYY HH:mm"
+            }
+        });
+
+        $.get("@Url.Action("obtenerUsoCFDI", "Catalogos")", function (data) {
+            $("#cmbUsoCFDI").html(data);
+        });
+
+        $.get("@Url.Action("obtenerUnidadesPeso", "Catalogos")", function (data) {
+            $("#cmbUnidad_peso").html(data);
+            $("#cmbUnidad_peso").val($("#cmbUnidad_peso option:last").val());
+        });
+
+        $.get("@Url.Action("obtenerPermiso", "CartaPorte")", function (data) {
+            for (var i = 0; i < data.length; i++)
+            {
+                $("#p_sct").append("<option value=" + data[i].id_permiso+">["+data[i].clave+"]"+data[i].descripcion+"</option>");
+            }
+            $("#p_sct").val($("#p_sct option:first").val());
+        });
+
+        $.get("@Url.Action("getConfVe", "CartaPorte")", function (data) {
+            for (var i = 0; i < data.length; i++)
+            {
+                $("#ConfigVehicular").append("<option value=" + data[i].id_permiso+">["+data[i].clave+"]"+data[i].descripcion+"</option>");
+            }
+            $("#ConfigVehicular").val($("#ConfigVehicular option:first").val());
+        });
+
+        $.get("@Url.Action("getRemolque", "CartaPorte")", function (data) {
+            for (var i = 0; i < data.length; i++)
+            {
+                $("#txtRemolque").append("<option value="+data[i].clave+">["+data[i].clave+"]"+data[i].remolque+"</option>");
+            }
+            $("#txtRemolque").val($("#txtRemolque option:first").val());
+        });
+
+        $.get("@Url.Action("obtenerMetodoPago", "Catalogos")", function (data) {
+            $("#cmbMetodoPago").html(data);
+            $("#cmbMetodoPago").val($("#cmbMetodoPago option:last").val());
+        });
+
+        $.get("@Url.Action("obtenerFormaPago", "Catalogos")", function (data) {
+            $("#cmbFormaPago").html(data);
+        });
+
+        $.get("@Url.Action("obtenerIVA", "Catalogos")", function (data) {
+             $("#cmbIVA").html(data);
+             $("#cmbIVA").val($("#cmbIVA option:last").val());
+        });
+
+        $.get("@Url.Action("obtenerIVARet", "Catalogos")", function (data) {
+            $("#cmbIVARet").html(data);
+            $("#cmbIVARet").val($("#cmbIVARet option:last").val());
+        });
+
+        $.get("@Url.Action("obtenerISR", "Catalogos")", async function (data) {
+            $("#cmbISR").html(data);
+            $("#cmbISR").val($("#cmbISR option:last").val());
+            if (id != "") {
+                setTimeout(function () { conCartaPorte(id); $("#btnGCartaPorte").html("<i class='fa fa-edit'></i> Actualizar"); }, 3000);
+            } else { cerrarCargando(); }
+        });
+
+        $("#txt_t_distancia").inputmask({
+            alias: "decimal",
+            integerDigits: 6,
+            digits: 2,
+            allowMinus: false,
+            digitsOptional: false,
+            placeholder: "0"
+        });
+
+        $("#dis_recorrida").inputmask({
+            alias: "decimal",
+            integerDigits: 6,
+            digits: 2,
+            allowMinus: false,
+            digitsOptional: false,
+            placeholder: "0"
+        });
+
+        TableUbicacion = $("#datatables-ubicaciones").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { visible: true, orderable: false, searchable: false, targets: 0, name: "acciones", data: "acciones" },
+                { visible: true, orderable: true, searchable: true, targets: 1, name: "id_ubicacion", data: "id_ubicacion" },
+                { visible: false, orderable: true, searchable: true, targets: 2, name: "idubicacion", data: "idubicacion" },
+                { visible: true, orderable: true, searchable: true, targets: 3, name: "tipo_ubicacion", data: "tipo_ubicacion" },
+                { visible: false, orderable: false, searchable: false, targets: 4, name: "id_tipo", data: "id_tipo" },
+                { visible: true, orderable: true, searchable: true, targets: 5, name: "distancia_recorrida", data: "distancia_recorrida" },
+                { visible: true, orderable: true, searchable: true, targets: 6, name: "fca_hora_salida", data: "fca_hora_salida" },
+                { visible: false, orderable: false, searchable: false, targets: 7, name: "num_estacion", data: "num_estacion" },
+                { visible: false, orderable: false, searchable: false, targets: 8, name: "id", data: "id" }
+            ],
+            order: [[1, 'asc']]
+        });
+
+        TableConceptos = $("#datatables-conceptos-factura").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { visible: true, orderable: false, searchable: false, targets: 0, name: "seleccion", data: "seleccion" },
+                { visible: true, orderable: false, searchable: false, targets: 1, name: "acciones", data: "acciones" },
+                { visible: true, orderable: true, searchable: true, targets: 2, name: "clave", data: "clave" },
+                { visible: true, orderable: true, searchable: true, targets: 3, name: "concepto", data: "concepto" },
+                { visible: false, orderable: false, searchable: false, targets: 4, name: "id_sat", data: "id_sat" },
+                { visible: true, orderable: true, searchable: true, targets: 5, name: "clave_sat", data: "clave_sat" },
+                { visible: true, orderable: true, searchable: true, targets: 6, name: "cantidad", data: "cantidad" },
+                { visible: false, orderable: false, searchable: false, targets: 7, name: "id_unidad_medida", data: "id_unidad_medida" },
+                { visible: true, orderable: true, searchable: true, targets: 8, name: "unidad", data: "unidad" },
+                { visible: true, orderable: true, searchable: true, targets: 9, name: "precio_unitario", data: "precio_unitario" },
+                { visible: true, orderable: true, searchable: true, targets: 10, name: "importe", data: "importe" },
+                { visible: false, orderable: false, searchable: false, targets: 11, name: "id_iva", data: "id_iva" },
+                { visible: false, orderable: false, searchable: false, targets: 12, name: "id_iva_ret", data: "id_iva_ret" },
+                { visible: false, orderable: false, searchable: false, targets: 13, name: "id_isr", data: "id_isr" },
+                { visible: true,  orderable: true,  searchable: true,  targets: 14, name: "total_iva", data: "total_iva" },
+                { visible: false, orderable: false, searchable: false, targets: 15, name: "total_iva_ret", data: "total_iva_ret" },
+                { visible: false, orderable: false, searchable: false, targets: 16, name: "total_isr", data: "total_isr" },
+                { visible: false, orderable: false, searchable: false, targets: 17, name: "tipo_descuento", data: "tipo_descuento" },
+                { visible: false, orderable: false, searchable: false, targets: 18, name: "descuento", data: "descuento" },
+                { visible: false, orderable: false, searchable: false, targets: 19, name: "total_descuento", data: "total_descuento" },
+                { visible: true,  orderable: true,  searchable: true,  targets: 20, name: "total", data: "total" },
+                { visible: false, orderable: false, searchable: false, targets: 21, name: "id_detalle_nota_venta", data: "id_detalle_nota_venta" },
+                { visible: false, orderable: false, searchable: false, targets: 22, name: "id_nota_venta", data: "id_nota_venta" },
+                { visible: false, orderable: false, searchable: false, targets: 23, name: "c_prod_serv", data: "c_prod_serv" },
+                { visible: false, orderable: false, searchable: false, targets: 24, name: "c_producto", data: "c_producto" },
+                { visible: false, orderable: false, searchable: false, targets: 25, name: "c_unidad_medida", data: "c_unidad_medida" },
+                { visible: false, orderable: false, searchable: false, targets: 26, name: "importe_unitario", data: "importe_unitario" },
+                { visible: false, orderable: false, searchable: false, targets: 27, name: "importe_total", data: "importe_total" },
+                { visible: false, orderable: false, searchable: false, targets: 28, name: "obj_impuesto", data: "obj_impuesto" },
+                { visible: false, orderable: false, searchable: false, targets: 29, name: "iva_imp_traslado", data: "iva_imp_traslado" },
+                { visible: false, orderable: false, searchable: false, targets: 30, name: "tipo_factor", data: "tipo_factor" },
+                { visible: false, orderable: false, searchable: false, targets: 31, name: "iva_tasa", data: "iva_tasa" },
+                { visible: false, orderable: false, searchable: false, targets: 32, name: "iva_tasa_impuesto", data: "iva_tasa_impuesto" },
+                { visible: false, orderable: false, searchable: false, targets: 33, name: "iva_ret", data: "iva_ret" },
+                { visible: false, orderable: false, searchable: false, targets: 34, name: "iva_ret_tasa", data: "iva_ret_tasa" },
+                { visible: false, orderable: false, searchable: false, targets: 35, name: "iva_ret_impuesto", data: "iva_ret_impuesto" },
+                { visible: false, orderable: false, searchable: false, targets: 36, name: "isr_ret", data: "isr_ret" },
+                { visible: false, orderable: false, searchable: false, targets: 37, name: "isr_ret_tasa", data: "isr_ret_tasa" },
+                { visible: false, orderable: false, searchable: false, targets: 38, name: "isr_ret_impuesto", data: "isr_ret_impuesto" },
+                { visible: false, orderable: false, searchable: false, targets: 38, name: "tipo_ieps", data: "tipo_ieps" },
+                { visible: false, orderable: false, searchable: false, targets: 39, name: "total_imp_retenido", data: "total_imp_retenido" }
+            ],
+            order: [[1, 'asc']]
+        });
+
+        TableAutoTrans = $("#datatables-remolque").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { visible: true, orderable: false, searchable: false, targets: 0, name: "st_remolque", data: "st_remolque"},
+                { visible: true, orderable: false, searchable: false, targets: 1, name: "placas", data: "placas"}
+            ],
+            order: [[1, 'asc']]
+        });
+
+        TableFiguras = $("#datatables-figura").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { visible: true, orderable: false, searchable: false, targets: 0, name: "acciones", data: "acciones" },
+                { visible: true, orderable: true, searchable: true, targets: 1, name: "rfc", data: "rfc" },
+                { visible: true, orderable: true, searchable: true, targets: 2, name: "figura", data: "figura" },
+                { visible: true, orderable: true, searchable: true, targets: 3, name: "num_figura", data: "num_figura" },
+                { visible: false, orderable: true, searchable: true, targets: 4, name: "id_figura", data: "id_figura" }
+            ],
+            order: [[1, 'asc']]
+        });
+
+        TableMercancias = $("#datatables-mercancia").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { visible: true, orderable: false, searchable: false, targets: 0, name: "acciones", data: "acciones" },
+                { visible: true, orderable: false, searchable: true, targets: 1, name: "mercancia", data: "mercancia" },
+                { visible: true, orderable: false, searchable: true, targets: 2, name: "peso_bruto", data: "peso_bruto" },
+                { visible: true, orderable: false, searchable: true, targets: 3, name: "unidad_peso", data: "unidad_peso" },
+                { visible: true, orderable: false, searchable: false, targets: 4, name: "peso_neto", data: "peso_neto" },
+                { visible: true, orderable: true, searchable: true, targets: 5, name: "num_mercancias", data: "num_mercancias" },
+                { visible: false, orderable: true, searchable: true, targets: 6, name: "id_mercancia", data: "id_mercancia" }
+            ],
+            order: [[1, 'asc']]
+        });
+
+        $('#datatables-conceptos-factura tbody').on('click', '.icon-delete', function () {
+            if ($("#btn-EditarConcepto").is(":visible")) {
+                notificacionAlert("No se pueden eliminar conceptos mientras se este editando alguno de ellos.", "danger");
+            }
+            else {
+                var t = TableConceptos;
+                dataEdit = t.row($(this).parents('tr'));
+                var data = dataEdit.data();
+                t.row($(this).parents('tr')).remove();
+                t.columns.adjust().draw(false);
+                calcularImporte();
+            }
+        });
+
+        $('#datatables-mercancia tbody').on('click', '.icon-delete', function () {
+            var t = TableMercancias;
+            dataEdit = t.row($(this).parents('tr'));
+            var data = dataEdit.data();
+            t.row($(this).parents('tr')).remove();
+            t.columns.adjust().draw(false);
+            $("#mercancia").val("");
+            $("#p_bruto").val("");
+            $("#Unidad_peso").val("");
+            $("#p_neto").val("");
+            $("#n_total_mercancias").val("");
+            $("#id_mercancia").val("");
+        });
+
+        $('#datatables-figura tbody').on('click', '.icon-delete', function () {
+            var t = TableFiguras;
+            dataEdit = t.row($(this).parents('tr'));
+            var data = dataEdit.data();
+            t.row($(this).parents('tr')).remove();
+            t.columns.adjust().draw(false);
+            $("#rfc_figura").val("");
+            $("#idfigura").val("");
+            $("#cmbTipo_figura").val("");
+            $("#NLicencia_figura").val("");
+            $("#Nom_figura").val("");
+            $("#No_id_figura").val("");
+            $("#id_figura").val("");
+        });
+
+        $("#btn-EditarConcepto").hide();
+
+        $("#btn-CancelarConcepto").hide();
+        //------------------------------------------------------------------------------------
+        $("#btnAddUbicacion").click(function () {
+            var array = TableUbicacion.rows()
+                .data().toArray();
+            let ex_o = ""; let ex_s = "";
+            var tipo = $("#cmbTipo_ubicacion option:selected").text();
+            for (var i = 0; i < array.length; i++)
+            {
+                ex_o = array[i].tipo == "Origen" ? array[i].tipo : "";
+                ex_s = array[i].tipo == "Destino" ? array[i].tipo : "";
+            }
+
+            if (ex_o == tipo || ex_s == tipo) { notificacionAlert("Ya existe el tipo", "danger"); return false; }
+            var t = TableUbicacion;
+
+            t.row.add(
+                {
+                    "acciones": '<a href="#" class="btn btn-danger btn-sm icon-delete" title="Eliminar"><i class="fas fa-trash"></i></a>',
+                    "idubicacion": $("#idubicacion").val(),
+                    "id_ubicacion": $("#id_ubicacion").val(),
+                    "tipo_ubicacion": $("#cmbTipo_ubicacion option:selected").text(),
+                    "id_tipo": $("#cmbTipo_ubicacion option:selected").val(),
+                    "distancia_recorrida": $("#dis_recorrida").val(),
+                    "fca_hora_salida": $("#txtFechaHora").val(),
+                    "id": $("#idubicacion").val(),
+                    "num_estacion": $("#num_estacion").val(),
+                    "distancia": $("#dis_recorrida").val() == "" ? "0" : $("#dis_recorrida").val()
+                }
+            );
+            t.columns.adjust().draw(false);
+            limpiarUbicacion();
+        });
+
+        $('#datatables-ubicaciones tbody').on('click', '.icon-delete', function () {
+            var t = TableUbicacion;
+            dataEdit = t.row($(this).parents('tr'));
+            var data = dataEdit.data();
+            t.row($(this).parents('tr')).remove();
+            t.columns.adjust().draw(false);
+            var array = TableUbicacion.rows()
+                .data().toArray();
+            if (array.length <= 1) { $("#btnAddUbicacion").attr("disabled", false);}
+        });
+
+        $(".btnAddFig").click(function () {
+            //DataTable Figuras
+            var t = TableFiguras;
+            t.row.add(
+                {
+                    "acciones": '<a href="#" class="btn btn-danger btn-sm icon-delete" title="Eliminar Concepto"><i class="fas fa-trash"></i></a>',
+                    "rfc": $("#rfc_figura").val(),
+                    "figura": $("#Nom_figura").val(),
+                    "num_figura": $("#NLicencia_figura").val(),
+                    "id_figura": $("#idfigura").val()
+                }
+            );
+            t.columns.adjust().draw(false);
+        });
+
+        $(".btnAddMerca").click(function () {
+            //DataTable Mercancia
+            var t = TableMercancias;
+            t.row.add(
+                {
+                    "acciones": '<a href="#" class="btn btn-danger btn-sm icon-delete" title="Eliminar"><i class="fas fa-trash"></i></a>',
+                    "mercancia": $("#mercancia").val(),
+                    "peso_bruto": $("#p_bruto").val(),
+                    "unidad_peso": $("#Unidad_peso").val(),
+                    "peso_neto": $("#p_neto").val(),
+                    "num_mercancias": $("#n_total_mercancias").val(),
+                    "id_mercancia": $("#id_mercancia").val()
+                }
+            );
+            t.columns.adjust().draw(false);
+        });
+
+        $(".btnAddAuto").click(() => {
+            $("#NumPermisoSCT").attr('disabled', true);
+            $(".btnRemAuto").css("visibility", "visible");
+            $(".btnAddAuto").css("visibility", "hidden");
+        });
+
+        $(".btnRemAuto").click(() => {
+            $("#NumPermisoSCT").attr('disabled', false);
+            $(".btnRemAuto").css("visibility", "hidden");
+            $(".btnAddAuto").css("visibility", "visible");
+            $("#NumPermisoSCT").val('');
+            $("#p_sct").val(1);
+            $("#ConfigVehicular").val(1);
+            $("#PlacaVM").val('');
+            $("#AnioModeloVM").val('');
+            $("#AseguraRespCivil").val('');
+            $("#PolizaRespCivil").val('');
+            $("#AseguraMedAmb").val('');
+            $("#PolizaMedAmb").val('');
+            $("#AseguraCarga").val('');
+            $("#PolizaCarga").val('');
+            $("#id_autotrans").val('');
+        });
+
+        $("#btnGCartaPorte").click(function () {
+            var data = [];
+            var autotrans = [];
+            var prefac = [];
+            //------------PreFactura----------------------------------------------------------
+            let cmbFormaPago = $("#cmbFormaPago option:selected").val();
+            //cmbFormaPago = cmbFormaPago > 9 ? cmbFormaPago : '0' + cmbFormaPago;
+            let subtotal = $("#txtTotalImporte").val();
+            let subtotal_ = subtotal.split("$");
+            subtotal = subtotal_[1].replace(",", "");
+
+            let total = $("#txtTotal").val();
+            let total_ = total.split("$");
+            total = total_[1].replace(",", "");
+            let total_isr = $("#txtTotalISRRet").val();
+            total_isr_ = total_isr.split("$");
+            total_isr = total_isr_[1].replace(",", "");
+            let total_iva = $("#txtTotalIVA").val();
+            let total_iva_ = total_iva.split("$");
+            total_iva = total_iva_[1].replace(",", "");
+            let total_iva_ret = $("#txtTotalIVARet").val();
+            let total_iva_ret_ = total_iva_ret.split("$");
+            total_iva_ret = total_iva_ret_[1].replace(",", "");
+            let descuento = $("#txtTotalDescuento").val();
+            let descuento_ = descuento.split("$");
+            descuento = descuento_[1].replace(",", "");
+
+            prefac.push({
+                serie: $("#txtSerie").val(),
+                folio: $("#txtFolio").val(),
+                reg_fiscal_usuario: $("#txtClaveRegimen").val(),
+                tipo_comprobante: $("#cmbTipoComprobante option:selected").val(),
+                exportacion: "01",
+                nombre_rfc_pf: $("#txtRFC").val(),
+                rfc_cliente_pf: $(".txtNombreRazonCliente").val(),
+                uso_factura: $("#cmbUsoCFDI").val() > 9 ? $("#cmbUsoCFDI").val() : "0" + $("#cmbUsoCFDI").val(),
+                lugar_expedicion: $("#txtLugarExpedicion").val(),
+                tipo_factura: $("#cmbTipoFactura option:selected").val(),
+                forma_pago: cmbFormaPago,
+                metodo_pago: $("#cmbMetodoPago option:selected").val(),
+                numero_pedido: $("#txtNumeroPedido").val(),
+                moneda: $("#cmbMoneda option:selected").val(),
+                tipo_cambio: $("#txtTipoCambio").val() == "" ? '01' : $("#txtTipoCambio").val(),
+                fecha_emision: $("#txtFechaEmision").val(),
+                clave_reg_fiscal: $("#txtClaveRegimen").val(),
+                clave_uso_cfdi: $("#cmbUsoCFDI option:selected").val(),
+                subtotal: subtotal,
+                total_iva: total_iva,
+                total_iva_ret: total_iva_ret,
+                total_isr_ret: total_isr,
+                descuento2: descuento,
+                total: total
+            });
+            var arrayC = TableConceptos.rows()
+                .data().toArray();
+            var arrayU = TableUbicacion.rows().data().toArray();
+            //------------------------
+            //for (var a = 0; a < array.length; a++)
+            //{
+            //    if (array[a].id_tipo == "2") {
+            //        id_d = array[a].idubicacion;
+            //        n_estacion_d = array[a].n_estacion;
+            //        distancia_r_d = array[a].distancia;
+            //        fca_hora_d = array[a].fca_hora;
+            //    } else {
+            //        id_o = array[a].idubicacion;
+            //        n_estacion_o = array[a].n_estacion;
+            //        distancia_r_o = array[a].distancia;
+            //        fca_hora_o = array[a].fca_hora;
+            //    }
+            //}
+            data.push({
+                "id_prefactura": $("#id_prefactura").val(),
+                "id_mercancia": $("#id_mercancia").val(),
+                "id_figura": $("#idfigura").val(),
+                "id_receptor": $("#id_receptor").val(),
+                "id_autotransporte": $("#id_autotrans").val(),
+                "transporte_inter": $("#cmbTipo_inter option:selected").val(),
+                "e_s_mercancia": $("#cmbTipo_es option:selected").val(),
+                "pais_ori_des": $("#txtPaisOrigen").val(),
+                "total_distancia_rec": $("#txt_t_distancia").val(),// distancia_r_d
+                "tipo_figura": $("#cmbTipo_figura option:selected").val(),
+                "res_fiscal_figura": $("#cmbResidencial_figura").val()
+            });
+            let url_ = '@Url.Action("saveCartaPorte","CartaPorte")';
+            if (id != 0)
+                url_ = '@Url.Action("updateCartaPorte", "CartaPorte")';
+            if (arrayU.length == 0) {
+                notificacionAlert("Debe capturar la ubicación.", "danger");
+                return false;
+            }
+            if ($("#id_mercancia").val() == "") {
+                notificacionAlert("Debe Alguna mercancia.", "danger");
+                return false;
+            }
+            if ($("#idfigura").val() == "") {
+                notificacionAlert("Debe agregar alguna Figura.", "danger");
+                return false;
+            }
+            if ($("#id_receptor").val() == "") {
+                notificacionAlert("Debe agregar algun cliente.", "danger");
+                return false;
+            }
+            //if (total <= 0 && $("#cmbTipoComprobante option:selected").val() == "T") {
+            //    notificacionAlert("El total de los conceptos debe ser mayor a 0.", "danger");
+            //    return false;
+            //}
+            abrirCargando();
+            console.log(arrayC);
+            //return false;
+            //--------------------------------------------------------------------------------------------------------
+             $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                 url: url_,
+                 data: JSON.stringify({ 'prefactura': prefac, 'ubicacion': arrayU, 'concepto': arrayC, 'precarta': data, 'autotrans': autotrans, 'id': $("#id_prefactura").val() }),
+                 success: function (data) {
+                     var response = data;
+                     if (data.tipo == "Guardar")
+                     {
+                         window.location = "/CartaPorte/PreviewCartaPorte?id=" + data.id;
+                     } else {
+                         window.location = "/CartaPorte/PreviewCartaPorte?id=" + data.id;
+                     }
+                 },
+                 error: function (jqXHR, textStatus, errorThrown) {
+                    notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                    cerrarCargando();
+                 }
+             });
+            cerrarCargando();
+            //---------------------------------------------------------------------------------------------------------
+        });
+
+    });
+
+    function t_comprobante()
+    {
+        let tipo = $("#cmbTipoComprobante option:selected").val();
+        if (tipo == "T") {
+            $("#txtPrecioUnitario").attr('disabled', true);
+            $("#cmbIVA").attr('disabled', true);
+            $("#cmbIVARet").attr('disabled', true);
+            $("#cmbISR").attr('disabled', true);
+            $("#txtPrecioUnitario").val("$ 0.00");
+            $("#cmbIVA").val($("#cmbIVA option:last").val());
+            $("#cmbIVARet").val($("#cmbIVARet option:last").val());
+            $("#cmbISR").val($("#cmbISR option:last").val());
+        } else {
+            $("#txtPrecioUnitario").attr('disabled', false);
+            $("#cmbIVA").attr('disabled', false);
+            $("#cmbIVARet").attr('disabled', false);
+            $("#cmbISR").attr('disabled', false);
+            $("#txtPrecioUnitario").val(" ");
+        }
+    }
+
+</script>

@@ -1,0 +1,348 @@
+﻿@model IEnumerable<Facturafast.Models.tbc_Productos_Servicios>
+@using Facturafast.Models
+@{
+    BD_FFEntities db = new BD_FFEntities();
+}
+<h1 class="h3 mb-3">Catálogos de Productos y Servicios</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-actions float-end">
+
+                </div>
+                <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#modalProductos" onclick="nuevoProducto()"><i class="fas fa-plus"></i> Agregar Producto o Servicio</button>
+
+            </div>
+            <div class="card-body">
+                <table id="datatables-catalogo-productos" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>ID SAT</th>
+                            <th>Clave</th>
+                            <th>Concepto</th>
+                            <th>Unidad</th>
+                            <th>Precio Unitario</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            tbc_ProdServ Sat = db.tbc_ProdServ.Where(s => s.id_sat == item.id_sat).Single();
+                            tbc_Unidades_Medida UM = db.tbc_Unidades_Medida.Where(s => s.id_unidad_medida == item.id_unidad_medida).Single();
+                            <tr>
+                                <td></td>
+                                <td>                                   
+                                    <button class="btn btn-warning btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#modalProductos" onclick="actualizarProducto(@item.id_producto_servicio, @item.id_sat, '@item.concepto', '@item.clave', @item.id_unidad_medida, @item.precio_unitario, @item.id_iva, @item.id_iva_ret, @item.id_isr, @item.es_tasa_ieps, @item.id_ieps, @item.cuota_ieps, '@("["+Sat.c_pord_serv+"] "+ Sat.descripcion)', '@("["+UM.clave+"] "+ UM.descripcion)');"><i class="fas fa-edit"></i></button>
+                                </td>
+                                <td>
+                                    @Sat.c_pord_serv <br />
+                                    @Sat.descripcion
+                                </td>
+                                <td>@item.clave</td>
+                                <td>@item.concepto</td>
+                                <td>@UM.clave - @UM.descripcion</td>
+                                <td>@item.precio_unitario.ToString("c")</td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="GuardarProducto.Catalogo" action="@Url.Action("GuardarProducto","Catalogos")" method="post" onsubmit="return validateForm()">
+    <input type="hidden" id="txtIdUnidad" name="txtIdUnidad">
+    <input type="hidden" id="txtIdSAT" name="txtIdSAT">
+    <input type="hidden" id="txtIdProducto" name="txtIdProducto">
+    <div class="modal fade" id="modalProductos" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Formulario de Producto o Servicio</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body m-3">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtIDSat" placeholder="ID SAT" required>
+                                <label for="txtIDSat">ID SAT</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-center">
+                            <a href="http://200.57.3.46:443/PyS/catPyS.aspx" target="_blank" class="btn btn-primary btn-lg" style="margin-top:10px;"><i class="fas fa-search"></i> Buscar ID SAT</a>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-floating mb-3">
+                                <textarea type="text" class="form-control form-control-lg" id="txtConcepto" name="txtConcepto" style="height:120px;" placeholder="Concepto" required></textarea>
+                                <label for="txtConcepto">Concepto</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtClave" name="txtClave" placeholder="Clave">
+                                <label for="txtClave">Clave</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtUnidad" placeholder="Unidad" required>
+                                <label for="txtUnidad">Unidad</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control form-control-lg" id="txtPrecioUnitario" name="txtPrecioUnitario" placeholder="Precio Unitario" required>
+                                <label for="txtPrecioUnitario">Precio Unitario</label>
+                            </div>
+                        </div>
+                    </div>
+                    <h4>Impuestos Federales</h4>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbIVA" name="cmbIVA" aria-label="IVA">
+                                </select>
+                                <label for="cmbIVA">IVA</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbIVARet" name="cmbIVARet" aria-label="IVA Ret">
+                                </select>
+                                <label for="cmbIVARet">IVA Ret</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbISR" name="cmbISR" aria-label="ISR">
+                                </select>
+                                <label for="cmbISR">ISR</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbTipoIEPS" name="cmbTipoIEPS" aria-label="IEPS" onchange="selectTipoIEPS()">
+                                    <option value="1">Tasa</option>
+                                    <option value="2">Cuota</option>
+                                </select>
+                                <label for="cmbTipoIEPS">IEPS</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4" id="col-Tasa">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbIEPS" name="cmbIEPS" aria-label="IEPS">
+                                </select>
+                                <label for="cmbIEPS">IEPS</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4" id="col-Cuota">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtIEPS" name="txtIEPS" placeholder="IEPS">
+                                <label for="txtIEPS">IEPS</label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i>&nbsp; Guardar Datos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+<script>
+
+    function nuevoProducto() {
+        document.forms["GuardarProducto.Catalogo"].reset();
+        $("#txtIdProducto").val(0);
+        $("#txtIEPS").val(0);
+        $("#cmbTipoIEPS").val(1);
+        $("#cmbIVA").val($("#cmbIVA option:first").val());
+        $("#cmbIVARet").val($("#cmbIVARet option:last").val());
+        $("#cmbIEPS").val($("#cmbIEPS option:last").val());
+        $("#cmbISR").val($("#cmbISR option:last").val());
+
+        $("#txtUnidad").removeClass("is-invalid");
+        $("#txtUnidad").removeClass("is-valid");
+        $("#txtIDSat").removeClass("is-invalid");
+        $("#txtIDSat").removeClass("is-valid");
+
+        selectTipoIEPS();
+    }
+
+    function actualizarProducto(a,b,c,d,e,f,g,h,i,j,k,l,m,n) {
+        $("#txtIdProducto").val(a);
+        $("#txtIDSat").addClass("is-valid");
+        $("#txtIdSAT").val(b);
+
+
+        $("#txtConcepto").val(c);
+        $("#txtClave").val(d);
+        $("#txtUnidad").addClass("is-valid");
+        $("#txtIdUnidad").val(e);
+
+        $("#txtPrecioUnitario").val(f);
+        $("#cmbIVA").val(g);
+        $("#cmbIVARet").val(h);
+        $("#cmbISR").val(i);
+        $("#cmbTipoIEPS").val(j);
+        $("#cmbIEPS").val(k);
+        $("#txtIEPS").val(l);
+
+
+        $("#txtIDSat").val(m);
+        $("#txtUnidad").val(n);
+
+        selectTipoIEPS();
+    }
+
+    var cacheUnidad = {};
+    var cacheSAT = {};
+    document.addEventListener("DOMContentLoaded", function () {
+        $("#datatables-catalogo-productos").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1] }
+            ],
+            order: [[2, 'asc']]
+        });
+
+        $.get("@Url.Action("obtenerIVA", "Catalogos")", function (data) {
+            $("#cmbIVA").html(data);
+        });
+        $.get("@Url.Action("obtenerIVARet", "Catalogos")", function (data) {
+            $("#cmbIVARet").html(data);
+        });
+        $.get("@Url.Action("obtenerIEPS", "Catalogos")", function (data) {
+            $("#cmbIEPS").html(data);
+        });
+        $.get("@Url.Action("obtenerISR", "Catalogos")", function (data) {
+            $("#cmbISR").html(data);
+        });
+
+        selectTipoIEPS();
+
+        $("#txtUnidad").autocomplete({
+            minLength: 2,
+            source: function (request, response) {
+                var term = request.term;
+                $("#txtUnidad").removeClass("is-invalid");
+                $("#txtUnidad").removeClass("is-valid");
+                $("#txtUnidad").addClass("is-invalid");
+                if (term in cacheUnidad) {
+                    response(cacheUnidad[term]);
+                    return;
+                }
+                $.getJSON("@Url.Action("obtenerUnidadesMedida", "Catalogos")", request, function (data, status, xhr) {
+                    cacheUnidad[term] = data;
+                    response(data);
+                });
+            },
+            select: function (event, ui) {
+                $("#txtUnidad").val(ui.item.label);
+                $("#txtIdUnidad").val(ui.item.value);
+                $("#txtUnidad").removeClass("is-invalid");
+                $("#txtUnidad").removeClass("is-valid");
+                $("#txtUnidad").addClass("is-valid");
+                return false;
+            }
+        });
+
+        $("#txtIDSat").autocomplete({
+            minLength: 3,
+            source: function (request, response) {
+                var term = request.term;
+                $("#txtIDSat").removeClass("is-invalid");
+                $("#txtIDSat").removeClass("is-valid");
+                $("#txtIDSat").addClass("is-invalid");
+                if (term in cacheSAT) {
+                    response(cacheSAT[term]);
+                    return;
+                }
+                $.getJSON("@Url.Action("obteneridSAT", "Catalogos")", request, function (data, status, xhr) {
+                    cacheSAT[term] = data;
+                    response(data);
+                });
+            },
+            select: function (event, ui) {
+                $("#txtIDSat").val(ui.item.label);
+                $("#txtIdSAT").val(ui.item.value);
+                $("#txtIDSat").removeClass("is-invalid");
+                $("#txtIDSat").removeClass("is-valid");
+                $("#txtIDSat").addClass("is-valid");
+                return false;
+            }
+        });
+
+    });
+
+    function selectTipoIEPS() {
+        var id = $("#cmbTipoIEPS").val();
+        if (id == 1) {
+            $("#col-Tasa").show();
+            $("#col-Cuota").hide();
+            $("#txtIEPS").prop("required", false);
+        }
+        else {
+            $("#col-Tasa").hide();
+            $("#col-Cuota").show();
+            $("#txtIEPS").prop("required", true);
+        }
+    }
+
+    function validateForm() {
+        let idSat = document.forms["GuardarProducto.Catalogo"]["txtIdSAT"].value;
+        if (idSat != "") {
+            if ($("#txtIDSat").hasClass("is-invalid")) {
+                notificacionAlert("Debe seleccionar un ID SAT válido.", "danger");
+                return false;
+            }
+        }
+        else {
+            notificacionAlert("No ha seleccionado un ID SAT.", "danger");
+            $("#txtIDSat").removeClass("is-invalid");
+            $("#txtIDSat").removeClass("is-valid");
+            $("#txtIDSat").addClass("is-invalid");
+            return false;
+        }
+
+        let unidad = document.forms["GuardarProducto.Catalogo"]["txtIdUnidad"].value;
+        if (unidad != "") {
+            if ($("#txtUnidad").hasClass("is-invalid")) {
+                notificacionAlert("Debe seleccionar una unidad de medida válida.", "danger");
+                return false;
+            }
+        }
+        else {
+            notificacionAlert("No ha seleccionado una unidad de medida.", "danger");
+            $("#txtUnidad").removeClass("is-invalid");
+            $("#txtUnidad").removeClass("is-valid");
+            $("#txtUnidad").addClass("is-invalid");
+            return false;
+        }
+
+        bootstrap.Modal.getOrCreateInstance(document.getElementById("modalProductos")).hide();
+        abrirCargando();
+        return true;
+    }
+
+</script>

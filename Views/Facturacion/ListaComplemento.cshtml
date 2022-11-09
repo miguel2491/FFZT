@@ -1,0 +1,404 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+<style>
+    .maius {
+        text-transform: uppercase;
+    }
+</style>
+<h1 class="h3 mb-3">Lista de Complemento</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-4">
+                        <div class="form-floating mb-3">
+                            <input type="date" class="form-control form-control-lg" id="txtFechaInicial" name="txtFechaInicial" placeholder="Fecha Inicial" value="@ViewBag.Inicio.ToString("yyyy-MM-dd")" required>
+                            <label for="txtFechaInicial">Fecha Inicial</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating mb-3">
+                            <input type="date" class="form-control form-control-lg" id="txtFechaFinal" name="txtFechaFinal" placeholder="Fecha Final" value="@ViewBag.Final.ToString("yyyy-MM-dd")" required>
+                            <label for="txtFechaFinal">Fecha Final</label>
+                        </div>
+                    </div>
+                    <div class="col-md-2"></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <button class="btn btn-success btn-lg" id="btnBuscar" style="margin-top:10px;"><i class="fas fa-search"></i>&nbsp; Buscar</button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="card-actions float-end">
+                    </div>
+                    <div class="col-md-3">
+                        <a class="btn btn-success btn-lg" href="@Url.Action("Complemento","Facturacion")"><i class="fas fa-plus"></i> Agregar</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <table id="datatables-pre-pagos" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>RFC Cliente</th>
+                            <th>Razón Social</th>
+                            <th>Total Pago</th>
+                            <th>Fecha Pago</th>
+                            <th>Método Pago</th>
+                            <th>Serie</th>
+                            <th>Folio</th>
+                            <th>Estatus</th>
+                        </tr>
+                    </thead>
+                    <tbody class="maius">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalPrePago" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">PrePago</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body m-3">
+                <input type="hidden" id="idprepago_modal" />
+                <input type="hidden" id="correo_cliente" />
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="rfc_receptor">
+                            <label for="rfc_emisor">RFC</label>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="razon_recpetor">
+                            <label for="razon_emisor">Razón Social</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="total_mod">
+                            <label for="total_mod">Total</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+<!--MODAL CANCELAR-->
+<div class="modal fade" id="modalCancelar" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color:darkred">
+                <h3 class="modal-title" style="color:white">Factura</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body m-3">
+                <input type="hidden" id="id_factura" />
+                <div class="row dmensaje" style="display:none"></div>
+                <div class="row delimina" style="display:none">
+                    <div class="row">
+                        <div class='col-md-6'>
+                            <div class="form-floating mb-3">
+                                
+                                <input type="text" class="form-control form-control-lg" disabled id="txtFolioFiscal" placeholder="Folio">
+                                <label for="txtUnidad">Folio Físcal</label>
+                            </div>
+                        </div>
+                        <div class='col-md-6'>
+                            <div class="form-floating mb-3">
+                                <select class='form-select form-select-lg' id='s_motivos' onchange='sTipoMotivo()'>
+                                    <option value='01'>Comprobante emitido con errores con relación</option>
+                                    <option value='02'>Comprobante emitido con errores sin relación</option>
+                                    <option value='03'>No se llevó a cabo la operación</option>
+                                    <option value='04'>Operación nominativa relacionada en una factura global</option>
+                                </select>
+                                <label for="s_motivos">Motivo</label>
+                            </div>
+                        </div>
+                        <div class='col-md-6' id='folioDiv'>
+                            <div class="form-floating mb-2">
+                                <label>Folio</label>
+                                <input type='text' class='form-control' id='folio_'>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="dbtn">
+                    <button class="btn btn-warning btn-sm" onclick="cancelaFactura()">Cancelar</button>
+                    <button class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+                <br />
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var TablePrePagos;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        getFirma();
+        TablePrePagos= $("#datatables-pre-pagos").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { visible: false, orderable: false, searchable: false, targets: 0, name: "id", data: "id" },
+                { visible: true, orderable: false, searchable: false, targets: 1, name: "acciones", data: "acciones" },
+                { visible: true, orderable: true, searchable: true, targets: 2, name: "rfc_cliente", data: "rfc_cliente" },
+                { visible: true, orderable: true, searchable: true, targets: 3, name: "nombre_razon", data: "nombre_razon" },
+                { visible: true, orderable: false, searchable: false, targets: 4, name: "total_pago", data: "total_pago" },
+                { visible: true, orderable: true, searchable: true, targets: 5, name: "fecha_pago", data: "fecha_pago" },
+                { visible: true, orderable: true, searchable: true, targets: 6, name: "forma_pago", data: "forma_pago" },
+                { visible: true, orderable: false, searchable: false, targets: 7, name: "serie", data: "serie" },
+                { visible: true, orderable: true, searchable: true, targets: 8, name: "folio", data: "folio" },
+                { visible: true, orderable: false, searchable: false, targets: 9, name: "estatus", data: "estatus" }
+            ],
+            order: [[1, 'asc']]
+        });
+        let fi = $("#txtFechaInicial").val();
+        let ff = $("#txtFechaFinal").val();
+        getListConcepto(fi, ff);
+
+        $('#datatables-pre-pagos tbody').on('click', '.icon-delete', function () {
+            notificacionAlert("No se puede eliminar, factura timbrada.", "danger");
+        });
+
+        $('#datatables-pre-pagos tbody').on('click', '.icon-edit', function () {
+            var t = TablePrePagos;
+            dataEdit = t.row($(this).parents('tr'));
+            var data = dataEdit.data();
+            window.location = '@Url.Action("Complemento", "Facturacion")?id='+data.id
+        });
+
+        $('#datatables-pre-pagos tbody').on('click', '.icon-preview', function () {
+            var t = TablePrePagos;
+            dataEdit = t.row($(this).parents('tr'));
+            var data = dataEdit.data();
+            window.location = '@Url.Action("ComplementoPreview", "Facturacion")?id='+data.id
+        });
+
+        $("#btnBuscar").click(function () {
+            let fi = $("#txtFechaInicial").val();
+            let ff = $("#txtFechaFinal").val();
+            getListConcepto(fi, ff);
+        });
+
+        $('#modalCancelar').on('show.bs.modal', function (event) {
+            var myVal = $(event.relatedTarget).data('id');
+            var tipo = $(event.relatedTarget).data('tipo');
+            if (tipo == "Estatus") {
+                $.get("@Url.Action("getStatusXML", "XML")?id=" + myVal+"&tipo=Pago", async function (data) {
+                    var dd = data.split("|");
+                    $('.dmensaje').empty();
+                    $('.dmensaje').css('display', 'block');
+                    $('.delimina').css('display', 'none');
+                    $('.dbtn').css('display', 'none');
+                    if (dd[0] == "S")
+                    {
+                        $('.dmensaje').append("<div class='row'>" +
+                            "<div class='col-md-4'>" + dd[1] + "</div>" +
+                            "<div class='col-md-4'>" + dd[2] + "</div>" +
+                            "<div class='col-md-4'><span class='badge bg-danger'>" + dd[3] + "</span></div>" +
+                            "</div>");
+                    }
+                });
+            }
+            else
+            {
+                $('.dmensaje').css('display', 'none');
+                $('.delimina').css('display', 'block');
+                consultarfolio_(myVal);
+            }
+            $(this).find("#id_factura").val(myVal);
+        });
+
+        function getListConcepto(fi,ff)
+        {
+            //----------------------------------------------------------------------------------------------------
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                url: '@Url.Action("getListPrePago", "Facturacion")',
+                data: JSON.stringify({ 'fecha_i': fi,'fecha_f':ff}),
+                success: function (data) {
+                    var response = data;
+                    var t = TablePrePagos;
+                    var t_obj = data.length;
+                    t.clear().draw(false);
+                    for (var x = 0; x < t_obj; x++) {
+                        let fp = data[x].fecha_pago;
+                        fp = fp.split("-");
+                        fp = fp[2] + "-" + fp[1] + "-" + fp[0];
+                        let estatus = data[x].status;
+                        let sta = estatus == 2 ? '<span class="badge btn-warning"><i class="fa fa-check-circle"></i>  Timbrada</span>' : estatus == 1 ? '<span class="badge btn-primary"><i class="fa fa-times"></i>  Sin Timbradar</span>' : estatus == 3 ? '<span class="badge btn-danger"><i class="fa fa-times"></i> Cancelada</span>':'';
+                        let edit = '<a href="#" class="btn btn-warning btn-sm icon-edit" title="Editar"><i class="fas fa-edit"></i></a>';
+                        let preview = '<a href="#" class="btn btn-success btn-sm icon-preview" title="Preview"><i class="fas fa-eye"></i></a>';
+                        let send_c = '<a href="#" class="btn btn-info btn-sm icon-send" data-bs-toggle="modal" data-bs-target="#modalPrePago" onclick="envPrePago(' + data[x].id +')" title="Enviar"><i class="fas fa-share"></i></a>';
+                        let borrar = '<a href="#" class="btn btn-danger btn-sm icon-delete" title="Eliminar"><i class="fas fa-trash"></i></a>';
+
+                        let g_xml = data[x].status == 2 ? '<button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalCancelar" data-id="' + data[x].id + '" data-tipo="Cancelacion" title="Cancelar XML"><i class="fas fa-window-close"></i></button>' : estatus == "3" ? '<button data-bs-toggle="modal" data-bs-target="#modalCancelar" data-tipo="Estatus" data-id="' + data[x].id + '" class="btn btn-success"><i class="fas fa-receipt"></i></button>' : '';
+                        let acciones = estatus == 1 ? edit + " " + preview + " " + borrar : preview + " " + send_c + " " + g_xml;
+                        t.row.add(
+                            {
+                                "id": data[x].id,
+                                "acciones": acciones,
+                                "rfc_cliente": data[x].rfc_cliente,
+                                "nombre_razon": data[x].nombre_razon,
+                                "total_pago": formatoMoneda(data[x].total_pago),
+                                "fecha_pago": data[x].fecha_pago,//fp,
+                                "forma_pago": data[x].metodo_pago,
+                                "serie": data[x].serie,
+                                "folio": data[x].folio,
+                                "estatus": sta
+                            }
+                        );
+                        t.columns.adjust().draw(false);
+                    }
+                    return false;
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                    cerrarCargando();
+                }
+            });
+            //----------------------------------------------------------------------------------------------------
+        }
+    });
+
+    function envPrePago(id)
+    {
+        $.get("@Url.Action("getPrePagoID", "Facturacion")?id=" + id, async function (data) {
+            $("#correo_cliente").val(data.correo);
+            $("#rfc_receptor").val(data.rfc);
+            $("#razon_recpetor").val(data.nombre_razon);
+            $("#total_mod").val(formatoMoneda(data.total));
+            $("#idprepago_modal").val(id);
+            $(".modal-footer").html('<button class="btn btn-primary" onclick=sendcorreo()><i class="fas fa-envelope"></i>&nbsp; Enviar Correo</button>' +
+                '<a target="_blank" class="btn btn-success" href="../Plantillas/' + data.url_pdf + '"><i class="fas fa-file"></i>&nbsp; Descargar PDF</button>' +
+                '<a class="btn btn-info" href="../Plantillas/' + data.url_xml + '"><i class="fas fa-file"></i>&nbsp; Descargar XML</button>');
+        });
+    }
+
+     function sendcorreo()
+    {
+        abrirCargando();
+        let correo = $("#correo_cliente").val();
+        let id = $("#idprepago_modal").val();
+        //-------------------------------------------------------------------------
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            url: '/Facturacion/EnviarCorreo',
+            data: JSON.stringify({ 'id_': id, 'correo_': correo, 'tipo':'Prepago'}),
+            success: function (data) {
+                var response = data;
+                cerrarCargando();
+                if (response == "Enviado") {
+                    notificacionAlert("Correo enviado satisfactoriamente.", "success");
+                    setTimeout(function () { window.location = '@Url.Action("ListaComplemento", "Facturacion")' }, 3000);
+                } else {
+                    notificacionAlert("Ocurrio un problema al enviar el correo, intentelo mas tarde.", "danger");
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                cerrarCargando();
+            }
+        });
+        //-------------------------------------------------------------------------
+    }
+
+    function consultarfolio_(id)
+    {
+        $.get("@Url.Action("getPrePagoUuid", "Facturacion")?id=" + id, async function (data)
+        {
+            $("#txtFolioFiscal").val(data[0].uuid);
+        });
+    }
+
+    function sTipoMotivo() {
+        var v = $("#s_motivos option:selected").val();
+        if (v == "01") {
+            $("#folioDiv").css('display', 'block');
+        } else {
+            $("#folioDiv").css('display', 'none');
+        }
+    }
+
+    function cancelaFactura()
+    {
+        //-------------------------------------------------------------------------
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            url: '/XML/setCancelar',
+            data: JSON.stringify({ 'id': $("#id_factura").val(), 'ffiscal': $("#txtFolioFiscal").val().trim(), 'motivo': $("#s_motivos").val(), 'folio_':$("#folio_").val(),'tipo':'Pago'}),
+            success: function (data) {
+                var response = data.split("|");
+                console.log(response);
+                cerrarCargando();
+                if (response[0] == "Cancelado") {
+                    notificacionAlert("Se cancelo correctamente.", "success");
+                    setTimeout(function () { window.location = '@Url.Action("ListaComplemento", "Facturacion")' }, 3000);
+                } else {
+                    notificacionAlert("Ocurrio un problema al cancelar, intentelo mas tarde.", "danger");
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                cerrarCargando();
+            }
+        });
+        //-------------------------------------------------------------------------
+    }
+
+    function getFirma() {
+        //-------------------------------------------------------------------------
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            url: '/Facturacion/GetFirma',
+            success: function (data) {
+                if (!data) {
+                    notificacionAlert("Aun no has cargado tu sello y llave para poder timbrar, vuelva a intentar", "danger");
+                    setTimeout(function () {
+                        window.location = "/Panel/Firmas";
+                    }, 3000)
+
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                cerrarCargando();
+            }
+        });
+        //-------------------------------------------------------------------------
+    }
+
+</script>

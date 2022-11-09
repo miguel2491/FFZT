@@ -1,0 +1,427 @@
+﻿
+<style>
+    .maius {
+        text-transform: uppercase;
+    }
+</style>
+<h1 class="h3 mb-3">Lista de Carta Porte</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-4">
+                        <div class="form-floating mb-3">
+                            <input type="date" class="form-control form-control-lg" id="txtFechaInicial" name="txtFechaInicial" placeholder="Fecha Inicial" value="@ViewBag.Inicio.ToString("yyyy-MM-dd")" required>
+                            <label for="txtFechaInicial">Fecha Inicial</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating mb-3">
+                            <input type="date" class="form-control form-control-lg" id="txtFechaFinal" name="txtFechaFinal" placeholder="Fecha Final" value="@ViewBag.Final.ToString("yyyy-MM-dd")" required>
+                            <label for="txtFechaFinal">Fecha Final</label>
+                        </div>
+                    </div>
+                    <div class="col-md-2"></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <button class="btn btn-success btn-lg" id="btnBuscar" style="margin-top:10px;"><i class="fas fa-search"></i>&nbsp; Buscar</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="card-actions float-end">
+                    </div>
+                    <div class="col-md-3">
+                        <a class="btn btn-success btn-lg" href="@Url.Action("CartaPorte","CartaPorte")"><i class="fas fa-plus"></i> Agregar</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <table id="datatables-carta_porte" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>RFC Emisor</th>
+                            <th>Nombre Razón Social Emisor</th>
+                            <th>Tipo</th>
+                            <th>Total</th>
+                            <th>Fecha Timbrado</th>
+                            <th>Estatus</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody class="maius">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalCartaPrepago" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Carta Porte</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body m-3">
+                <input type="hidden" id="id_cartaporte_modal" />
+                <input type="hidden" id="correo_cliente" />
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="rfc_receptor">
+                            <label for="rfc_emisor">RFC</label>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="razon_recpetor">
+                            <label for="razon_emisor">Razón Social</label>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalEliminar" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color:darkred">
+                <h3 class="modal-title" style="color:white">Carta Porte</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body m-3">
+                <input type="hidden" id="idcartaporte_modal" />
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <p>¿Seguro que deseas eliminar?</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-4 text-center">
+                        <button class="btn btn-primary btn-md" onclick="eliminarCarta()">Si</button>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-danger btn-md" data-bs-dismiss="modal">No</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer"><br/>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalCancelar" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color:darkred">
+                <h3 class="modal-title" style="color:white">Factura</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body m-3">
+                <input type="hidden" id="id_factura" />
+                <div class="row dmensaje" style="display:none"></div>
+                <div class="row delimina" style="display:none">
+                    <div class="row">
+                        <div class='col-md-4'>
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" disabled id="txtFolioFiscal" placeholder="Folio">
+                                <label for="txtUnidad">Folio Físcal</label>
+                            </div>
+                        </div>
+                        <div class='col-md-4'>
+                            <div class="form-floating mb-3">
+                                <select class='form-select form-select-lg' id='s_motivos' onchange='sTipoMotivo()'>
+                                    <option value='01'>Comprobante emitido con errores con relación</option>
+                                    <option value='02'>Comprobante emitido con errores sin relación</option>
+                                    <option value='03'>No se llevó a cabo la operación</option>
+                                    <option value='04'>Operación nominativa relacionada en una factura global</option>
+                                </select>
+                                <label>Motivo</label>
+                            </div>
+                        </div>
+                        <div class='col-md-4' id='folioDiv'>
+                            <div class="form-floating mb-3">
+                                <label>Folio</label>
+                                <input type='text' class='form-control' id='folio_'>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="dbtn">
+                    <button class="btn btn-warning btn-sm" onclick="cancelaFactura()" >Cancelar</button>
+                    <button class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+                <br />
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var TableCartaPorte;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        getFirma();
+        TableCartaPorte = $("#datatables-carta_porte").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { visible: true, orderable: false, searchable: false, targets: 0, name: "acciones", data: "acciones" },
+                { visible: true, orderable: false, searchable: false, targets: 1, name: "rfc_receptor", data: "rfc_receptor" },
+                { visible: true, orderable: false, searchable: false, targets: 2, name: "nombre_receptor", data: "nombre_receptor" },
+                { visible: true, orderable: true, searchable: true, targets: 3, name: "tipo", data: "tipo"},
+                { visible: true, orderable: true, searchable: true, targets: 4, name: "total", data: "total"},
+                { visible: true, orderable: false, searchable: false, targets: 5, name: "fecha_timbrado", data: "fecha_timbrado" },
+                { visible: true, orderable: false, searchable: false, targets: 6, name: "estatus", data: "estatus" },
+                { visible: false, orderable: false, searchable: false, targets: 7, name: "id", data: "id" }
+            ],
+            order: [[1, 'asc']]
+        });
+        let fi = $("#txtFechaInicial").val();
+        let ff = $("#txtFechaFinal").val();
+        getListCarta(fi, ff);
+
+        $('#modalEliminar').on('show.bs.modal', function (event) {
+            var myVal = $(event.relatedTarget).data('id');
+            $(this).find("#idcartaporte_modal").val(myVal);
+        });
+
+        $('#modalCancelar').on('show.bs.modal', function (event) {
+            var myVal = $(event.relatedTarget).data('id');
+            var tipo = $(event.relatedTarget).data('tipo');
+            if (tipo == "Estatus") {
+                $.get("@Url.Action("getStatusXML", "CartaPorte")?id=" + myVal, async function (data) {
+                    var dd = data.split("|");
+                    $('.dmensaje').empty();
+                    $('.dmensaje').css('display', 'block');
+                    $('.delimina').css('display', 'none');
+                    $('.dbtn').css('display', 'none');
+                    if (dd[0] == "S")
+                    {
+                        $('.dmensaje').append("<div class='row'>" +
+                            "<div class='col-md-4'>" + dd[1] + "</div>" +
+                            "<div class='col-md-4'>" + dd[2] + "</div>" +
+                            "<div class='col-md-4'><label class='badge btn-danger'>" + dd[3] + "</label></div>" +
+                            "</div>");
+                    }
+                });
+            }
+            else
+            {
+                $('.dmensaje').css('display', 'none');
+                $('.delimina').css('display', 'block');
+                consultarfolio(myVal);
+            }
+            $(this).find("#id_factura").val(myVal);
+        });
+
+        $('#datatables-carta_porte tbody').on('click', '.icon-edit', function () {
+            var t = TableCartaPorte;
+            dataEdit = t.row($(this).parents('tr'));
+            var data = dataEdit.data();
+            window.location = '@Url.Action("CartaPorte", "CartaPorte")?id='+data.id
+        });
+
+        $('#datatables-carta_porte tbody').on('click', '.icon-preview', function () {
+            var t = TableCartaPorte;
+            dataEdit = t.row($(this).parents('tr'));
+            var data = dataEdit.data();
+            //window.location = '@Url.Action("ComplementoPreview", "Facturacion")?id='+data.id
+        });
+
+        $("#btnBuscar").click(function () {
+            let fi = $("#txtFechaInicial").val();
+            let ff = $("#txtFechaFinal").val();
+            getListCarta(fi, ff);
+        });
+
+    });
+    function sTipoMotivo() {
+        var v = $("#s_motivos option:selected").val();
+        if (v == "01") {
+            $("#folioDiv").css('display','block');
+        } else {
+            $("#folioDiv").css('display', 'none');
+        }
+    }
+
+    function envCartaPorte(id)
+        {
+            $.get("@Url.Action("getCartaPorte", "CartaPorte")?id=" + id, async function (data) {
+                $("#correo_cliente").val(data.correo_receptor);
+                $("#rfc_receptor").val(data.rfc_receptor);
+                $("#razon_recpetor").val(data.nombre_receptor);
+                $("#id_cartaporte_modal").val(id);
+                $(".modal-footer").html('<button class="btn btn-primary" onclick=sendcorreo()><i class="fas fa-envelope"></i>&nbsp; Enviar Correo</button>' +
+                    '<a target="_blank" class="btn btn-success" href="../Plantillas/' + data.url_pdf + '"><i class="fas fa-file"></i>&nbsp; Descargar PDF</button>' +
+                    '<a class="btn btn-info" href="../Plantillas/' + data.url_xml + '"><i class="fas fa-file"></i>&nbsp; Descargar XML</button>');
+            });
+        }
+
+    function sendcorreo()
+        {
+            abrirCargando();
+            let correo = $("#correo_cliente").val();
+            let id = $("#id_cartaporte_modal").val();
+            //-------------------------------------------------------------------------
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                url: '/Facturacion/EnviarCorreo',
+                data: JSON.stringify({ 'id_': id, 'correo_': correo, 'tipo':'CartaPorte'}),
+                success: function (data) {
+                    var response = data;
+                    cerrarCargando();
+                    if (response == "Enviado") {
+                        notificacionAlert("Correo enviado satisfactoriamente.", "success");
+                        setTimeout(function () { window.location = '@Url.Action("ListCarPorte", "CartaPorte")' }, 3000);
+                    } else {
+                        notificacionAlert("Ocurrio un problema al enviar el correo, intentelo mas tarde.", "danger");
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                    cerrarCargando();
+                }
+            });
+            //-------------------------------------------------------------------------
+        }
+
+    function getListCarta(fi,ff)
+        {
+            //--------------------------------------------------
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                url: '@Url.Action("getListCarta", "CartaPorte")',
+                data: JSON.stringify({ 'fecha_i': fi,'fecha_f':ff}),
+                success: function (data) {
+                    var t = TableCartaPorte;
+                    var t_obj = data.length;
+                    t.clear().draw(false);
+                    for (var x = 0; x < t_obj; x++) {
+                        let fp = data[x].fca_timbrado;
+                        let estatus = data[x].status;
+                        console.log(estatus);
+                        let sta = estatus == 2 ? '<span class="badge btn-warning"><i class="fa fa-check-circle"></i>  Timbrada</span>' : estatus == 1 ? '<span class="badge btn-primary"><i class="fa fa-times"></i>  Sin Timbradar</span>' : estatus == 3 ? '<span class="badge btn-danger"><i class="fa fa-times"></i> Cancelada</span>' : '';
+                        let edit = '<a href="#" class="btn btn-warning btn-sm icon-edit" title="Editar"><i class="fas fa-edit"></i></a>';
+                        let preview = '<a href="/CartaPorte/PreviewCartaPorte?id=' + data[x].id + '" class="btn btn-info btn-sm icon-preview" title="Preview"><i class="fas fa-eye"></i></a>';
+                        let del = '<a href="#" class="btn btn-danger btn-sm icon-delete" data-id="' + data[x].id +'" data-bs-toggle="modal" data-bs-target="#modalEliminar" title="Eliminar"><i class="fas fa-trash"></i></a>';
+                        let s_correo = '<a href="#" class="btn btn-info btn-sm icon-send" data-bs-toggle="modal" data-bs-target="#modalCartaPrepago" onclick="envCartaPorte(' + data[x].id + ')" title="Enviar"><i class="fas fa-share"></i></a>';
+                        //---Auxiliar------
+                        //let g_xml = '<a href="/CartaPorte/GenXML?id='+data[x].id+'" class="btn btn-warning"><i class="fas fa-file"></i></a>';
+                        let g_xml = data[x].status == 2 ? '<a href="#" class="btn btn-warning btn-sm icon-preview" data-bs-toggle="modal" data-bs-target="#modalCancelar" data-id="' + data[x].id + '" data-tipo="Cancelacion" title="Cancelar XML"><i class="fas fa-window-close"></i></i></a>' : data[x].status == 3 ? '<a href="#" data-bs-toggle="modal" data-bs-target="#modalCancelar" data-tipo="Estatus" data-id="' + data[x].id + '" class="btn btn-success"><i class="fas fa-receipt"></i></a>' : '';
+                        //----------------------------------------------------------------------------------------------------------------------------------------
+                        let acciones = estatus == 1 ? edit + " " + preview + " " + del + " " + g_xml : preview + " " + s_correo + " " + del + " "+g_xml;
+                        t.row.add(
+                            {
+                                "id": data[x].id,
+                                "acciones": acciones,
+                                "rfc_receptor": data[x].rfc_receptor,
+                                "nombre_receptor": data[x].nombre_receptor,
+                                "total": formatoMoneda(data[x].total),
+                                "tipo": data[x].tipo_comprobante == "I" ? "Ingreso":"Traslado",
+                                "fecha_timbrado": fp,
+                                "estatus": sta
+                            }
+                        );
+                        t.columns.adjust().draw(false);
+                    }
+                    return false;
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                    cerrarCargando();
+                }
+            });
+            //--------------------------------------------------
+        }
+
+    function eliminarCarta()
+        {
+            var idcp = document.getElementById("idcartaporte_modal").value;
+            console.log(idcp);
+            $.get("@Url.Action("delCartaPorte", "CartaPorte")?id=" + idcp, async function (data) {
+                console.log(data);
+                let fi = $("#txtFechaInicial").val();
+                let ff = $("#txtFechaFinal").val();
+                getListCarta(fi, ff);
+                $('#modalEliminar').modal('hide');
+            });
+        }
+
+    function consultarfolio(id)
+    {
+        $.get("@Url.Action("getFacturasUuid", "Facturacion")?id=" + id, async function (data)
+        {
+            console.log(data);
+            $("#txtFolioFiscal").val(data[0].uuid);
+        });
+    }
+
+    function cancelaFactura()
+    {
+        //-------------------------------------------------------------------------
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            url: '/CartaPorte/setCancelar',
+            data: JSON.stringify({ 'id': $("#id_factura").val(), 'ffiscal': $("#txtFolioFiscal").val().trim(), 'motivo': $("#s_motivos").val(), 'folio_':$("#folio_").val()}),
+            success: function (data) {
+                var response = data.split("|");
+                console.log(response);
+                cerrarCargando();
+                if (response[0] == "Cancelado") {
+                    notificacionAlert("Se cancelo correctamente.", "success");
+                    setTimeout(function () { window.location = '@Url.Action("ListCarPorte", "CartaPorte")' }, 3000);
+                } else {
+                    notificacionAlert("Ocurrio un problema al cancelar, intentelo mas tarde.", "danger");
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                cerrarCargando();
+            }
+        });
+        //-------------------------------------------------------------------------
+    }
+
+    function getFirma() {
+        //-------------------------------------------------------------------------
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            url: '/Facturacion/GetFirma',
+            success: function (data) {
+                if (!data) {
+                    notificacionAlert("Aun no has cargado tu sello y llave para poder timbrar, vuelva a intentar", "danger");
+                    setTimeout(function () {
+                        window.location = "/Panel/Firmas";
+                    }, 3000)
+
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                cerrarCargando();
+            }
+        });
+        //-------------------------------------------------------------------------
+    }
+
+</script>

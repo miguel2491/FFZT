@@ -1,0 +1,160 @@
+﻿@model IEnumerable<Facturafast.Models.tbc_Paquetes>
+@using Facturafast.Models
+@{
+    BD_FFEntities db = new BD_FFEntities();
+}
+<h1 class="h3 mb-3">Lista de Paquetes</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-actions float-end">
+
+                </div>
+                <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#modalPaquete" onclick="nuevoPaquete();"><i class="fas fa-plus"></i> Agregar Paquete</button>
+            </div>
+            <div class="card-body">
+                <table id="datatables-paquetes" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>Paquete</th>
+                            <th>Descripción</th>
+                            <th>Folios</th>
+                            <th>Importe</th>
+                            <th>IVA</th>
+                            <th>Costo</th>
+                            <th>Estatus</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                        <tr>
+                            <td></td>
+                            <td><button class="btn btn-warning btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#modalPaquete" onclick="actualizarPaquete(@item.id_paquete, '@item.nombre_paquete', '@item.descripcion_paquete', @item.folios, @item.importe, @item.iva, @item.id_estatus);"><i class="fas fa-edit"></i></button></td>
+                            <td>@item.nombre_paquete</td>
+                            <td>@item.descripcion_paquete</td>
+                            <td>@item.folios</td>
+                            <td>@item.importe.ToString("c")</td>
+                            <td>@item.iva.ToString("c")</td>
+                            <td>@item.costo.ToString("c")</td>
+                            <td>@db.tbc_Estatus.Where(s => s.id_estatus == item.id_estatus).Single().estatus</td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form name="GuardarPaquete.Administracion" action="@Url.Action("GuardarPaquete","Administracion")" method="post" onsubmit="return validateForm();">
+    <div class="modal fade" id="modalPaquete" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Formulario del Paquete</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body m-3">
+                    <input type="hidden" id="txtIdPaquete" name="txtIdPaquete" />
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtNombrePaquete" name="txtNombrePaquete" placeholder="Nombre del Paquete" required>
+                                <label for="txtNombrePaquete">Nombre del Paquete</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbEstatus" name="cmbEstatus" aria-label="Estatus">
+                                    <option value="1">Activo</option>
+                                    <option value="2">Inactivo</option>
+                                </select>
+                                <label for="cmbEstatus">Estatus</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-floating mb-3">
+                                <textarea type="text" class="form-control form-control-lg" id="txtDescripcionPaquete" name="txtDescripcionPaquete" style="height:120px;" placeholder="Descripción" required></textarea>
+                                <label for="txtDescripcionPaquete">Descripción</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control form-control-lg" id="txtFolios" name="txtFolios" placeholder="Folios" required>
+                                <label for="txtFolios">Folios</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control form-control-lg" id="txtImporte" name="txtImporte" placeholder="Importe" required>
+                                <label for="txtImporte">Importe</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control form-control-lg" id="txtIVA" name="txtIVA" placeholder="IVA" required>
+                                <label for="txtIVA">IVA</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i>&nbsp; Guardar Datos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        $("#datatables-paquetes").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1] }
+            ],
+            order: [[2, 'asc']]
+        });
+    });
+
+    function validateForm() {
+        let rfc = document.forms["GuardarPaquete.Administracion"]["txtNombrePaquete"].value;
+        if (rfc != "") {
+
+            bootstrap.Modal.getOrCreateInstance(document.getElementById("modalPaquete")).hide();
+            abrirCargando();
+
+            return true;
+        }
+        return false;
+    }
+
+    function nuevoPaquete() {
+        document.forms["GuardarPaquete.Administracion"].reset();
+        document.forms["GuardarPaquete.Administracion"]["txtIdPaquete"].value = 0;
+        $("#cmbEstatus").val(1);
+    }
+
+    function actualizarPaquete(a, b, c, d, e, f, g) {
+        document.forms["GuardarPaquete.Administracion"]["txtIdPaquete"].value = a;
+        document.forms["GuardarPaquete.Administracion"]["txtNombrePaquete"].value = b;
+        document.forms["GuardarPaquete.Administracion"]["txtDescripcionPaquete"].value = c;
+        document.forms["GuardarPaquete.Administracion"]["txtFolios"].value = d;
+        document.forms["GuardarPaquete.Administracion"]["txtImporte"].value = e;
+        document.forms["GuardarPaquete.Administracion"]["txtIVA"].value = f;
+        $("#cmbEstatus").val(g);
+    }
+
+</script>
+

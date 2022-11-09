@@ -1,0 +1,709 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .text-tra {
+        text-transform:uppercase;
+    }
+</style>
+<h1 class="h3">Datos del Cliente</h1>
+<input type="hidden" id="id" value="@ViewBag.id" />
+<input type="hidden" id="id_factura" />
+<input type="hidden" id="id_cliente" />
+<input type="hidden" id="id_pre_pago" />
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-actions float-end"></div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="input-group mb-1">
+                            <div class="form-floating form-floating-group flex-grow-1">
+                                <input type="text" class="form-control form-control-lg text-uppercase" style="text-transform:uppercase" pattern="^[a-zA-Z0-9]{12,13}" id="txtRFC" name="txtRFC" placeholder="RFC Cliente" required>
+                                <label for="txtRFC">RFC</label>
+                            </div>
+                            <button class="btn btn-success btn-lg input-group-text" data-bs-toggle="modal" data-bs-target="#modalCliente">&nbsp;<i class="fas fa-plus"></i>&nbsp;</button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-1">
+                            <input type="text" class="form-control form-control-lg txtNombreRazonCliente" id="txtRFC" placeholder="Nombre / Razón Social del Cliente" readonly>
+                            <label for="txtRFC">Nombre / Razón Social del Cliente</label>
+                        </div>
+                    </div>
+                </div>
+                <hr />
+            </div>
+        </div>
+    </div>
+</div>
+
+<h1 class="h3 mb-3">Datos del Comprobante</h1>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-actions float-end"></div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-floating mb-3">
+                            <select class="form-select form-select-lg" id="cmbPago" aria-label="Desc" disabled>
+                                <option value="1" selected>Pago</option>
+                            </select>
+                            <label for="cmbPago">Tipo de Comprobante</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3"></div>
+                    <div class="col-md-3">
+                        <div class="form-floating mb-3">
+                            <select class="form-select form-select-lg" id="cmbMetodoPago" aria-label="Método de Pago">
+                                <option value="1">PUE - Pago en una Sola Exhibición</option>
+                                <option value="2" selected="selected">PPD - Pago en Parcialidades ó Diferido</option>
+                            </select>
+                            <label for="txtMetodoPago">Método de Pago</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating mb-3">
+                            <select class="form-select form-select-lg" id="cmbUsoCFDI" aria-label="Uso de CFDI"></select>
+                            <label for="cmbUsoCFDI">Uso del CFDI</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtFechaEmision" placeholder="Fecha de Emisión">
+                            <label for="txtFechaEmision">Fecha de Emisión</label>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg text-tra" id="txtSerie" value="P" placeholder="Serie">
+                            <label for="txtSerie">Serie</label>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg text-tra" id="txtFolio" placeholder="Folio">
+                            <label for="txtFolio">Folio</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg text-tra" id="txtnoperacion">
+                            <label for="txtnoperacion">Núm de Operación</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-floating mb-3">
+                            <select class="form-select form-select-lg" id="cmbMoneda" aria-label="Moneda">
+                                <option value="0">USD - Dolar Americano</option>
+                                <option value="1" selected="selected">MXN - Peso Mexicano</option>
+                            </select>
+                            <label for="txtMoneda">Moneda</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtTipoCambio" placeholder="Tipo de Cambio">
+                            <label for="txtTipoCambio">Tipo de Cambio</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtFechaPago" placeholder="Fecha de Pago">
+                            <label for="txtFechaPago">Fecha de Pago</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtFechaHoraPago" placeholder="Hora de Pago">
+                            <label for="txtFechaPago"></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h1 class="h3 mb-3">Detalle de Pago</h1>
+<input type="hidden" id="txtiduuid">
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-actions float-end">
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="input-group mb-3">
+                            <div class="form-floating form-floating-group flex-grow-1">
+                                <input type="text" class="form-control form-control-lg" id="txtuuid" style="text-transform:uppercase">
+                                <label for="txtuuid">UUID</label>
+                            </div>
+                            <button class="btn btn-success btn-lg input-group-text" data-bs-toggle="modal" data-bs-target="#modalUuid">&nbsp;<i class="fas fa-plus"></i>&nbsp;</button>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating mb-3">
+                            <select class="form-select form-select-lg" id="cmbFormaPago" aria-label="Forma de Pago"></select>
+                            <label for="cmbFormaPago">Forma de Pago</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtpagono" placeholder="0">
+                            <label for="txtPago">Pago No.</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg txtcifras" id="txtSaldoAnterior" placeholder="0.00" onkeypress="return valideKey(event);">
+                            <label for="txtSaldoAnt">Saldo Anterior</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg txtcifras" id="txtPagar" placeholder="0.00" onblur="v_pago()">
+                            <label for="txtPago">Pago</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating mb-3">
+                            <button class="btn btn-lg btn-success" id="btnAddDetalle" disabled>Agregar Detalle</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="table-responsive">
+                        <table id="datatables-pagos_c" class="table table-striped table-secondary" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>UUID</th>
+                                    <th>Forma de Pago</th>
+                                    <th></th>
+                                    <th>Pago No.</th>
+                                    <th>Saldo Anticipado</th>
+                                    <th>Pago</th>
+                                    <th>Saldo Actual</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <hr />
+                <div class="row">
+                    <div class="col-lg-6"></div>
+                    <div class="col-lg-2" style="text-align:end;font-size:16px;margin-top:1%">
+                        <label><b>TOTAL:</b></label>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtTotal" value="0" placeholder="0" style="text-align:right;" readonly>
+                            <label for="txtTotal">TOTAL</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<br />
+<row class="row">
+    <div class="col-md-12 text-center">
+        <button class="btn btn-success btn-lg" style="margin-top:10px;" id="btnGFactura"><i class="fas fa-save"></i>&nbsp; Guardar Complemento de Pago</button>
+    </div>
+</row>
+<br />
+<!-- MODAL -->
+<div class="modal fade" id="modalUuid" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Seleccionar UUID</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body m-3">
+                <div class="row">
+                    <div class="col-md-12">
+                        <table id="datatables-uuid" class="table table-striped table-secondary" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>UUID</th>
+                                    <th>Forma de Pago</th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger btn-md" data-bs-dismiss="modal"><i class="fas fa-close"></i> Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var cacheRFC = {};
+    var cacheUUID = {};
+    var id = '@ViewBag.id';
+    document.addEventListener("DOMContentLoaded", function () {
+
+        $.get("@Url.Action("obtenerUsoCFDI", "Catalogos")", function (data) {
+            $("#cmbUsoCFDI").html(data);
+            $("#cmbUsoCFDI").val($("#cmbUsoCFDI option:last").val());
+        });
+
+        $.get("@Url.Action("obtenerFormaPago", "Catalogos")", function (data) {
+            $("#cmbFormaPago").html(data);
+            $("#cmbFormaPago").val($("#cmbFormaPago option:last").val());
+        });
+
+        $('#txtuuid').mask('AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA');
+
+        $("input[id=\"txtFechaEmision\"]").daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true,
+            timePicker: true,
+            locale: {
+                format: "DD/MM/YYYY HH:mm"
+            }
+        });
+
+        $("input[id=\"txtFechaPago\"]").daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true,
+            timePicker: true,
+            locale: {
+                format: "DD/MM/YYYY"
+            }
+        });
+
+        $("input[id=\"txtFechaHoraPago\"]").daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true,
+            timePicker: true,
+            locale: {
+                format: "HH:mm"
+            }
+        });
+
+        $(".txtcifras").inputmask({
+            alias: "decimal",
+            integerDigits: 6,
+            digits: 4,
+            allowMinus: false,
+            digitsOptional: false,
+            placeholder: "0"
+        });
+
+        TablePagos = $("#datatables-pagos_c").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { visible: true, orderable: false, searchable: false, targets: 0, name: "acciones", data: "acciones" },
+                { visible: true, orderable: true, searchable: true, targets: 1, name: "uuid", data: "uuid" },
+                { visible: true, orderable: true, searchable: true, targets: 2, name: "forma_pago", data: "forma_pago" },
+                { visible: false, orderable: false, searchable: false, targets: 3, name: "d_forma_pago", data: "d_forma_pago" },
+                { visible: true, orderable: true, searchable: true, targets: 4, name: "pago_no", data: "pago_no" },
+                { visible: true, orderable: true, searchable: true, targets: 5, name: "s_anterior", data: "s_anterior" },
+                { visible: true, orderable: true, searchable: true, targets: 6, name: "pago", data: "pago" },
+                { visible: true, orderable: true, searchable: true, targets: 7, name: "s_actual", data: "s_actual" }
+            ],
+            order: [[1, 'asc']]
+        });
+
+        Tableuuid = $("#datatables-uuid").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { visible: true, orderable: false, searchable: false, targets: 0, name: "acciones", data: "acciones" },
+                { visible: true, orderable: true, searchable: true, targets: 1, name: "uuid", data: "uuid" },
+                { visible: true, orderable: true, searchable: true, targets: 2, name: "forma_pago", data: "forma_pago" },
+                { visible: false, orderable: true, searchable: true, targets: 3, name: "id_forma_pago", data: "id_forma_pago" },
+                { visible: false, orderable: true, searchable: true, targets: 4, name: "total", data: "total" },
+                { visible: false, orderable: false, searchable: false, targets: 5, name: "id_factura", data: "id_factura" }
+            ],
+            order: [[1, 'asc']]
+        });
+
+        $('#datatables-pagos_c tbody').on('click', '.icon-delete', function () {
+            var t = TablePagos;
+            dataEdit = t.row($(this).parents('tr'));
+            var data = dataEdit.data();
+            //---------
+            let total = data.s_anterior;
+            let subtotal = $("#txtTotal").val();
+            let subtotal_ = subtotal.split("$");
+            subtotal = subtotal_[1].replace(",", "");
+            let total_ = total.split("$");
+            total = total_[1].replace(",", "");
+            total = subtotal - total;
+            $("#txtTotal").val(total);
+            t.row($(this).parents('tr')).remove();
+            t.columns.adjust().draw(false);
+            //calcular();
+        });
+        //===Autocomplete===
+        $("#txtRFC").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+
+                if (term.length > 2) {
+                    $("#txtRFC").removeClass("is-invalid");
+                    $("#txtRFC").removeClass("is-valid");
+                    $("#txtRFC").addClass("is-invalid");
+                    if (term in cacheRFC) {
+                        response(cacheRFC[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerRFCCliente", "Catalogos")", request, function (data, status, xhr) {
+                        cacheRFC[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtRFC").removeClass("is-invalid");
+                    $("#txtRFC").removeClass("is-valid");
+                    $("#txtRFC").addClass("is-invalid");
+                    response([]);
+                }
+
+            },
+            select: function (event, ui) {
+                $("#txtRFC").val(ui.item.rfc);
+                $(".txtNombreRazonCliente").val(ui.item.name);
+                $("#id_cliente").val(ui.item.value);
+                //conPrePago(ui.item.rfc);
+                $("#txtRFC").removeClass("is-invalid");
+                $("#txtRFC").removeClass("is-valid");
+                $("#txtRFC").addClass("is-valid");
+                return false;
+            }
+        });
+
+        $("#txtuuid").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtuuid").removeClass("is-invalid");
+                    $("#txtuuid").removeClass("is-valid");
+                    $("#txtuuid").addClass("is-invalid");
+                    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalUuid")).show();
+                    if (term in cacheUUID) {
+                        response(cacheUUID[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerUUIDFactura", "Facturacion")", request, function (data, status, xhr) {
+                        var t = Tableuuid;
+                        t.clear().draw(false);
+                        for (let a = 0; a < data.length; a++)
+                        {
+                            let idpago = data[a].id_forma_pago > 9 ? data[a].id_forma_pago : "0" + data[a].id_forma_pago;
+                            t.row.add({
+                                "acciones": '<a href="#" class="btn btn-success btn-sm icon-sel" title="Seleccionar"><i class="fas fa-check"></i></a>',
+                                "uuid": data[a].uuid,
+                                "forma_pago": idpago + "-"+data[a].forma_pago,
+                                "id_forma_pago": data[a].id_forma_pago,
+                                "total": data[a].total,
+                                "id_factura": data[a].id_factura
+                            });
+                        }
+                        t.columns.adjust().draw(false);
+                        $("#txtuuid").removeClass("is-invalid");
+                        $("#txtuuid").removeClass("is-valid");
+                        $("#txtuuid").addClass("is-valid");
+                        return false;
+                    });
+                }
+                else {
+                    $("#txtuuid").removeClass("is-invalid");
+                    $("#txtuuid").removeClass("is-valid");
+                    $("#txtuuid").addClass("is-valid");
+                    response([]);
+                }
+            },
+        });
+
+        //===Btn Seleccionar UUID===
+        $('#datatables-uuid tbody').on('click', '.icon-sel', function () {
+            var t = Tableuuid;
+            dataEdit = t.row($(this).parents('tr'));
+            var data = dataEdit.data();
+            $('#modalUuid').modal('hide');
+            $("#txtuuid").val(data.uuid);
+            $("#txtiduuid").val(data.uuid);
+            $("#id_factura").val(data.id_factura);
+            //if ($("#txtRFC").val() != "") {
+                $.get("@Url.Action("getDetallePrePago", "Facturacion")?uuid=" + data.uuid, async function (data) {
+                    if (data.length > 0)
+                    {
+                        let s_actual = 0;
+                        let s_original = 0;
+                        for (var a = 0; a < data.length; a++) {
+                            if (a == 0) {
+                                s_original = data[a].s_anterior;
+                            }
+                            s_actual = s_actual + data[a].pago;
+                        }
+                        let sa = s_original - s_actual;
+                        $("#txtSaldoAnterior").val(sa.toFixed(2));
+                        $("#txtTotal").val(sa.toFixed(2));
+                        $("#cmbFormaPago").val(data[0].id_forma_pago);
+                    }
+                });
+            //}
+            $("#txtuuid").removeClass("is-invalid");
+            $("#txtuuid").removeClass("is-valid");
+            $("#txtuuid").addClass("is-valid");
+            if ($("#txtSaldoAnterior").val() != "")
+                $("#txtSaldoAnterior").val(data.total);
+        });
+
+        $("#btnAddDetalle").click(function () {
+            if ($("#txtpagono").val() == "") {
+                notificacionAlert("Debe agregar algun numero de pago.", "danger");
+                return false;
+            }
+            var t = TablePagos;
+            t.clear().draw(false);
+            t.row.add(
+                {
+                    "acciones": '<a href="#" class="btn btn-danger btn-sm icon-delete" title="Eliminar Concepto"><i class="fas fa-trash"></i></a>',
+                    "uuid": $("#txtuuid").val(),
+                    "forma_pago": $("#cmbFormaPago option:selected").text(),
+                    "d_forma_pago": $("#cmbFormaPago option:selected").val(),
+                    "pago_no": $("#txtpagono").val(),
+                    "s_anterior": $("#txtSaldoAnterior").val(),
+                    "pago": $("#txtPagar").val(),
+                    "s_actual": 0
+                }
+            );
+            t.columns.adjust().draw(false);
+            calcular();
+            limpiar();
+            return false;
+
+        });
+
+        //Guardar
+        $("#btnGFactura").click(function () {
+            if ($("#txtFolio").val() == "") {
+                notificacionAlert("Debe agregar algun folio.", "danger");
+                return false;
+            }
+            let url_ = '@Url.Action("SavePrePago", "Facturacion")';
+            if (id != "0") {
+                url_ = '@Url.Action("UpdatePrePago", "Facturacion")';
+            }
+            abrirCargando();
+            let stotal = $("#txtTotal").val();
+            let stotal_ = stotal.split("$");
+            stotal = stotal_[1].replace(",", "");
+            //-----------------------------------------------------------
+            var data_json = [];
+            data_json.push({
+                id_factura: $("#id_factura").val(),
+                id_cliente: $("#id_cliente").val(),
+                metodo_pago: $("#cmbMetodoPago option:selected").val(),
+                uso_cfdi: $("#cmbUsoCFDI option:selected").val(),
+                f_emision: $("#txtFechaEmision").val(),
+                serie: $("#txtSerie").val(),
+                folio: $("#txtFolio").val(),
+                num_operacion: $("#txtnoperacion").val(),
+                tipo_moneda: $("#cmbMoneda option:selected").val(),
+                tipo_cambio: $("#txtTipoCambio").val(),
+                fecha_pago: $("#txtFechaPago").val(),
+                hora: $("#txtFechaHoraPago").val(),
+                total: stotal,
+                uuid: $("#txtiduuid").val()
+            });
+            //---------------Detalles Pago----------------
+            var a_pagos = TablePagos.rows().data().toArray();
+            console.log(a_pagos);
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                url: url_,
+                data: JSON.stringify({ 'prepago': data_json, 'dprepago': a_pagos, 'id':id}),
+                success: function (data) {
+                    var response = data;
+                    notificacionAlert("Se guardo correctamente", "success");
+                    window.location = '@Url.Action("ListaComplemento", "Facturacion")'
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                    cerrarCargando();
+                }
+            });
+            cerrarCargando();
+        });
+        
+        if (id != "0") {
+            abrirCargando();
+            setTimeout(function () { conPrePagoEdit(id) }, 1500);
+        }
+    });
+
+
+    //--Funciones
+    function v_pago() {
+        var pago = parseFloat($("#txtPagar").val());
+        let s_ant = parseFloat($("#txtSaldoAnterior").val());
+        if (pago > 0 && s_ant >= pago) {
+            document.getElementById("btnAddDetalle").removeAttribute("disabled");
+        } else {
+            notificacionAlert("El pago no puede ser mayor al saldo actual", "danger");
+            document.getElementById("btnAddDetalle").setAttribute("disabled", true);
+        }
+    }
+
+    function calcular()
+    {
+        let total = 0;
+        let subtotal = parseFloat($("#txtTotal").val());
+        abrirCargando();
+        var array = TablePagos.rows()
+            .data().toArray();
+        if (array.length > 0) {
+            array.map(function (dato) {
+                let sant = parseFloat(dato.s_anterior);
+                let pago = parseFloat(dato.pago);
+                dato.s_anterior = formatoMoneda(sant.toFixed(2));
+                dato.pago = formatoMoneda(pago.toFixed(2));
+                let sa = sant - pago;
+                dato.s_actual = formatoMoneda(sa.toFixed(2));
+                total = total + sant;
+            });
+            TablePagos.clear().draw(false);
+            TablePagos.rows.add(array);
+            TablePagos.columns.adjust().draw(false);
+            total = formatoMoneda(total.toFixed(2));
+            $("#txtTotal").val(total);
+            cerrarCargando();
+        } else {
+            cerrarCargando();
+            limpiar();
+        }
+    }
+
+    function limpiar() {
+        $("#txtuuid").val("");
+        $("#cmbFormaPago").val($("#cmbFormaPago option:last").val());
+        $("#txtpagono").val("");
+        $("#txtSaldoAnterior").val("0.0000");
+        $("#txtPagar").val("0.0000");
+    }
+
+    function valideKey(evt) {
+        // code is the decimal ASCII representation of the pressed key.
+        var code = (evt.which) ? evt.which : evt.keyCode;
+        if (code == 8) { // backspace.
+            return true;
+        } else if (code >= 48 && code <= 57) { // is a number.
+            return true;
+        } else if (code == 46) { // is a point
+            return true;
+        } else { // other keys.
+            return false;
+        }
+    }
+
+    function conPrePago(id)
+    {
+        $.get("@Url.Action("getPrePago", "Facturacion")?id=" + id, async function (data) {
+            if (data.length > 0)
+            {
+                $("#txtiduuid").val(data[0].uuid);
+                $("#txtuuid").val(data[0].uuid);
+                $("#id_factura").val(data[0].id_prefactura);
+                let s_actual = 0;
+                let s_original = 0;
+                for (var a = 0; a < data.length; a++)
+                {
+                    if (a == 0)
+                    {
+                        s_original = data[a].s_anterior;
+                    }
+                    s_actual = s_actual + data[a].pago;
+                }
+                let sa = s_original - s_actual;
+                $("#txtSaldoAnterior").val(sa.toFixed(2));
+                $("#txtTotal").val(sa.toFixed(2));
+            }
+        });
+    }
+
+    function conPrePagoEdit(id)
+    {
+        let uuid = '';
+        $.get("@Url.Action("getPrePagoID", "Facturacion")?id=" + id, async function (data) {
+            $("#id_cliente").val(data.id_cliente);
+            $("#txtRFC").val(data.rfc);
+            $(".txtNombreRazonCliente").val(data.nombre_razon);
+            $("#cmbMetodoPago").val(data.metodo_pago);
+            $("#cmbUsoCFDI").val(data.uso_cfdi);
+            $("#txtFechaEmision").val(data.fecha_emision);
+            $("#txtSerie").val(data.serie);
+            $("#txtFolio").val(data.folio);
+            $("#txtnoperacion").val(data.num_operacion);
+            $("#cmbMoneda").val(data.tipo_moneda);
+            $("#txtTipoCambio").val(data.tipo_cambio);
+            $("#txtFechaPago").val(data.fecha_pago);
+            $("#txtFechaHoraPago").val(data.hora);
+            $("#txtiduuid").val(data.uuid);
+            //=============================================>DetallePrePagos<=============================================
+            $.get("@Url.Action("getDetallePrePagoId", "Facturacion")?id=" + id, async function (data) {
+                cerrarCargando();
+                let total = 0;
+                if (data.length > 0)
+                {
+                    var t = TablePagos;
+                    for (var i = 0; i < data.length; i++)
+                    {
+                        t.row.add(
+                            {
+                                "acciones": '<a href="#" class="btn btn-danger btn-sm icon-delete" title="Eliminar Concepto"><i class="fas fa-trash"></i></a>',
+                                "uuid": data[i].uuid,
+                                "forma_pago": data[i].forma_pago,
+                                "d_forma_pago": data[i].d_forma_pago,
+                                "pago_no": data[i].num_pago,
+                                "s_anterior": formatoMoneda(data[i].s_anterior.toFixed(2)),
+                                "pago": formatoMoneda(data[i].pago.toFixed(2)),
+                                "s_actual": formatoMoneda(data[i].s_actual.toFixed(2))
+                            }
+                        );
+                        t.columns.adjust().draw(false);
+                        total = total + parseFloat(data[i].s_anterior);
+                    }
+                    $("#txtTotal").val(formatoMoneda(total.toFixed(2)));
+                }
+            });
+            //---------------------------------------------------------------------------------------------------------------------------
+        });
+        $("#btnGFactura").html("<i class='fa fa-edit'></i> Actualizar Complemento de Pago");
+    }
+
+</script>

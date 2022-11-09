@@ -1,0 +1,245 @@
+﻿@model IEnumerable<Facturafast.Models.tbc_Ubicaciones>
+@using Facturafast.Models
+@{ 
+    BD_FFEntities db = new BD_FFEntities();
+}
+<h1 class="h3 mb-3">Ubicaciones</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-actions float-end">
+
+                </div>
+                <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#modalUbicacion" onclick="nuevaUbicacion();"><i class="fas fa-plus"></i> Agregar Ubicación</button>
+            </div>
+            <div class="card-body">
+                <table id="datatables-cartaporte-ubicaciones" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>Tipo</th>
+                            <th>Nombre</th>
+                            <th>Identificador</th>
+                            <th>RFC</th>
+                            <th>Nombre /Razón Social</th>
+                            <th>Dirección</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            tbc_Tipos_Ubicacion ubicacion = db.tbc_Tipos_Ubicacion.Where(s => s.id_tipo_ubicacion == item.id_tipo_ubicacion).Single();
+                        <tr>
+                            <td></td>
+                            <td>
+                                <table>
+                                    <tr>
+                                        <td style="padding:0px 5px;">
+                                            <button class="btn btn-warning btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#modalUbicacion" onclick="actualizarUbicacion(@item.id_ubicacion, '@item.nombre_ubicacion', '@item.id_origen_destino', '@item.rfc_origen_destino', '@item.nombre_origen_destino', '@item.pais', '@item.codigo_postal', '@item.calle', '@item.num_ext', '@item.num_int', '@item.colonia', '@item.localidad', '@item.municipio', '@item.estado', '@item.referencia', @item.id_tipo_ubicacion);"><i class="fas fa-edit"></i></button>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td>@ubicacion.tipo_ubicacion</td>
+                            <td>@item.nombre_ubicacion</td>
+                            <td>@item.id_origen_destino</td>
+                            <td>@item.rfc_origen_destino</td>
+                            <td>@item.nombre_origen_destino</td>
+                            <td>@item.calle @item.num_ext / @item.num_int, @item.colonia, @item.municipio, @item.estado, @item.codigo_postal, @item.pais </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form name="GuardarUbicacion.CartaPorte" action="@Url.Action("GuardarUbicacion","CartaPorte")" method="post" onsubmit="return validateForm();">
+    <div class="modal fade" id="modalUbicacion" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Formulario de Ubicación</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body m-3">
+                    <input type="hidden" id="txtIdUbicacion" name="txtIdUbicacion" />
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbTipoUbicacion" name="cmbTipoUbicacion" aria-label="Tipo Ubicación">
+                                    <option value="1">Origen</option>
+                                    <option value="2">Destino</option>
+                                </select>
+                                <label for="cmbTipoUbicacion">Tipo Ubicación</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg text-uppercase" id="txtNombreUbicacion" name="txtNombreUbicacion" placeholder="Nombre Ubicación" required>
+                                <label for="txtNombreUbicacion">Nombre Ubicación</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg text-uppercase" id="txtIdentificador" name="txtIdentificador" maxlength="8" placeholder="Identificador" required>
+                                <label for="txtIdentificador">Identificador</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg text-uppercase" pattern="^[a-zA-Z0-9]{12,13}" id="txtRFC" name="txtRFC" placeholder="RFC" required>
+                                <label for="txtRFC">RFC</label>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg text-uppercase" id="txtNombreRazon" name="txtNombreRazon" placeholder="Nombre / Razón Social" required />
+                                <label for="txtNombreRazon">Nombre / Razón Social</label>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input class="form-control form-control-lg" id="txtPais" name="txtPais" placeholder="País" required>
+                                <label for="txtPais">País</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input class="form-control form-control-lg" id="txtCodigoPostal" name="txtCodigoPostal" placeholder="Código Postal" required>
+                                <label for="txtCodigoPostal">Código Postal</label>
+                            </div>
+                        </div>                        
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input class="form-control form-control-lg" id="txtCalle" name="txtCalle" placeholder="Calle" required>
+                                <label for="txtCalle">Calle</label>
+                            </div>
+                        </div>                        
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input class="form-control form-control-lg" id="txtNumExt" name="txtNumExt" placeholder="Núm Ext" required>
+                                <label for="txtNumExt">Núm Ext</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input class="form-control form-control-lg" id="txtNumInt" name="txtNumInt" placeholder="Núm Int">
+                                <label for="txtNumInt">Núm Int</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input class="form-control form-control-lg" id="txtColonia" name="txtColonia" placeholder="Colonia" required>
+                                <label for="txtColonia">Colonia</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input class="form-control form-control-lg" id="txtLocalidad" name="txtLocalidad" placeholder="Localidad" required>
+                                <label for="txtLocalidad">Localidad</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input class="form-control form-control-lg" id="txtMunicipio" name="txtMunicipio" placeholder="Municipio" required>
+                                <label for="txtMunicipio">Municipio</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input class="form-control form-control-lg" id="txtEstado" name="txtEstado" placeholder="Estado" required>
+                                <label for="txtEstado">Estado</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-floating mb-3">
+                                <input class="form-control form-control-lg" id="txtReferencia" name="txtReferencia" placeholder="Referencia">
+                                <label for="txtReferencia">Referencia</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i>&nbsp; Guardar Datos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+<script>
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+        $("#datatables-cartaporte-ubicaciones").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1] }
+            ],
+            order: [[2, 'asc']]
+        });
+
+    });
+
+    function validateForm() {
+        let rfc = document.forms["GuardarUbicacion.CartaPorte"]["txtNombreUbicacion"].value;
+        if (rfc != "") {
+
+            bootstrap.Modal.getOrCreateInstance(document.getElementById("modalUbicacion")).hide();
+            abrirCargando();
+
+            return true;
+        }
+        return false;
+    }
+
+    function nuevaUbicacion() {
+        document.forms["GuardarUbicacion.CartaPorte"].reset();
+        document.forms["GuardarUbicacion.CartaPorte"]["txtIdUbicacion"].value = 0;
+        $("#cmbTipoUbicacion").val(1);       
+    }
+
+    function actualizarUbicacion(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) {
+        document.forms["GuardarUbicacion.CartaPorte"]["txtIdUbicacion"].value = a;
+        document.forms["GuardarUbicacion.CartaPorte"]["txtNombreUbicacion"].value = b;
+        document.forms["GuardarUbicacion.CartaPorte"]["txtIdentificador"].value = c;
+        document.forms["GuardarUbicacion.CartaPorte"]["txtRFC"].value = d;
+        document.forms["GuardarUbicacion.CartaPorte"]["txtNombreRazon"].value = e;
+        document.forms["GuardarUbicacion.CartaPorte"]["txtPais"].value = f;
+        document.forms["GuardarUbicacion.CartaPorte"]["txtCodigoPostal"].value = g;
+        document.forms["GuardarUbicacion.CartaPorte"]["txtCalle"].value = h;
+        document.forms["GuardarUbicacion.CartaPorte"]["txtNumExt"].value = i;
+        document.forms["GuardarUbicacion.CartaPorte"]["txtNumInt"].value = j;
+        document.forms["GuardarUbicacion.CartaPorte"]["txtColonia"].value = k;
+        document.forms["GuardarUbicacion.CartaPorte"]["txtLocalidad"].value = l;
+        document.forms["GuardarUbicacion.CartaPorte"]["txtMunicipio"].value = m;
+        document.forms["GuardarUbicacion.CartaPorte"]["txtEstado"].value = n;
+        document.forms["GuardarUbicacion.CartaPorte"]["txtReferencia"].value = o;
+        $("#cmbTipoUbicacion").val(p);
+    }
+
+
+</script>

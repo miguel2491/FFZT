@@ -1,0 +1,838 @@
+﻿@model IEnumerable<Facturafast.Models.tbd_Mercancias>
+@using Facturafast.Models
+@{
+    BD_FFEntities db = new BD_FFEntities();
+    tbc_Usuarios usuario = Session["tbc_Usuarios"] as tbc_Usuarios;
+}
+<h1 class="h3 mb-3">Mercancías</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-actions float-end">
+
+                </div>
+                <form method="post" action="@Url.Action("Mercancias","CartaPorte")">
+                    <div class="row">
+                        <div class="col-md-2">
+
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control form-control-lg" id="txtFechaInicial" name="txtFechaInicial" placeholder="Fecha Inicial" value="@ViewBag.Inicio.ToString("yyyy-MM-dd")" required>
+                                <label for="txtFechaInicial">Fecha Inicial</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control form-control-lg" id="txtFechaFinal" name="txtFechaFinal" placeholder="Fecha Final" value="@ViewBag.Final.ToString("yyyy-MM-dd")" required>
+                                <label for="txtFechaFinal">Fecha Final</label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 text-center">
+                            <button type="submit" class="btn btn-success btn-lg" style="margin-top:10px;"><i class="fas fa-search"></i>&nbsp; Buscar Notas de Ventas</button>
+                        </div>
+                    </div>
+                </form>
+                <br />
+                <hr />
+                <div class="row">
+                    <div class="col-md-4">
+                        @*<button type="submit" class="btn btn-primary" style="margin-top:10px;"><i class="fas fa-check-square"></i></button> &nbsp;
+                        <button type="submit" class="btn btn-danger" style="margin-top:10px;"><i class="far fa-fw fa-square"></i></button>*@
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#modalMercancias" onclick="nuevaMercancia();"><i class="fas fa-plus"></i> Agregar Mercancías</button>                    </div>
+                    <div class="col-md-4 text-center">
+                        @*<button type="submit" class="btn btn-success btn-lg" style="margin-top:10px;"><i class="fas fa-search"></i>&nbsp; Buscar Notas de Ventas</button>*@
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                    <table id="datatables-reporte-mercancias" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>Bienes Transportados</th>
+                            <th>Descripción</th>
+                            <th>Cantidad</th>
+                            <th>Clave Unidad</th>
+                            <th>Peso KG</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (var item in Model)
+                        {
+                            //tbd_Mercancias mercancias = db.tbd_Mercancias.Where(s => s.rfc_usuario == item.rfc_usuario).Single();                           
+                            tbc_ProdServ producto = db.tbc_ProdServ.Where(s => s.id_sat == item.id_sat).Single();
+                            tbc_Clave_STCC clavestcc = db.tbc_Clave_STCC.Where(s => s.id_clave_stcc == item.id_clave_stcc).SingleOrDefault();
+                            tbc_Unidades_Medida unidadmedida = db.tbc_Unidades_Medida.Where(s => s.id_unidad_medida == item.id_unidad_medida).Single();
+                            tbc_Materiales_Peligrosos materiapeligroso = db.tbc_Materiales_Peligrosos.Where(s => s.id_material_peligroso == item.id_material_peligroso).SingleOrDefault();
+                            tbc_Tipos_Embalaje embalaje = db.tbc_Tipos_Embalaje.Where(s => s.id_tipo_embalaje == item.id_tipo_embalaje).SingleOrDefault();
+                            tbc_Tipos_Moneda moneda = db.tbc_Tipos_Moneda.Where(s => s.id_moneda == item.id_moneda).SingleOrDefault();
+                            tbc_Fracciones_Arancelaria aranceles = db.tbc_Fracciones_Arancelaria.Where(s => s.id_fraccion_arancelaria == item.id_fraccion_arancelaria).SingleOrDefault();
+                            tbc_Unidades_Peso unidadpeso = db.tbc_Unidades_Peso.Where(s => s.id_unidad_peso == item.id_unidad_peso_m).SingleOrDefault();
+
+                            <tr>
+                                <td></td>
+                                <td>      
+                                    <table>
+                                        <tr>
+                                            <td style="padding:0px 5px;">
+                                                        <button class="btn btn-warning btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#modalMercancias" onclick="actualizarMercancia(@item.id_mercancia,
+                                                        @item.id_sat, '@producto.c_pord_serv', '@producto.descripcion',
+                                                        @item.id_clave_stcc, '@if (clavestcc == null) { var a = ""; } else { @clavestcc.clave_stcc; } ', '@if (clavestcc == null) { var a = ""; } else { @clavestcc.descripcion; } ',
+                                                        '@item.descripcion', @item.cantidad,
+                                                        @item.id_unidad_medida, '@unidadmedida.clave', '@unidadmedida.descripcion',
+                                                        '@item.unidad', '@item.dimensiones', '@item.material_peligroso',
+                                                        @item.id_material_peligroso,'@if (materiapeligroso == null) { var a = ""; } else {@materiapeligroso.clave_material_peligroso }', '@if (materiapeligroso == null) { var a = ""; } else {@materiapeligroso.descripcion}',
+                                                        @item.id_tipo_embalaje,'@if (embalaje == null) {var a = ""; }else {@embalaje.clave_designacion;}','@if (embalaje == null) {var a = "";} else { @embalaje.descripcion;}',
+
+                                                        '@item.descrip_embalaje', @item.peso_kg, @item.valor_mercancia,
+                                                        @item.id_moneda, '@if (moneda == null) { var a = ""; } else { @moneda.clave_moneda; } ', '@if (moneda == null) { var a = ""; } else { @moneda.descripcion; } ',
+                                                        @item.id_fraccion_arancelaria, '@if (aranceles == null) { var a = ""; } else { @aranceles.c_fraccion_arancelaria; } ', '@if (aranceles == null) { var a = ""; } else { @aranceles.descripcion; } ',
+                                                        '@item.uuid_comercio_ext',
+                                                        @item.id_unidad_peso_m, '@if (unidadpeso == null) { var a = ""; } else { @unidadpeso.clave_unidad; } ', '@if (unidadpeso == null) { var a = ""; } else { @unidadpeso.nombre__unidad_peso; } ',
+                                                        @item.peso_bruto, @item.peso_neto, @item.peso_tara, @item.numero_piezas);">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td>[@producto.c_pord_serv] @producto.descripcion</td>
+                                <td>@item.descripcion</td>
+                                <td>@item.cantidad</td>
+                                <td>[@unidadmedida.clave] @unidadmedida.descripcion</td>
+                                <td>@item.peso_kg</td>
+                                </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form name="guardarMercancia.CartaPorte" action="@Url.Action("guardarMercancia","CartaPorte")" method="post" onsubmit="return validateForm();">    
+    <div class="modal fade" id="modalMercancias" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Formulario Mercancía</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body m-3">
+                    <input type="hidden" id="txtIdMercancias" name="txtIdMercancias">
+                    <input type="hidden" id="txtIdBienesTransp" name="txtIdBienesTransp">
+                    <input type="hidden" id="txtIdClaveSTCC" name="txtIdClaveSTCC">
+                    <input type="hidden" id="txtIdClaveUnidad" name="txtIdClaveUnidad">
+                    <input type="hidden" id="txtIdClaveMaterialPeligroso" name="txtIdClaveMaterialPeligroso">
+                    <input type="hidden" id="txtIdEmbalaje" name="txtIdEmbalaje">
+                    <input type="hidden" id="txtIdMoneda" name="txtIdMoneda">
+                    <input type="hidden" id="txtIdFraccionArancelaria" name="txtIdFraccionArancelaria">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtBienesTransp" placeholder="Bienes Transportados" required>
+                                <label for="txtBienesTransp">Bienes Transportados</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtClaveSTCC" placeholder="Clave STCC">
+                                <label for="txtClaveSTCC">Clave STCC</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtDescripcion" minlenght="1" maxlength="1000" name="txtDescripcion" placeholder="Descripción" required>
+                                <label for="txtDescripcion">Descripción</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control form-control-lg" id="txtCantidad" min="0.000001" step="0.000001" name="txtCantidad" placeholder="Cantidad" required>
+                                <label for="txtCantidad">Cantidad</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtClaveUnidad" placeholder="Clave Unidad" required>
+                                <label for="txtClaveUnidad">Clave Unidad</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtUnidadP" minlenght="1" maxlength="20" name="txtUnidadP" placeholder="Unidad">
+                                <label for="txtUnidadP">Unidad</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtDimensiones" maxlength="50" name="txtDimensiones" placeholder="Dimensiones">
+                                <label for="txtDimensiones">Dimensiones</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbMaterialPeligroso" name="cmbMaterialPeligroso" aria-label="Material Peligroso">
+                                    <option value="Si">Si</option>
+                                    <option value="No">No</option>
+                                </select>
+                                <label for="cmbMaterialPeligroso">Material Peligroso</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtClaveMaterialPeligroso" placeholder="Clave Material Peligroso">
+                                <label for="txtClaveMaterialPeligroso">Clave Material Peligroso</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtEmbalaje" placeholder="Embalaje">
+                                <label for="txtEmbalaje">Embalaje</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtDescripcionEmbalaje" minlength="1" maxlength="100" name="txtDescripcionEmbalaje" placeholder="Descripción Embalaje">
+                                <label for="txtDescripcionEmbalaje">Descripción Embalaje</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control form-control-lg" id="txtPesoKG" min="0.000" step="0.001" name="txtPesoKG" placeholder="Peso KG" required>
+                                <label for="txtPesoKG">Peso KG</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control form-control-lg" id="txtValorMercancia" min="0.000" step="0.001" value="0" name="txtValorMercancia" placeholder="Valor Mercancía">
+                                <label for="txtValorMercancia">Valor Mercancía</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtMoneda" placeholder="Moneda">
+                                <label for="txtMoneda">Moneda</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtFraccionArancelaria" placeholder="Fracción Arancelaría">
+                                <label for="txtFraccionArancelaria">Fracción Arancelaría</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtUUIDComercioExt" maxlength="50" name="txtUUIDComercioExt" placeholder="UUID Comercio Exterior">
+                                <label for="txtUUIDComercioExt">UUID Comercio Exterior</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h1 class="h3 mb-3">Detalle Mercancía</h1>
+                    <input type="hidden" id="txtIdUnidadPesoMercancia" name="txtIdUnidadPesoMercancia">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtUnidadPesoMercancia" placeholder="Unidad de Peso de Mercancía">
+                                <label for="txtUnidadPesoMercancia">Unidad de Peso de Mercancía</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control form-control-lg" min="0.000" step="0.001" value="0" id="txtPesoBruto" name="txtPesoBruto" placeholder="Peso Bruto">
+                                <label for="txtPesoBruto">Peso Bruto</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control form-control-lg" min="0.000" step="0.001" value="0" id="txtPesoNeto" name="txtPesoNeto" placeholder="Peso Neto">
+                                <label for="txtPesoNeto">Peso Neto</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control form-control-lg" min="0.000" step="0.001" value="0" id="txtPesoTara" name="txtPesoTara" placeholder="Peso Tara">
+                                <label for="txtPesoTara">Peso Tara</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control form-control-lg" min="0" step="1" value="0" id="txtNumeroPiezas" name="txtNumeroPiezas" placeholder="Número Piezas">
+                                <label for="txtNumeroPiezas">Número Piezas</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="modal-footer">
+                    @*<div class="row">
+                        <div class="col-md-12">*@
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+                            <button type="submit" class="btn btn-success"><i class="fas fa-save"></i>&nbsp; Guardar Datos</button>
+                        @*</div>
+                    </div>*@
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    var cacheBienesTransp = {};
+    var cacheClaveSTCC = {};
+    var cacheClaveUnidad = {};
+    var cacheClaveMaterialPeligroso = {};
+    var cacheEmbalaje = {};
+    var cacheMoneda = {};
+    var cacheFracAran = {};
+    var cacheunidadPesoM = {};
+
+    document.addEventListener("DOMContentLoaded", function () {                
+
+        $("#datatables-reporte-mercancias").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1, 2] }
+            ],
+            order: [[2, 'desc']]
+        });        
+
+        $("#txtBienesTransp").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtBienesTransp").removeClass("is-invalid");
+                    $("#txtBienesTransp").removeClass("is-valid");
+                    $("#txtBienesTransp").addClass("is-invalid");
+                    if (term in cacheBienesTransp) {
+                        response(cacheBienesTransp[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obteneridSAT", "Catalogos")", request, function (data, status, xhr) {
+                        cacheBienesTransp[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtBienesTransp").removeClass("is-invalid");
+                    $("#txtBienesTransp").removeClass("is-valid");
+                    $("#txtBienesTransp").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtBienesTransp").val(ui.item.label);
+                $("#txtIdBienesTransp").val(ui.item.value);
+                $("#txtBienesTransp").removeClass("is-invalid");
+                $("#txtBienesTransp").removeClass("is-valid");
+                $("#txtBienesTransp").addClass("is-valid");
+                $("#txtBienesTransp").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+
+        $("#txtClaveSTCC").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtClaveSTCC").removeClass("is-invalid");
+                    $("#txtClaveSTCC").removeClass("is-valid");
+                    $("#txtClaveSTCC").addClass("is-invalid");
+                    if (term in cacheClaveSTCC) {
+                        response(cacheClaveSTCC[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerClaveSTCC", "Catalogos")", request, function (data, status, xhr) {
+                        cacheClaveSTCC[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtClaveSTCC").removeClass("is-invalid");
+                    $("#txtClaveSTCC").removeClass("is-valid");
+                    $("#txtClaveSTCC").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtClaveSTCC").val(ui.item.label);
+                $("#txtIdClaveSTCC").val(ui.item.value);
+                $("#txtClaveSTCC").removeClass("is-invalid");
+                $("#txtClaveSTCC").removeClass("is-valid");
+                $("#txtClaveSTCC").addClass("is-valid");
+                $("#txtClaveSTCC").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+
+        $("#txtClaveUnidad").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtClaveUnidad").removeClass("is-invalid");
+                    $("#txtClaveUnidad").removeClass("is-valid");
+                    $("#txtClaveUnidad").addClass("is-invalid");
+                    if (term in cacheClaveUnidad) {
+                        response(cacheClaveUnidad[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerUnidadesMedida", "Catalogos")", request, function (data, status, xhr) {
+                        cacheClaveUnidad[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtClaveUnidad").removeClass("is-invalid");
+                    $("#txtClaveUnidad").removeClass("is-valid");
+                    $("#txtClaveUnidad").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtClaveUnidad").val(ui.item.label);
+                $("#txtIdClaveUnidad").val(ui.item.value);
+                $("#txtClaveUnidad").removeClass("is-invalid");
+                $("#txtClaveUnidad").removeClass("is-valid");
+                $("#txtClaveUnidad").addClass("is-valid");
+                $("#txtClaveUnidad").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+
+        $("#txtClaveMaterialPeligroso").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtClaveMaterialPeligroso").removeClass("is-invalid");
+                    $("#txtClaveMaterialPeligroso").removeClass("is-valid");
+                    $("#txtClaveMaterialPeligroso").addClass("is-invalid");
+                    if (term in cacheClaveMaterialPeligroso) {
+                        response(cacheClaveMaterialPeligroso[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerMaterialPeli", "Catalogos")", request, function (data, status, xhr) {
+                        cacheClaveMaterialPeligroso[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtClaveMaterialPeligroso").removeClass("is-invalid");
+                    $("#txtClaveMaterialPeligroso").removeClass("is-valid");
+                    $("#txtClaveMaterialPeligroso").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtClaveMaterialPeligroso").val(ui.item.label);
+                $("#txtIdClaveMaterialPeligroso").val(ui.item.value);
+                $("#txtClaveMaterialPeligroso").removeClass("is-invalid");
+                $("#txtClaveMaterialPeligroso").removeClass("is-valid");
+                $("#txtClaveMaterialPeligroso").addClass("is-valid");
+                $("#txtClaveMaterialPeligroso").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+
+        $("#txtEmbalaje").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtEmbalaje").removeClass("is-invalid");
+                    $("#txtEmbalaje").removeClass("is-valid");
+                    $("#txtEmbalaje").addClass("is-invalid");
+                    if (term in cacheEmbalaje) {
+                        response(cacheEmbalaje[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerEmbalaje", "Catalogos")", request, function (data, status, xhr) {
+                        cacheEmbalaje[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtEmbalaje").removeClass("is-invalid");
+                    $("#txtEmbalaje").removeClass("is-valid");
+                    $("#txtEmbalaje").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtEmbalaje").val(ui.item.label);
+                $("#txtIdEmbalaje").val(ui.item.value);
+                $("#txtEmbalaje").removeClass("is-invalid");
+                $("#txtEmbalaje").removeClass("is-valid");
+                $("#txtEmbalaje").addClass("is-valid");
+                $("#txtEmbalaje").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+
+        $("#txtMoneda").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtMoneda").removeClass("is-invalid");
+                    $("#txtMoneda").removeClass("is-valid");
+                    $("#txtMoneda").addClass("is-invalid");
+                    if (term in cacheMoneda) {
+                        response(cacheMoneda[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerMoneda", "Catalogos")", request, function (data, status, xhr) {
+                        cacheMoneda[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtMoneda").removeClass("is-invalid");
+                    $("#txtMoneda").removeClass("is-valid");
+                    $("#txtMoneda").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtMoneda").val(ui.item.label);
+                $("#txtIdMoneda").val(ui.item.value);
+                $("#txtMoneda").removeClass("is-invalid");
+                $("#txtMoneda").removeClass("is-valid");
+                $("#txtMoneda").addClass("is-valid");
+                $("#txtMoneda").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+
+        $("#txtFraccionArancelaria").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtFraccionArancelaria").removeClass("is-invalid");
+                    $("#txtFraccionArancelaria").removeClass("is-valid");
+                    $("#txtFraccionArancelaria").addClass("is-invalid");
+                    if (term in cacheFracAran) {
+                        response(cacheFracAran[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerFraccionesArancelarias", "Catalogos")", request, function (data, status, xhr) {
+                        cacheFracAran[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtFraccionArancelaria").removeClass("is-invalid");
+                    $("#txtFraccionArancelaria").removeClass("is-valid");
+                    $("#txtFraccionArancelaria").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtFraccionArancelaria").val(ui.item.label);
+                $("#txtIdFraccionArancelaria").val(ui.item.value);
+                $("#txtFraccionArancelaria").removeClass("is-invalid");
+                $("#txtFraccionArancelaria").removeClass("is-valid");
+                $("#txtFraccionArancelaria").addClass("is-valid");
+                $("#txtFraccionArancelaria").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+
+        $("#txtUnidadPesoMercancia").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtUnidadPesoMercancia").removeClass("is-invalid");
+                    $("#txtUnidadPesoMercancia").removeClass("is-valid");
+                    $("#txtUnidadPesoMercancia").addClass("is-invalid");
+                    if (term in cacheunidadPesoM) {
+                        response(cacheunidadPesoM[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerUnidadesPeso", "Catalogos")", request, function (data, status, xhr) {
+                        cacheunidadPesoM[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtUnidadPesoMercancia").removeClass("is-invalid");
+                    $("#txtUnidadPesoMercancia").removeClass("is-valid");
+                    $("#txtUnidadPesoMercancia").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtUnidadPesoMercancia").val(ui.item.label);
+                $("#txtIdUnidadPesoMercancia").val(ui.item.value);
+                $("#txtUnidadPesoMercancia").removeClass("is-invalid");
+                $("#txtUnidadPesoMercancia").removeClass("is-valid");
+                $("#txtUnidadPesoMercancia").addClass("is-valid");
+                $("#txtUnidadPesoMercancia").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+
+    });
+
+    function validateForm() {
+        let Descripcion = document.forms["guardarMercancia.CartaPorte"]["txtDescripcion"].value;
+
+        var $Form = document.forms["guardarMercancia.CartaPorte"];
+
+        if ($Form["txtIdBienesTransp"].value != "") {
+            if ($("#txtBienesTransp").val() == "" || $("#txtBienesTransp").hasClass("is-invalid")) {
+                notificacionAlert("Debe seleccionar un Bien Transportado válido.", "danger");
+                return false;
+            }
+        }
+        else {
+            notificacionAlert("No ha seleccionado un Bien Transportado válido.", "danger");
+            $("#txtBienesTransp").removeClass("is-invalid");
+            $("#txtBienesTransp").removeClass("is-valid");
+            $("#txtBienesTransp").addClass("is-invalid");
+            return false;
+        }
+
+        if ($Form["txtIdClaveSTCC"].value == "") {
+            if ($("#txtClaveSTCC").hasClass("is-invalid")) {
+                notificacionAlert("Debe seleccionar una Clave STCC válida.", "danger");
+                return false;
+            }
+            else {
+                $("#txtIdClaveSTCC").val(0);
+            }
+        }
+        else {
+            if ($("#txtClaveSTCC").hasClass("is-invalid")) {
+                notificacionAlert("Debe seleccionar una Clave STCC válida.", "danger");
+                return false;
+            }
+        }
+
+        if ($Form["txtIdClaveUnidad"].value != "") {
+            if ($("#txtClaveUnidad").val() == "" || $("#txtClaveUnidad").hasClass("is-invalid")) {
+                notificacionAlert("Debe seleccionar una Unidad válida.", "danger");
+                return false;
+            }
+        }
+        else {
+            notificacionAlert("No ha seleccionado una Unidad válida.", "danger");
+            $("#txtClaveUnidad").removeClass("is-invalid");
+            $("#txtClaveUnidad").removeClass("is-valid");
+            $("#txtClaveUnidad").addClass("is-invalid");
+            return false;
+        }
+
+        if ($Form["txtIdClaveMaterialPeligroso"].value == "") {
+            if ($("#txtClaveMaterialPeligroso").hasClass("is-invalid")) {
+                notificacionAlert("Debe seleccionar una Clave de Material Peligroso válida.", "danger");
+                return false;
+            }
+            else {
+                $("#txtIdClaveMaterialPeligroso").val(0);
+            }
+        }
+        else {
+            if ($("#txtClaveMaterialPeligroso").hasClass("is-invalid")) {
+                notificacionAlert("Debe seleccionar una Clave de Material Peligroso válida.", "danger");
+                return false;
+            }
+        }
+
+        if ($Form["txtIdEmbalaje"].value == "") {
+            if ($("#txtEmbalaje").hasClass("is-invalid")) {
+                notificacionAlert("Debe seleccionar un Embalaje válido.", "danger");
+                return false;
+            }
+            else {
+                $("#txtIdEmbalaje").val(0);
+            }
+        }
+        else {
+            if ($("#txtEmbalaje").hasClass("is-invalid")) {
+                notificacionAlert("Debe seleccionar un Embalaje válido.", "danger");
+                return false;
+            }
+        }
+
+        if ($Form["txtIdMoneda"].value == "") {
+            if ($("#txtMoneda").hasClass("is-invalid")) {
+                notificacionAlert("Debe seleccionar una Moneda válida.", "danger");
+                return false;
+            }
+            else {
+                $("#txtIdMoneda").val(0);
+            }
+        }
+        else {
+            if ($("#txtMoneda").hasClass("is-invalid")) {
+                notificacionAlert("Debe seleccionar una Moneda válida.", "danger");
+                return false;
+            }
+        }
+
+        if ($Form["txtIdFraccionArancelaria"].value == "") {
+            if ($("#txtFraccionArancelaria").hasClass("is-invalid")) {
+                notificacionAlert("Debe seleccionar una Fraccion Arancelaría válida.", "danger");
+                return false;
+            }
+            else {
+                $("#txtIdFraccionArancelaria").val(0);
+            }
+        }
+        else {
+            if ($("#txtFraccionArancelaria").hasClass("is-invalid")) {
+                notificacionAlert("Debe seleccionar una Fraccion Arancelaría válida.", "danger");
+                return false;
+            }
+        }
+
+        if ($Form["txtIdUnidadPesoMercancia"].value == "") {
+            if ($("#txtUnidadPesoMercancia").hasClass("is-invalid")) {
+                notificacionAlert("Debe seleccionar una Unidad de Peso válida.", "danger");
+                return false;
+            }
+            else {
+                $("#txtIdUnidadPesoMercancia").val(0);
+            }
+        }
+        else {
+            if ($("#txtUnidadPesoMercancia").hasClass("is-invalid")) {
+                notificacionAlert("Debe seleccionar una Unidad de Peso válida.", "danger");
+                return false;
+            }
+        }
+
+        if (Descripcion != "") {
+            bootstrap.Modal.getOrCreateInstance(document.getElementById("modalMercancias")).hide();
+            abrirCargando();
+
+            return true;
+        }
+        return false;
+    }
+
+    function nuevaMercancia() {
+        document.forms["guardarMercancia.CartaPorte"].reset();
+
+        document.forms["guardarMercancia.CartaPorte"]["txtIdMercancias"].value = 0;
+
+        $("#txtIdBienesTransp").val("");
+        $("#txtBienesTransp").removeClass("is-invalid");
+        $("#txtBienesTransp").removeClass("is-valid");
+
+        $("#txtIdClaveSTCC").val("");
+        $("#txtClaveSTCC").removeClass("is-invalid");
+        $("#txtClaveSTCC").removeClass("is-valid");
+
+        $("#txtIdClaveUnidad").val("");
+        $("#txtClaveUnidad").removeClass("is-invalid");
+        $("#txtClaveUnidad").removeClass("is-valid");
+
+        $("#txtIdClaveMaterialPeligroso").val("");
+        $("#txtClaveMaterialPeligroso").removeClass("is-invalid");
+        $("#txtClaveMaterialPeligroso").removeClass("is-valid");
+
+        $("#txtIdEmbalaje").val("");
+        $("#txtEmbalaje").removeClass("is-invalid");
+        $("#txtEmbalaje").removeClass("is-valid");
+
+        $("#txtIdMoneda").val("");
+        $("#txtMoneda").removeClass("is-invalid");
+        $("#txtMoneda").removeClass("is-valid");
+
+        $("#txtIdFraccionArancelaria").val("");
+        $("#txtFraccionArancelaria").removeClass("is-invalid");
+        $("#txtFraccionArancelaria").removeClass("is-valid");
+
+        $("#txtIdUnidadPesoMercancia").val("");
+        $("#txtUnidadPesoMercancia").removeClass("is-invalid");
+        $("#txtUnidadPesoMercancia").removeClass("is-valid");
+    }
+
+    function actualizarMercancia(a, zj, zk, zl, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z, za, zb, zc, zd, ze, zf, zg, zh, zi) {
+        nuevaMercancia();
+        if (b == 0) { var aux1 = ""; var aux2 = ""; } else { var aux1 = '['; var aux2 = '] '; }
+        if (m == 0) { var aux11 = ""; var aux12 = ""; } else { var aux11 = '['; var aux12 = '] '; }
+        if (p == 0) { var aux3 = ""; var aux4 = ""; } else { var aux3 = '['; var aux4 = '] '; }
+        if (v == 0) { var aux5 = ""; var aux6 = ""; } else { var aux5 = '['; var aux6 = '] '; }
+        if (y == 0) { var aux7 = ""; var aux8 = ""; } else { var aux7 = '['; var aux8 = '] '; }
+        if (zc == 0) { var aux9 = ""; var aux0 = ""; } else { var aux9 = '['; var aux0 = '] '; }
+
+        document.forms["guardarMercancia.CartaPorte"]["txtIdMercancias"].value = a;
+
+        document.forms["guardarMercancia.CartaPorte"]["txtIdBienesTransp"].value = zj;
+        document.forms["guardarMercancia.CartaPorte"]["txtBienesTransp"].value = '[' + zk + '] ' + zl;
+
+        document.forms["guardarMercancia.CartaPorte"]["txtIdClaveSTCC"].value = b;
+        document.forms["guardarMercancia.CartaPorte"]["txtClaveSTCC"].value = aux1 + c + aux2 + d;
+
+        document.forms["guardarMercancia.CartaPorte"]["txtDescripcion"].value = e;
+        document.forms["guardarMercancia.CartaPorte"]["txtCantidad"].value = f;
+
+        document.forms["guardarMercancia.CartaPorte"]["txtIdClaveUnidad"].value = g;
+        document.forms["guardarMercancia.CartaPorte"]["txtClaveUnidad"].value = '[' + h + '] ' + i;
+
+        document.forms["guardarMercancia.CartaPorte"]["txtUnidadP"].value = j;
+        document.forms["guardarMercancia.CartaPorte"]["txtDimensiones"].value = k;
+        document.forms["guardarMercancia.CartaPorte"]["cmbMaterialPeligroso"].value = l;
+
+        document.forms["guardarMercancia.CartaPorte"]["txtIdClaveMaterialPeligroso"].value = m;
+        document.forms["guardarMercancia.CartaPorte"]["txtClaveMaterialPeligroso"].value = aux11 + n + aux12 + o;
+
+        document.forms["guardarMercancia.CartaPorte"]["txtIdEmbalaje"].value = p;
+        document.forms["guardarMercancia.CartaPorte"]["txtEmbalaje"].value = aux3 + q + aux4 + r;
+
+        document.forms["guardarMercancia.CartaPorte"]["txtDescripcionEmbalaje"].value = s;
+        document.forms["guardarMercancia.CartaPorte"]["txtPesoKG"].value = t;
+        document.forms["guardarMercancia.CartaPorte"]["txtValorMercancia"].value = u;
+
+        document.forms["guardarMercancia.CartaPorte"]["txtIdMoneda"].value = v;
+        document.forms["guardarMercancia.CartaPorte"]["txtMoneda"].value = aux5 + w + aux6 + x;
+
+        document.forms["guardarMercancia.CartaPorte"]["txtIdFraccionArancelaria"].value = y;
+        document.forms["guardarMercancia.CartaPorte"]["txtFraccionArancelaria"].value = aux7 + z + aux8 + za;
+
+        document.forms["guardarMercancia.CartaPorte"]["txtUUIDComercioExt"].value = zb;
+
+        document.forms["guardarMercancia.CartaPorte"]["txtIdUnidadPesoMercancia"].value = zc;
+        document.forms["guardarMercancia.CartaPorte"]["txtUnidadPesoMercancia"].value = aux9 + zd + aux0 + ze;
+
+        document.forms["guardarMercancia.CartaPorte"]["txtPesoBruto"].value = zf;
+        document.forms["guardarMercancia.CartaPorte"]["txtPesoNeto"].value = zg;
+        document.forms["guardarMercancia.CartaPorte"]["txtPesoTara"].value = zh;
+        document.forms["guardarMercancia.CartaPorte"]["txtNumeroPiezas"].value = zi;
+    }
+
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.29.0/docxtemplater.js"></script>
+<script src="https://unpkg.com/pizzip@3.1.1/dist/pizzip.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.js"></script>
+<script src="https://unpkg.com/pizzip@3.1.1/dist/pizzip-utils.js"></script>

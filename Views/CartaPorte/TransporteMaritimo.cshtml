@@ -1,0 +1,1063 @@
+﻿@model IEnumerable<Facturafast.Models.tbd_Transporte_Maritimo>
+@using Facturafast.Models
+@{
+    BD_FFEntities db = new BD_FFEntities();
+    tbc_Usuarios usuario = Session["tbc_Usuarios"] as tbc_Usuarios;
+}
+
+<h2>Transporte Marítimo</h2>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-actions float-end">
+
+                </div>
+                <form method="post" action="@Url.Action("TransporteMaritimo","CartaPorte")">
+                    <div class="row">
+                        <div class="col-md-2">
+
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control form-control-lg" id="txtFechaInicial" name="txtFechaInicial" placeholder="Fecha Inicial" value="@ViewBag.Inicio.ToString("yyyy-MM-dd")" required>
+                                <label for="txtFechaInicial">Fecha Inicial</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control form-control-lg" id="txtFechaFinal" name="txtFechaFinal" placeholder="Fecha Final" value="@ViewBag.Final.ToString("yyyy-MM-dd")" required>
+                                <label for="txtFechaFinal">Fecha Final</label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 text-center">
+                            <button type="submit" class="btn btn-success btn-lg" style="margin-top:10px;"><i class="fas fa-search"></i>&nbsp; Buscar Transporte Marítimo</button>
+                        </div>
+                    </div>
+                </form>
+                <br />
+                <hr />
+                <div class="row">
+                    <div class="col-md-4">
+                        @*<button type="submit" class="btn btn-primary" style="margin-top:10px;"><i class="fas fa-check-square"></i></button> &nbsp;
+                            <button type="submit" class="btn btn-danger" style="margin-top:10px;"><i class="far fa-fw fa-square"></i></button>*@
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <button type="submit" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#modalTransporteMaritimo" onclick="nuevoContenedor();"><i class="fas fa-plus"></i> Agregar Transporte Marítimo</button>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        @*<button type="submit" class="btn btn-success btn-lg" style="margin-top:10px;"><i class="fas fa-search"></i>&nbsp; Buscar Notas de Ventas</button>*@
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <table id="datatables-cartaporte-transportemaritimo" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>Permiso SCT</th>
+                            <th>Tipo Embarcación</th>
+                            <th>Matrícula</th>
+                            <th>Número OMI</th>
+                            <th>Nacionalidad Embarcación</th>
+                            <th>Unidades de Arqueo Bruto</th>
+                            <th>Tipo Carga</th>
+                            <th>Número Certificado ITC</th>
+                            <th>Nombre Agente Naviero</th>
+                            <th>Número Autorización Naviero</th>
+
+                            <th>Número Permiso SCT</th>
+                            <th>Nombre Aseguradora</th>
+                            <th>Número Poliza Seguro</th>
+                            <th>Año Embarcación</th>
+                            <th>Nombre Embarcación</th>
+                            <th>Eslora</th>
+                            <th>Manga</th>
+                            <th>Calado</th>
+                            <th>Línea Naviera</th>
+                            <th>Número Viaje</th>
+                            <th>Número Conocimiento Embarque</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (var item in Model)
+                        {
+                            tbc_Tipos_Permiso permisosct = db.tbc_Tipos_Permiso.Where(s => s.id_tipo_permiso == item.permiso_sct).Single();
+                            tbc_Config_Maritima configmaritima = db.tbc_Config_Maritima.Where(s => s.id_config_maritima == item.tipo_embarcacion).Single();
+                            tbc_Clave_Tipo_Carga tipocarga = db.tbc_Clave_Tipo_Carga.Where(s => s.id_clave_tipo_carga == item.tipo_carga).Single();
+                            tbc_Paises pais = db.tbc_Paises.Where(s => s.id_pais == item.nacionalidad_embarcacion).Single();
+                            tbc_Num_Autorizacion_Naviero autorizacionNaviera = db.tbc_Num_Autorizacion_Naviero.Where(s => s.id_num_autorizacion_naviero == item.num_autorizacion_naviero).Single();
+                        <tr>
+                            <td></td>
+                            <td>
+                                @*<table>
+                <tr>
+                    <td style="padding:0px 5px;">
+                        <button class="btn btn-warning btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#modalUbicacion" onclick="actualizarUbicacion(@item.peso_bruto_total );"><i class="fas fa-edit"></i></button>
+                    </td>
+                </tr>
+            </table>*@
+                            </td>
+                            <td>[@permisosct.clave] @permisosct.descripcion</td>
+                            <td>[@configmaritima.clave_configuracion_maritima] @configmaritima.descripcion</td>
+                            <td>@item.matricula</td>
+                            <td>@item.numero_omi</td>
+                            <td>[@pais.clave_pais] @pais.descripcion</td>
+                            <td>@item.unidades_arq_bruto</td>
+                            <td>[@tipocarga.clave_tipo_carga] @tipocarga.descripcion</td>
+                            <td>@item.num_cert_itc</td>
+                            <td>@item.nombre_agente_naviero</td>
+                            <td>[@autorizacionNaviera.numero_autorizacion]</td>
+
+                            <td>@item.num_permiso_sct</td>
+                            <td>@item.nombre_aseg</td>
+                            <td>@item.num_poliza_seguro</td>
+                            <td>@item.anio_embarcacion</td>
+                            <td>@item.nombre_embarcacion</td>
+                            <td>@item.eslora</td>
+                            <td>@item.manga</td>
+                            <td>@item.calado</td>
+                            <td>@item.linea_naviera</td>
+                            <td>@item.num_viaje</td>
+                            <td>@item.num_conoc_embarc</td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form name="guardarTransporteMaritimo.CartaPorte" action="@Url.Action("guardarTransporteMaritimo","CartaPorte")" method="post">
+    <input type="hidden" id="txtIdTransporteMaritimo" name="txtIdTransporteMaritimo">
+    <input type="hidden" id="txtIdPermisoSCT" name="txtIdPermisoSCT">
+    <input type="hidden" id="txtIdTipoEmbarcacion" name="txtIdTipoEmbarcacion">
+    <input type="hidden" id="txtIdNacionalidadEmbarcacion" name="txtIdNacionalidadEmbarcacion">
+    <input type="hidden" id="txtIdTipoCarga" name="txtIdTipoCarga">
+    <input type="hidden" id="txtIdNumeroAutorizacionNaviero" name="txtIdNumeroAutorizacionNaviero">
+
+    <div class="modal fade" id="modalTransporteMaritimo" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Formulario Transporte Marítimo</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body m-3">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtPermisoSCT" name="txtPermisoSCT" placeholder="Permiso SCT" required>
+                                <label for="txtPermisoSCT">Permiso SCT</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg text-uppercase " minlength="1" maxlength="30" pattern="^[A-Z0-9]*" onkeyup="javascript:this.value=this.value.toUpperCase();" title="Letras y/ó números." id="txtNumeroPermisoSCT" name="txtNumeroPermisoSCT" placeholder="Número Permiso SCT">
+                                <label for="txtNumeroPermisoSCT">Número Permiso SCT</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg text-capitalize" minlength="3" maxlength="50" id="txtNombreAseguradora" name="txtNombreAseguradora" placeholder="Nombre Aseguradora">
+                                <label for="txtNombreAseguradora">Nombre Aseguradora</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="3" maxlength="30" pattern="^[0-9]+" title="Solo números" id="txtNumeroPolizaSeguro" name="txtNumeroPolizaSeguro" placeholder="Número Póliza Seguro">
+                                <label for="txtNumeroPolizaSeguro">Número Póliza Seguro</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtTipoEmbarcacion" name="txtTipoEmbarcacion" placeholder="Tipo Embarcación" required>
+                                <label for="txtTipoEmbarcacion">Tipo Embarcación</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="7" maxlength="30" pattern="^[A-Z0-9]+" title="Solo letras mayusculas y números" id="txtMatricula" name="txtMatricula" placeholder="Matrícula" required>
+                                <label for="txtMatricula">Matrícula</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="7" maxlength="7" pattern="^[0-9]*" title="Solo números" id="txtNumeroOMI" name="txtNumeroOMI" placeholder="Número OMI" required>
+                                <label for="txtNumeroOMI">Número OMI</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="4" maxlength="4" pattern="20([0-9]{2})|19([0-9]{2})" title="año mayor a 1900" id="txtAnioEmbarcacion" name="txtAnioEmbarcacion" placeholder="Año Embarcación">
+                                <label for="txtAnioEmbarcacion">Año Embarcación</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg text-capitalize" minlength="1" maxlength="50" title="Solo Letras." id="txtNombreEmbarcacion" name="txtNombreEmbarcacion" placeholder="Nombre de la Embarcación">
+                                <label for="txtNombreEmbarcacion">Nombre de la Embarcación</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtNacionalidadEmbarcacion" name="txtNacionalidadEmbarcacion" placeholder="Nacionalidad Embarcación" required>
+                                <label for="txtNacionalidadEmbarcacion">Nacionalidad Embarcación</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control form-control-lg" step="0.001" min="0.001" id="txtUnidadesArqueoBruto" name="txtUnidadesArqueoBruto" placeholder="Unidades de Arqueo Bruto" required>
+                                <label for="txtUnidadesArqueoBruto">Unidades de Arqueo Bruto</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtTipoCarga" name="txtTipoCarga" placeholder="Tipo Carga" required>
+                                <label for="txtTipoCarga">Tipo Carga</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="3" maxlength="20" pattern="^[A-Z0-9]*" title="Letras mayusculas y números." id="txtNumeroCertificadoITC" name="txtNumeroCertificadoITC" placeholder="Número Certificado ITC" required>
+                                <label for="txtNumeroCertificadoITC">Número Certificado ITC</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control form-control-lg" min="0.00" step="0.01" id="txtEslora" name="txtEslora" placeholder="Eslora">
+                                <label for="txtEslora">Eslora</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control form-control-lg" min="0.00" step="0.01" id="txtManga" name="txtManga" placeholder="Manga">
+                                <label for="txtManga">Manga</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control form-control-lg" min="0.00" step="0.01" id="txtCalado" name="txtCalado" placeholder="Calado">
+                                <label for="txtCalado">Calado</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg text-capitalize" minlength="3" maxlength="50" id="txtLineaNaviera" name="txtLineaNaviera" placeholder="Línea Naviera">
+                                <label for="txtLineaNaviera">Línea Naviera</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg text-capitalize" maxlength="100" title="Solo letras." id="txtNombreAgenteNaviero" name="txtNombreAgenteNaviero" placeholder="Nombre Agente Naviero" required>
+                                <label for="txtNombreAgenteNaviero">Nombre Agente Naviero</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtNumeroAutorizacionNaviero" name="txtNumeroAutorizacionNaviero" placeholder="Número Autorización Naviero" required>
+                                <label for="txtNumeroAutorizacionNaviero">Número Autorización Naviero</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="1" maxlength="30" pattern="^[0-9]+" title="Solo números." id="txtNumeroViaje" name="txtNumeroViaje" placeholder="Número Viaje">
+                                <label for="txtNumeroViaje">Número Viaje</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="1" maxlength="30" pattern="^[0-9]*" title="Solo números." id="txtNumeroConocimientoEmbarque" name="txtNumeroConocimientoEmbarque" placeholder="Número Conocimiento Embarque">
+                                <label for="txtNumeroConocimientoEmbarque">Número Conocimiento Embarque</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h1 class="h3 mb-3">Contenedor</h1>
+                    <input type="hidden" id="txtIdTipoContenedor" name="txtIdTipoContenedor">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="11" maxlength="15" id="txtMatriculaContenedor" name="txtMatriculaContenedor" placeholder="Matrícula Contenedor" required>
+                                <label for="txtMatriculaContenedor">Matrícula Contenedor</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtTipoContenedor" name="txtTipoContenedor" placeholder="Tipo Contenedor" required />
+                                <label for="txtTipoContenedor">Tipo Contenedor</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="5" maxlength="20" pattern="^[0-9]*" id="txtNumeroPrecinto" name="txtNumeroPrecinto" placeholder="Número Precinto" value="0">
+                                <label for="txtNumeroPrecinto">Número Precinto</label>
+                            </div>
+                        </div>
+                    </div>                                        
+                    <div class="row">
+                        <div class="col-md-3">
+
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-secondary btn-lg" style="margin-top:10px;" id="btn-CancelarContenedor" onclick="cancelarContenedor();"><i class="fas fa-remove"></i>&nbsp; Cancelar</button>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success btn-lg" style="margin-top:10px;" id="btn-AgregarContenedor"><i class="fas fa-plus"></i>&nbsp; Agregar Contenedor</button>
+                                <button type="submit" class="btn btn-warning btn-lg" style="margin-top:10px;" id="btn-EditarContenedor"><i class="fas fa-edit"></i>&nbsp; Editar Contenedor</button>
+
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table id="datatables-conceptos-contenedor" class="table table-striped table-secondary" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th></th>
+                                        <th>Matrícula </th>
+                                        <th></th>
+                                        <th>Tipo Contenedor</th>
+                                        <th>Número Precinto</th>                                        
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <hr />
+                </div>
+                <div class="modal-footer">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+                            <button type="button" class="btn btn-success" onclick="guardarTransporteMaritimo();"><i class="fas fa-save"></i>&nbsp; Guardar Datos</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    var cachePermisoSCT = {};
+    var cacheTipoEmbarcacion = {};
+    var cacheNacioEmbarcacion = {};
+    var cacheTipoCarga = {};
+    var cacheNumAutorizacionNaviero = {};
+    var cacheTipoContenedor = {};
+
+    var TableContenedores;
+    var dataEdit;
+    document.addEventListener("DOMContentLoaded", function () {
+
+        $("#btn-EditarContenedor").hide();
+        $("#btn-CancelarContenedor").hide();
+        $("#btn-AgregarContenedor").show();
+
+        /////
+        $(document.forms["guardarTransporteMaritimo.CartaPorte"]).on('submit', function (e) {
+            var $btn = $(e.originalEvent.submitter);
+            var $Form = document.forms["guardarTransporteMaritimo.CartaPorte"];
+            var t = TableContenedores;
+
+
+            if ($btn.attr('id') == "btn-AgregarContenedor") {
+
+                if ($Form["txtIdTipoContenedor"].value != "") {
+                    if ($("#txtTipoContenedor").val() == "" || $("#txtTipoContenedor").hasClass("is-invalid")) {
+                        notificacionAlert("Debe seleccionar un Tipo de Contenedor válido.", "danger");
+                        return false;
+                    }
+                    
+                }
+                else {
+                    notificacionAlert("No ha seleccionado un Tipo de Contenedor válido.", "danger");
+                    $("#txtTipoContenedor").removeClass("is-invalid");
+                    $("#txtTipoContenedor").removeClass("is-valid");
+                    $("#txtTipoContenedor").addClass("is-invalid");
+                    return false;
+                }
+
+                t.row.add(
+                    {
+                        "seleccion": "",
+                        "acciones": '<a href="#" class="btn btn-warning btn-sm icon-editar" title="Editar Concepto"><i class="fas fa-edit"></i></a> &nbsp;&nbsp; <a href="#" class="btn btn-danger btn-sm icon-delete" title="Eliminar Concepto"><i class="fas fa-trash"></i></a>',
+                        //
+                        "matricula_contenedor": $Form["txtMatriculaContenedor"].value,
+
+                        "id_contenedor_maritimo": $Form["txtIdTipoContenedor"].value,
+                        "ContenedorMaritimo": $Form["txtTipoContenedor"].value,
+
+                        "num_precinto": $Form["txtNumeroPrecinto"].value
+                        //
+                    }
+                );
+                t.columns.adjust().draw(false);
+                cancelarContenedor();
+                notificacionAlert("El concepto se agrego correctamente.", "success");
+                return false;
+            }
+
+            if ($btn.attr('id') == "btn-EditarContenedor") {
+
+                if ($Form["txtIdTipoContenedor"].value != "") {
+                    if ($("#txtTipoContenedor").hasClass("is-invalid")) {
+                        notificacionAlert("Debe seleccionar un Tipo de Contenedor válido.", "danger");
+                        return false;
+                    }
+                }
+                else {
+                    $("#txtTipoContenedor").removeClass("is-invalid");
+                    $("#txtTipoContenedor").removeClass("is-valid");
+                    $("#txtTipoContenedor").addClass("is-invalid");
+                    return false;
+                }
+
+                var data = dataEdit.data();
+
+                data.matricula_contenedor = $Form["txtMatriculaContenedor"].value;
+
+                data.id_contenedor_maritimo = $Form["txtIdTipoContenedor"].value;
+                data.ContenedorMaritimo = $Form["txtTipoContenedor"].value;
+
+                data.num_precinto = $Form["txtNumeroPrecinto"].value;
+
+                //
+                dataEdit.data(data).draw();
+                t.columns.adjust().draw(false);
+                notificacionAlert("El Contenedor se actualizo correctamente.", "success");
+                cancelarContenedor();
+                return false;
+            }
+        });
+        ///
+
+        $("#datatables-cartaporte-transportemaritimo").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1] }
+            ],
+            order: [[2, 'asc']]
+        });
+
+        TableContenedores = $("#datatables-conceptos-contenedor").DataTable({
+            responsive: true,
+            'columnDefs': [
+                //
+                { visible: true, orderable: false, searchable: false, targets: 0, name: "seleccion", data: "seleccion" },
+                { visible: true, orderable: false, searchable: false, targets: 1, name: "acciones", data: "acciones" },
+
+                { visible: true, orderable: true, searchable: true, targets: 2, name: "matricula_contenedor", data: "matricula_contenedor" },
+
+                { visible: false, orderable: false, searchable: false, targets: 3, name: "id_contenedor_maritimo", data: "id_contenedor_maritimo" },
+                { visible: true, orderable: true, searchable: true, targets: 4, name: "ContenedorMaritimo", data: "ContenedorMaritimo" },
+
+                { visible: true, orderable: true, searchable: true, targets: 5, name: "num_precinto", data: "num_precinto" },
+                //
+            ],
+            order: [[3, 'asc']]
+        });
+
+        $('#datatables-conceptos-contenedor tbody').on('click', '.icon-delete', function () {
+
+            if ($("#btn-EditarContenedor").is(":visible")) {
+                notificacionAlert("No se pueden eliminar el contenedor mientras se este editando alguno de ellos.", "danger");
+            }
+            else {
+                var t = TableContenedores;
+                t.row($(this).parents('tr')).remove();
+                t.columns.adjust().draw(false);
+            }
+        });
+
+        $('#datatables-conceptos-contenedor tbody').on('click', '.icon-editar', function () {
+            $("#btn-EditarContenedor").show();
+            $("#btn-CancelarContenedor").show();
+            $("#btn-AgregarContenedor").hide();
+
+            var t = TableContenedores;
+            dataEdit = t.row($(this).parents('tr'));
+            var data = dataEdit.data();
+
+            $("#txtMatriculaContenedor").val(data.matricula_contenedor);
+
+            $("#txtIdTipoContenedor").val(data.id_contenedor_maritimo);
+            $("#txtTipoContenedor").val(data.ContenedorMaritimo);
+            $("#txtTipoContenedor").removeClass("is-invalid");
+            $("#txtTipoContenedor").removeClass("is-valid");
+            $("#txtTipoContenedor").addClass("is-valid");
+
+            $("#txtNumeroPrecinto").val(data.num_precinto);
+
+        });
+
+        //Autocompletar
+        $("#txtPermisoSCT").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtPermisoSCT").removeClass("is-invalid");
+                    $("#txtPermisoSCT").removeClass("is-valid");
+                    $("#txtPermisoSCT").addClass("is-invalid");
+                    if (term in cachePermisoSCT) {
+                        response(cachePermisoSCT[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerTipoPermiso", "Catalogos")", request, function (data, status, xhr) {
+                        cachePermisoSCT[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtPermisoSCT").removeClass("is-invalid");
+                    $("#txtPermisoSCT").removeClass("is-valid");
+                    $("#txtPermisoSCT").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtPermisoSCT").val(ui.item.label);
+                $("#txtIdPermisoSCT").val(ui.item.value);
+                $("#txtPermisoSCT").removeClass("is-invalid");
+                $("#txtPermisoSCT").removeClass("is-valid");
+                $("#txtPermisoSCT").addClass("is-valid");
+                $("#txtPermisoSCT").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+
+        $("#txtTipoEmbarcacion").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtTipoEmbarcacion").removeClass("is-invalid");
+                    $("#txtTipoEmbarcacion").removeClass("is-valid");
+                    $("#txtTipoEmbarcacion").addClass("is-invalid");
+                    if (term in cacheTipoEmbarcacion) {
+                        response(cacheTipoEmbarcacion[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerTipoEmbarcacion", "Catalogos")", request, function (data, status, xhr) {
+                        cacheTipoEmbarcacion[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtTipoEmbarcacion").removeClass("is-invalid");
+                    $("#txtTipoEmbarcacion").removeClass("is-valid");
+                    $("#txtTipoEmbarcacion").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtTipoEmbarcacion").val(ui.item.label);
+                $("#txtIdTipoEmbarcacion").val(ui.item.value);
+                $("#txtTipoEmbarcacion").removeClass("is-invalid");
+                $("#txtTipoEmbarcacion").removeClass("is-valid");
+                $("#txtTipoEmbarcacion").addClass("is-valid");
+                $("#txtTipoEmbarcacion").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+
+        $("#txtNacionalidadEmbarcacion").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtNacionalidadEmbarcacion").removeClass("is-invalid");
+                    $("#txtNacionalidadEmbarcacion").removeClass("is-valid");
+                    $("#txtNacionalidadEmbarcacion").addClass("is-invalid");
+                    if (term in cacheNacioEmbarcacion) {
+                        response(cacheNacioEmbarcacion[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerPais", "Catalogos")", request, function (data, status, xhr) {
+                        cacheNacioEmbarcacion[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtNacionalidadEmbarcacion").removeClass("is-invalid");
+                    $("#txtNacionalidadEmbarcacion").removeClass("is-valid");
+                    $("#txtNacionalidadEmbarcacion").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtNacionalidadEmbarcacion").val(ui.item.label);
+                $("#txtIdNacionalidadEmbarcacion").val(ui.item.value);
+                $("#txtNacionalidadEmbarcacion").removeClass("is-invalid");
+                $("#txtNacionalidadEmbarcacion").removeClass("is-valid");
+                $("#txtNacionalidadEmbarcacion").addClass("is-valid");
+                $("#txtNacionalidadEmbarcacion").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+
+        $("#txtTipoCarga").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtTipoCarga").removeClass("is-invalid");
+                    $("#txtTipoCarga").removeClass("is-valid");
+                    $("#txtTipoCarga").addClass("is-invalid");
+                    if (term in cacheTipoCarga) {
+                        response(cacheTipoCarga[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerTipoCarga", "Catalogos")", request, function (data, status, xhr) {
+                        cacheTipoCarga[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtTipoCarga").removeClass("is-invalid");
+                    $("#txtTipoCarga").removeClass("is-valid");
+                    $("#txtTipoCarga").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtTipoCarga").val(ui.item.label);
+                $("#txtIdTipoCarga").val(ui.item.value);
+                $("#txtTipoCarga").removeClass("is-invalid");
+                $("#txtTipoCarga").removeClass("is-valid");
+                $("#txtTipoCarga").addClass("is-valid");
+                $("#txtTipoCarga").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+
+        $("#txtNumeroAutorizacionNaviero").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtNumeroAutorizacionNaviero").removeClass("is-invalid");
+                    $("#txtNumeroAutorizacionNaviero").removeClass("is-valid");
+                    $("#txtNumeroAutorizacionNaviero").addClass("is-invalid");
+                    if (term in cacheNumAutorizacionNaviero) {
+                        response(cacheNumAutorizacionNaviero[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerNumAutorizacionNaviera", "Catalogos")", request, function (data, status, xhr) {
+                        cacheNumAutorizacionNaviero[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtNumeroAutorizacionNaviero").removeClass("is-invalid");
+                    $("#txtNumeroAutorizacionNaviero").removeClass("is-valid");
+                    $("#txtNumeroAutorizacionNaviero").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtNumeroAutorizacionNaviero").val(ui.item.label);
+                $("#txtIdNumeroAutorizacionNaviero").val(ui.item.value);
+                $("#txtNumeroAutorizacionNaviero").removeClass("is-invalid");
+                $("#txtNumeroAutorizacionNaviero").removeClass("is-valid");
+                $("#txtNumeroAutorizacionNaviero").addClass("is-valid");
+                $("#txtNumeroAutorizacionNaviero").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+
+         $("#txtTipoContenedor").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtTipoContenedor").removeClass("is-invalid");
+                    $("#txtTipoContenedor").removeClass("is-valid");
+                    $("#txtTipoContenedor").addClass("is-invalid");
+                    if (term in cacheTipoContenedor) {
+                        response(cacheTipoContenedor[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerTipoContenedor", "Catalogos")", request, function (data, status, xhr) {
+                        cacheTipoContenedor[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtTipoContenedor").removeClass("is-invalid");
+                    $("#txtTipoContenedor").removeClass("is-valid");
+                    $("#txtTipoContenedor").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtTipoContenedor").val(ui.item.label);
+                $("#txtIdTipoContenedor").val(ui.item.value);
+                $("#txtTipoContenedor").removeClass("is-invalid");
+                $("#txtTipoContenedor").removeClass("is-valid");
+                $("#txtTipoContenedor").addClass("is-valid");
+                $("#txtTipoContenedor").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+        //Fin Autocompletar
+    });
+
+    function nuevoContenedor() {
+        document.forms["guardarTransporteMaritimo.CartaPorte"].reset();
+        //
+        $("#txtIdTransporteMaritimo").val(0);
+
+        $("#txtIdPermisoSCT").val("");
+        $("#txtPermisoSCT").removeClass("is-invalid");
+        $("#txtPermisoSCT").removeClass("is-valid");
+
+        $("#txtNumeroPermisoSCT").val("");
+        $("#txtNumeroPermisoSCT").removeClass("is-invalid");
+        $("#txtNumeroPermisoSCT").removeClass("is-valid");
+
+        $("#txtNombreAseguradora").val("");
+        $("#txtNombreAseguradora").removeClass("is-invalid");
+        $("#txtNombreAseguradora").removeClass("is-valid");
+
+        $("#txtNumeroPolizaSeguro").val("");
+        $("#txtNumeroPolizaSeguro").removeClass("is-invalid");
+        $("#txtNumeroPolizaSeguro").removeClass("is-valid");
+
+        $("#txtIdTipoEmbarcacion").val("");
+        $("#txtTipoEmbarcacion").removeClass("is-invalid");
+        $("#txtTipoEmbarcacion").removeClass("is-valid");
+
+        $("#txtMatricula").val("");
+        $("#txtMatricula").removeClass("is-invalid");
+        $("#txtMatricula").removeClass("is-valid");
+
+        $("#txtNumeroOMI").val("");
+        $("#txtNumeroOMI").removeClass("is-invalid");
+        $("#txtNumeroOMI").removeClass("is-valid");
+
+        $("#txtAnioEmbarcacion").val(2021);
+        $("#txtAnioEmbarcacion").removeClass("is-invalid");
+        $("#txtAnioEmbarcacion").removeClass("is-valid");
+
+        $("#txtNombreEmbarcacion").val("");
+        $("#txtNombreEmbarcacion").removeClass("is-invalid");
+        $("#txtNombreEmbarcacion").removeClass("is-valid");
+
+        $("#txtIdNacionalidadEmbarcacion").val("");
+        $("#txtNacionalidadEmbarcacion").removeClass("is-invalid");
+        $("#txtNacionalidadEmbarcacion").removeClass("is-valid");
+
+        $("#txtUnidadesArqueoBruto").val("");
+        $("#txtUnidadesArqueoBruto").removeClass("is-invalid");
+        $("#txtUnidadesArqueoBruto").removeClass("is-valid");
+
+        $("#txtIdTipoCarga").val("");
+        $("#txtTipoCarga").removeClass("is-invalid");
+        $("#txtTipoCarga").removeClass("is-valid");
+
+        $("#txtNumeroCertificadoITC").val("");
+        $("#txtNumeroCertificadoITC").removeClass("is-invalid");
+        $("#txtNumeroCertificadoITC").removeClass("is-valid");
+
+        $("#txtEslora").val(0);
+        $("#txtEslora").removeClass("is-invalid");
+        $("#txtEslora").removeClass("is-valid");
+
+        $("#txtManga").val(0);
+        $("#txtManga").removeClass("is-invalid");
+        $("#txtManga").removeClass("is-valid");
+
+        $("#txtCalado").val(0);
+        $("#txtCalado").removeClass("is-invalid");
+        $("#txtCalado").removeClass("is-valid");
+
+        $("#txtLineaNaviera").val("");
+        $("#txtLineaNaviera").removeClass("is-invalid");
+        $("#txtLineaNaviera").removeClass("is-valid");
+
+        $("#txtNombreAgenteNaviero").val("");
+        $("#txtNombreAgenteNaviero").removeClass("is-invalid");
+        $("#txtNombreAgenteNaviero").removeClass("is-valid");
+
+        $("#txtIdNumeroAutorizacionNaviero").val("");
+        $("#txtNumeroAutorizacionNaviero").removeClass("is-invalid");
+        $("#txtNumeroAutorizacionNaviero").removeClass("is-valid");
+
+        $("#txtNumeroViaje").val(0);
+        $("#txtNumeroViaje").removeClass("is-invalid");
+        $("#txtNumeroViaje").removeClass("is-valid");
+
+        $("#txtNumeroConocimientoEmbarque").val(0);
+        $("#txtNumeroConocimientoEmbarque").removeClass("is-invalid");
+        $("#txtNumeroConocimientoEmbarque").removeClass("is-valid");
+
+        //
+        $("#txtMatriculaContenedor").val();
+
+        $("#txtIdTipoContenedor").val();
+        $("#txtTipoContenedor").removeClass("is-invalid");
+        $("#txtTipoContenedor").removeClass("is-valid");
+
+        $("#txtNumeroPrecinto").val(0);
+        //
+
+        $("#btn-EditarContenedor").hide();
+        $("#btn-CancelarContenedor").hide();
+        $("#btn-AgregarContenedor").show();
+
+        TableContenedores.clear().draw(false);
+ 
+    }
+
+    function cancelarContenedor() {
+        $("#btn-EditarContenedor").hide();
+        $("#btn-CancelarContenedor").hide();
+        $("#btn-AgregarContenedor").show();
+        //
+        var noTransporteMaritimo = $("#txtIdTransporteMaritimo").val();
+        var idPermisoSCT = $("#txtIdPermisoSCT").val();
+        var PermisoSCT = $("#txtPermisoSCT").val();
+        var NumPermisoSCT = $("#txtNumeroPermisoSCT").val();
+        var NombreAseguradora = $("#txtNombreAseguradora").val();
+        var NumeroPolizaSeguro = $("#txtNumeroPolizaSeguro").val();
+        var idTipoEmbarcacion = $("#txtIdTipoEmbarcacion").val();
+        var TipoEmbarcacion = $("#txtTipoEmbarcacion").val();
+        var Matricula = $("#txtMatricula").val();
+        var NumeroOMI = $("#txtNumeroOMI").val();
+        var AnioEmbarcacion = $("#txtAnioEmbarcacion").val();
+        var NombreEmbarcacion = $("#txtNombreEmbarcacion").val();
+        var idNacionalidadEmbarcacion = $("#txtIdNacionalidadEmbarcacion").val();
+        var NacionalidadEmbarcacion = $("#txtNacionalidadEmbarcacion").val();
+        var UnidadesArqueoBruto = $("#txtUnidadesArqueoBruto").val();
+        var idTipoCarga = $("#txtIdTipoCarga").val();
+        var TipoCarga = $("#txtTipoCarga").val();
+        var NumeroCertificadoITC = $("#txtNumeroCertificadoITC").val();
+        var Eslora = $("#txtEslora").val();
+        var Manga = $("#txtManga").val();
+        var Calado = $("#txtCalado").val();
+        var LineaNaviera = $("#txtLineaNaviera").val();
+        var NombreAgenteNaviero = $("#txtNombreAgenteNaviero").val();
+        var idNumeroAutorizacionNaviero = $("#txtIdNumeroAutorizacionNaviero").val();
+        var NumeroAutorizacionNaviero = $("#txtNumeroAutorizacionNaviero").val();
+        var NumeroViaje = $("#txtNumeroViaje").val();
+        var NumeroConocimientoEmbarque = $("#txtNumeroConocimientoEmbarque").val();
+
+        //
+
+        document.forms["guardarTransporteMaritimo.CartaPorte"].reset();
+        //
+        $("#txtPermisoSCT").val(PermisoSCT);
+        $("#txtNumeroPermisoSCT").val(NumPermisoSCT);
+        $("#txtNombreAseguradora").val(NombreAseguradora);
+        $("#txtNumeroPolizaSeguro").val(NumeroPolizaSeguro);
+        $("#txtTipoEmbarcacion").val(TipoEmbarcacion);
+        $("#txtMatricula").val(Matricula);
+        $("#txtNumeroOMI").val(NumeroOMI);
+        $("#txtAnioEmbarcacion").val(AnioEmbarcacion);
+        $("#txtNombreEmbarcacion").val(NombreEmbarcacion);
+        $("#txtNacionalidadEmbarcacion").val(NacionalidadEmbarcacion);
+        $("#txtUnidadesArqueoBruto").val(UnidadesArqueoBruto);
+        $("#txtTipoCarga").val(TipoCarga);
+        $("#txtNumeroCertificadoITC").val(NumeroCertificadoITC);
+        $("#txtEslora").val(Eslora);
+        $("#txtManga").val(Manga);
+        $("#txtCalado").val(Calado);
+        $("#txtLineaNaviera").val(LineaNaviera);
+        $("#txtNombreAgenteNaviero").val(NombreAgenteNaviero);
+        $("#txtNumeroAutorizacionNaviero").val(NumeroAutorizacionNaviero);
+        $("#txtNumeroViaje").val(NumeroViaje);
+        $("#txtNumeroConocimientoEmbarque").val(NumeroConocimientoEmbarque);
+
+        //
+        $("#txtTipoContenedor").removeClass("is-invalid");
+        $("#txtTipoContenedor").removeClass("is-valid");
+        //
+
+        $("#txtIdTransporteMaritimo").val(noTransporteMaritimo);
+        $("#txtIdPermisoSCT").val(idPermisoSCT);
+        $("#txtIdTipoEmbarcacion").val(idTipoEmbarcacion);
+        $("#txtIdNacionalidadEmbarcacion").val(idNacionalidadEmbarcacion);
+        $("#txtIdTipoCarga").val(idTipoCarga);
+        $("#txtIdNumeroAutorizacionNaviero").val(idNumeroAutorizacionNaviero);
+        //
+        $("#btn-EditarContenedor").hide();
+        $("#btn-CancelarContenedor").hide();
+        $("#btn-AgregarContenedor").show();
+
+        $("#txtIdTipoContenedor").val(0);
+
+    }
+
+    function agregarConcepto() {
+
+        var $validationForm = $(document.forms["guardarTransporteMaritimo.CartaPorte"]);
+
+        var a = $validationForm.serialize();
+
+
+        return false;
+    }
+
+    function guardarTransporteMaritimo() {
+
+        var $Form = document.forms["guardarTransporteMaritimo.CartaPorte"];
+
+        if ($Form["txtIdPermisoSCT"].value != "") {
+            if ($("#txtPermisoSCT").val() == "" || $("#txtPermisoSCT").hasClass("is-invalid")) {
+                notificacionAlert("Debe seleccionar un Permiso SCT válido.", "danger");
+            }
+            else {
+                if ($Form["txtIdTipoEmbarcacion"].value != "") {
+                    if ($("#txtTipoEmbarcacion").val() == "" || $("#txtTipoEmbarcacion").hasClass("is-invalid")) {
+                        notificacionAlert("Debe seleccionar un Tipo Embarcación válido.", "danger");
+                    }
+                    else {
+                        if ($Form["txtIdNacionalidadEmbarcacion"].value != "") {
+                            if ($("#txtNacionalidadEmbarcacion").val() == "" || $("#txtNacionalidadEmbarcacion").hasClass("is-invalid")) {
+                                notificacionAlert("Debe seleccionar una Nacionalidad válida.", "danger");
+                            }
+                            else {
+                                if ($Form["txtIdTipoCarga"].value != "") {
+                                    if ($("#txtTipoCarga").val() == "" || $("#txtTipoCarga").hasClass("is-invalid")) {
+                                        notificacionAlert("Debe seleccionar un Tipo de Carga válido.", "danger");
+                                    }
+                                    else {
+                                        if ($Form["txtIdNumeroAutorizacionNaviero"].value != "") {
+                                            if ($("#txtNumeroAutorizacionNaviero").val() == "" || $("#txtNumeroAutorizacionNaviero").hasClass("is-invalid")) {
+                                                notificacionAlert("Debe seleccionar un Número de Autorización válido.", "danger");
+                                            }
+                                            else {
+                                                if ($("#txtMatricula").val() == "") {
+                                                    notificacionAlert("Debe capturar una Matricula válida", "danger");
+                                                }
+                                                else {
+                                                    if ($("#txtNumeroOMI").val() == "") {
+                                                        notificacionAlert("Debe capturar un Número OMI válido.", "danger");
+                                                    }
+                                                    else {
+                                                        if ($("#txtUnidadesArqueoBruto").val() <= 0) {
+                                                            notificacionAlert("El número de unidades debe ser mayor a 0.", "danger");
+                                                        }
+                                                        else {
+                                                            if ($("#txtNumeroCertificadoITC").val() == "") {
+                                                                notificacionAlert("Debe capturar un Número de Certificado ITC válido.", "danger");
+                                                            }
+                                                            else {
+                                                                if ($("#txtNombreAgenteNaviero").val() == "") {
+                                                                    notificacionAlert("Debe capturar un Nombre de Agente Naviero válido.", "danger");
+                                                                }
+                                                                else {
+                                                                    var array = TableContenedores.rows()
+                                                                    .data().toArray();
+                                                                    if (array.length == 0) {
+                                                                        notificacionAlert("Debe haber por lo menos un concepto para hacer la nota de venta.", "danger");
+                                                                    }
+                                                                    else {
+                                                                        abrirCargando();
+                                                                        $.ajax({
+                                                                            type: "POST",
+                                                                            contentType: "application/json; charset=utf-8",
+                                                                            dataType: "json",
+                                                                            url: '@Url.Action("guardarTransporteMaritimo", "CartaPorte")',
+                                                                            data: JSON.stringify({ 'conceptos': array, 'txtIdTransporteMaritimo': $Form["txtIdTransporteMaritimo"].value, 'txtIdPermisoSCT': $Form["txtIdPermisoSCT"].value, 'txtNumeroPermisoSCT': $Form["txtNumeroPermisoSCT"].value, 'txtNombreAseguradora': $Form["txtNombreAseguradora"].value, 'txtNumeroPolizaSeguro': $Form["txtNumeroPolizaSeguro"].value, 'txtIdTipoEmbarcacion': $Form["txtIdTipoEmbarcacion"].value, 'txtMatricula': $Form["txtMatricula"].value, 'txtNumeroOMI': $Form["txtNumeroOMI"].value, 'txtAnioEmbarcacion': $Form["txtAnioEmbarcacion"].value, 'txtNombreEmbarcacion': $Form["txtNombreEmbarcacion"].value, 'txtIdNacionalidadEmbarcacion': $Form["txtIdNacionalidadEmbarcacion"].value, 'txtUnidadesArqueoBruto': $Form["txtUnidadesArqueoBruto"].value, 'txtIdTipoCarga': $Form["txtIdTipoCarga"].value, 'txtNumeroCertificadoITC': $Form["txtNumeroCertificadoITC"].value, 'txtEslora': $Form["txtEslora"].value, 'txtManga': $Form["txtManga"].value, 'txtCalado': $Form["txtCalado"].value, 'txtLineaNaviera': $Form["txtLineaNaviera"].value, 'txtNombreAgenteNaviero': $Form["txtNombreAgenteNaviero"].value, 'txtIdNumeroAutorizacionNaviero': $Form["txtIdNumeroAutorizacionNaviero"].value, 'txtNumeroViaje': $Form["txtNumeroViaje"].value, 'txtNumeroConocimientoEmbarque': $Form["txtNumeroConocimientoEmbarque"].value}),
+                                                                            success: function (data) {
+                                                                                var response = data;
+                                                                                if (response.Estatus == 1) {
+                                                                                    window.location = '@Url.Action("TransporteMaritimo", "CartaPorte")';
+                                                                                }
+                                                                                else {
+                                                                                    notificacionAlert(response.Mensaje, "danger");
+                                                                                }
+                                                                                cerrarCargando();
+                                                                            }
+                                                                        });
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else {
+                                            notificacionAlert("No ha seleccionado un Número de Autorización válido.", "danger");
+                                            $("#txtNumeroAutorizacionNaviero").removeClass("is-invalid");
+                                            $("#txtNumeroAutorizacionNaviero").removeClass("is-valid");
+                                            $("#txtNumeroAutorizacionNaviero").addClass("is-invalid");
+                                            return false;
+                                        }
+                                    }
+                                }
+                                else {
+                                    notificacionAlert("No ha seleccionado un Tipo de Carga válido.", "danger");
+                                    $("#txtTipoCarga").removeClass("is-invalid");
+                                    $("#txtTipoCarga").removeClass("is-valid");
+                                    $("#txtTipoCarga").addClass("is-invalid");
+                                    return false;
+                                }
+                            }
+                        }
+                        else {
+                            notificacionAlert("No ha seleccionado una Nacionalidad válida.", "danger");
+                            $("#txtNacionalidadEmbarcacion").removeClass("is-invalid");
+                            $("#txtNacionalidadEmbarcacion").removeClass("is-valid");
+                            $("#txtNacionalidadEmbarcacion").addClass("is-invalid");
+                            return false;
+                        }
+                    }
+                }
+                else {
+                    notificacionAlert("No ha seleccionado un Tipo Embarcación válido.", "danger");
+                    $("#txtTipoEmbarcacion").removeClass("is-invalid");
+                    $("#txtTipoEmbarcacion").removeClass("is-valid");
+                    $("#txtTipoEmbarcacion").addClass("is-invalid");
+                    return false;
+                }
+            }
+        }
+        else {
+            notificacionAlert("No ha seleccionado un Permiso SCT válido.", "danger");
+            $("#txtPermisoSCT").removeClass("is-invalid");
+            $("#txtPermisoSCT").removeClass("is-valid");
+            $("#txtPermisoSCT").addClass("is-invalid");
+            return false;
+        }
+
+
+    }
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.29.0/docxtemplater.js"></script>
+<script src="https://unpkg.com/pizzip@3.1.1/dist/pizzip.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.js"></script>
+<script src="https://unpkg.com/pizzip@3.1.1/dist/pizzip-utils.js"></script>

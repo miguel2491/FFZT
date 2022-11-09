@@ -1,0 +1,724 @@
+﻿@model IEnumerable<Facturafast.Models.tbd_Autotransporte>
+@using Facturafast.Models
+@{
+    BD_FFEntities db = new BD_FFEntities();
+    tbc_Usuarios usuario = Session["tbc_Usuarios"] as tbc_Usuarios;
+}
+
+<h2>Autotransporte</h2>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-actions float-end">
+
+                </div>
+                <form method="post" action="@Url.Action("AutoTransporte", "CartaPorte")">
+                    <div class="row">
+                        <div class="col-md-2">
+
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control form-control-lg" id="txtFechaInicial" name="txtFechaInicial" placeholder="Fecha Inicial" value="@ViewBag.Inicio.ToString("yyyy-MM-dd")" required>
+                                <label for="txtFechaInicial">Fecha Inicial</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control form-control-lg" id="txtFechaFinal" name="txtFechaFinal" placeholder="Fecha Final" value="@ViewBag.Final.ToString("yyyy-MM-dd")" required>
+                                <label for="txtFechaFinal">Fecha Final</label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 text-center">
+                            <button type="submit" class="btn btn-success btn-lg" style="margin-top:10px;"><i class="fas fa-search"></i>&nbsp; Buscar Autotransporte </button>
+                        </div>
+                    </div>
+                </form>
+                <br />
+                <hr />
+                <div class="row">
+                    <div class="col-md-4">
+
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <button type="submit" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#modalAutotransporte" onclick="nuevoAutotransporte();"><i class="fas fa-plus"></i> Agregar Autotransporte</button>
+                    </div>
+                    <div class="col-md-4">
+
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <table id="datatables-cartaporte-autotransporte" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>Permiso SCT</th>
+                            <th>Número Permiso SCT</th>
+                            <th>Configuración Vehicular</th>
+                            <th>Placa VM</th>
+                            <th>Año Modelo VM</th>
+                            <th>Aseguradora Responsabilidad Civil</th>
+                            <th>Póliza Responsable Civil</th>
+                            <th>Aseguradora Medio Ambiente</th>
+                            <th>Póliza Medio Ambiente</th>
+                            <th>Aseguradora Carga</th>
+                            <th>Póliza Carga</th>
+                            <th>Prima Seguro</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            tbc_Tipos_Permiso permiso = db.tbc_Tipos_Permiso.Where(s => s.id_tipo_permiso == item.id_tipo_permiso).Single();
+                            tbc_Config_AutoTransporte confauto = db.tbc_Config_AutoTransporte.Where(s => s.id_conf_autotrans == item.id_conf_autotrans).Single();
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td>[@permiso.clave] @permiso.descripcion</td>
+                                <td>@item.num_permiso_sct</td>
+                                <td>[@confauto.clave] @confauto.descripcion</td>
+                                <td>@item.placa_vm</td>
+                                <td>@item.anio_modelo_vm</td>
+                                <td>@item.asegura_resp_civil</td>
+                                <td>@item.poliza_resp_civil</td>
+                                <td>@item.asegura_med_ambiente</td>
+                                <td>@item.poliza_med_ambiente</td>
+                                <td>@item.asegura_carga</td>
+                                <td>@item.poliza_carga</td>
+                                <td>@item.prima_seguro</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form name="guardarAutotransporte.CartaPorte" action="@Url.Action("guardarAutotransporte", "CartaPorte")" method="post">
+    <input type="hidden" id="txtIdAutotransporte" name="txtIdAutotransporte">
+    <input type="hidden" id="txtIdPermisoSCT" name="txtIdPermisoSCT">
+    <input type="hidden" id="txtIdConfigVehicular" name="txtIdConfigVehicular">
+
+    <div class="modal fade" id="modalAutotransporte" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Formulario Autotransporte</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>
+                </div>
+                <div class="modal-body m-3">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtPermisoSCT" name="txtPermisoSCT" required>
+                                <label for="txtPermisoSCT">Permiso SCT</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" maxlength="50" pattern="^[A-Z0-9]+" title="Solo letras mayúsculas y números." id="txtNumPermisoSCT" name="txtNumPermisoSCT" required>
+                                <label for="txtNumPermisoSCT">Número Permiso SCT</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtConfigVehicular" name="txtConfigVehicular" required>
+                                <label for="txtConfigVehicular">Configuración vehicular</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="5" maxlength="7" title="Solo valores alfanuméricos." id="txtPlacaVM" name="txtPlacaVM" required>
+                                <label for="txtPlacaVM">Placa VM</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control form-control-lg" min="1900" max="2099" id="txtAnioModeloVM" name="txtAnioModeloVM" required>
+                                <label for="txtAnioModeloVM">Año Modelo VM</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="3" maxlength="50" id="txtAsegRespCivil" name="txtAsegRespCivil" required>
+                                <label for="txtAsegRespCivil">Aseguradora Responsabilidad Civil</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="3" maxlength="30" id="txtPolizaRespCivil" name="txtPolizaRespCivil" required>
+                                <label for="txtPolizaRespCivil">Póliza Responsabilidad Civil</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="3" maxlength="50" id="txtAsegMedAmbiente" name="txtAsegMedAmbiente">
+                                <label for="txtAsegMedAmbiente">Aseguradora Medio Ambiente</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="3" maxlength="30" id="txtPolizaMedAmbiente" name="txtPolizaMedAmbiente">
+                                <label for="txtPolizaMedAmbiente">Póliza Medio Ambiente</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="3" maxlength="50" id="txtAsegCarga" name="txtAsegCarga">
+                                <label for="txtAsegCarga">Aseguradora Carga</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="3" maxlength="30" id="txtPolCarga" name="txtPolCarga">
+                                <label for="txtPolCarga">Póliza Carga</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-4">
+                                <input type="number" class="form-control form-control-lg" min="0.00" step="0.01" id="txtPrimSeguro" name="txtPrimSeguro">
+                                <label for="txtPrimSeguro">Prima Seguro</label>
+                            </div>
+                        </div>
+                    </div>
+                    <h1>Remolque</h1>
+                    <input type="hidden" id="txtIdSubTipRem" name="txtIdSubTipRem">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtSubTipRem" name="txtSubTipRem" required>
+                                <label for="txtSubTipRem">Subtipo Remolque</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="text" class="form-control form-control-lg" minlength="5" maxlength="7" id="txtPlaca" name="txtPlaca" required>
+                                <label for="txtPlaca">Placa</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-secondary btn-lg" style="margin-top:10px;" id="btn-CancelarRemolque" onclick="cancelarRemolque();"><i class="fas fa-remove"></i>&nbsp; Cancelar</button>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success btn-lg" style="margin-top:10px;" id="btn-AgregarRemolque"><i class="fas fa-plus"></i>&nbsp; Agregar Remolque</button>
+                                <button type="submit" class="btn btn-warning btn-lg" style="margin-top:10px;" id="btn-EditarRemolque"><i class="fas fa-edit"></i>&nbsp; Editar Remolque</button>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table id="datatables-conceptos-remolque" class="table table-striped table-secondary" style="width:100%;">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th>Subtipo Remolque</th>
+                                        <th>Placa</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <hr />
+                </div>
+                <div class="modal-footer">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+                            <button type="button" class="btn btn-success" onclick="guardarAutotransporte();"><i class="fas fa-save"></i>&nbsp; Guardar Datos</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+<script>
+    var cachePermisoSCT = {};
+    var cacheConfigVehicular = {};
+    var cacheSubRemolque = {};
+
+    var TableRemolques;
+    var dataEdit;
+    document.addEventListener("DOMContentLoaded", function () {
+
+        $("#btn-EditarRemolque").hide();
+        $("#btn-CancelarRemolque").hide();
+        $("#btn-AgregarRemolque").show();
+
+        $(document.forms["guardarAutotransporte.CartaPorte"]).on('submit', function (e) {
+            var $btn = $(e.originalEvent.submitter);
+            var $Form = document.forms["guardarAutotransporte.CartaPorte"];
+            var t = TableRemolques;
+
+            if ($btn.attr('id') == "btn-AgregarRemolque") {
+                if ($Form["txtIdSubTipRem"].value != "") {
+                    if ($("#txtSubTipRem").val() == "" || $("#txtSubTipRem").hasClass("is-invalid")) {
+                        notificacionAlert("Debe seleccionar un Tipo de Remolque válido.", "danger");
+                        return false;
+                    }
+                }
+                else {
+                    notificacionAlert("No ha seleccionado un Tipo de Remolque válido", "danger");
+                    $("#txtSubTipRem").removeClass("is-invalid");
+                    $("#txtSubTipRem").removeClass("is-valid");
+                    $("#txtSubTipRem").addClass("is-invalid");
+                    return false;
+                }
+
+                t.row.add(
+                    {
+                        "seleccion": "",
+                        "acciones": '<a href="#" class="btn btn-warning btn-sm icon-editar" title="Editar Concepto"><i class="fas fa-edit"></i></a> &nbsp;&nbsp; <a href="#" class="btn btn-danger btn-sm icon-delete" title="Eliminar Concepto"><i class="fas fa-trash"></i></a>',
+
+                        "id_remolque_sub": $Form["txtIdSubTipRem"].value,
+                        "tipo_remolque": $Form["txtSubTipRem"].value,
+
+                        "placa": $Form["txtPlaca"].value
+                    }
+                );
+                t.columns.adjust().draw(false);
+                cancelarRemolque();
+                notificacionAlert("El Remolque se agrego correctamente.", "success");
+                return false;
+            }
+
+            if ($btn.attr('id') == "btn-EditarRemolque") {
+                if ($Form["txtIdSubTipRem"].value != "") {
+                    if ($("#txtSubTipRem").hasClass("is-invalid")) {
+                        notificacionAlert("Debe seleccionar un Tipo de Remolque válido.", "danger");
+                        return false;
+                    }
+                }
+                else {
+                    $("#txtSubTipRem").removeClass("is-invalid");
+                    $("#txtSubTipRem").removeClass("is-valid");
+                    $("#txtSubTipRem").addClass("is-invalid");
+                    return false;
+                }
+
+                var data = dataEdit.data();
+
+                data.id_remolque_sub = $Form["txtIdSubTipRem"].value;
+                data.tipo_remolque = $Form["txtSubTipRem"].value;
+
+                data.placa = $Form["txtPlaca"].value;
+
+                dataEdit.data(data).draw();
+                t.columns.adjust().draw(false);
+                notificacionAlert("El Remolque se actualizo correctamente", "success");
+                cancelarRemolque();
+                return false;
+            }
+        });
+
+        $("#datatables-cartaporte-autotransporte").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1] }
+            ],
+            order: [[2, 'asc']]
+        });
+
+        TableRemolques = $("#datatables-conceptos-remolque").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { visible: true, orderable: false, searchable: false, targets: 0, name: "seleccion", data: "seleccion" },
+                { visible: true, orderable: false, searchable: false, targets: 1, name: "acciones", data: "acciones" },
+
+                { visible: false, orderable: false, searchable: false, targets: 2, name: "id_remolque_sub", data: "id_remolque_sub" },
+                { visible: true, orderable: false, searchable: false, targets: 3, name: "tipo_remolque", data: "tipo_remolque" },
+
+                { visible: true, orderable: false, searchable: false, targets: 4, name: "placa", data: "placa" },
+            ],
+            order: [[3, 'asc']]
+        });
+
+        $('#datatables-conceptos-remolque tbody').on('click', '.icon-delete', function () {
+            if ($("#btn-EditarRemolque").is(":visible")) {
+                notificacionAlert("No se pueden eliminar el Remolque mientras se este editando alguno de ellos.","danger");
+            }
+            else {
+                var t = TableRemolques;
+                t.row($(this).parents('tr')).remove();
+                t.columns.adjust().draw(false);
+            }
+        });
+
+        $('#datatables-conceptos-remolque tbody').on('click', '.icon-editar', function () {
+            $("#btn-EditarRemolque").show();
+            $("#btn-CancelarRemolque").show();
+            $("#btn-AgregarRemolque").hide();
+
+            var t = TableRemolques;
+            dataEdit = t.row($(this).parents('tr'));
+            var data = dataEdit.data();
+
+            $("#txtIdSubTipRem").val(data.id_remolque_sub);
+            $("#txtSubTipRem").val(data.tipo_remolque);
+            $("#txtSubTipRem").removeClass("is-invalid");
+            $("#txtSubTipRem").removeClass("is-valid");
+            $("#txtSubTipRem").addClass("is-valid");
+
+            $("#txtPlaca").val(data.placa);
+        });
+
+        //Autocomplete
+        $("#txtPermisoSCT").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtPermisoSCT").removeClass("is-invalid");
+                    $("#txtPermisoSCT").removeClass("is-valid");
+                    $("#txtPermisoSCT").addClass("is-invalid");
+                    if (term in cachePermisoSCT) {
+                        response(cachePermisoSCT[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerTipoPermiso", "Catalogos")", request, function (data, status, xhr) {
+                        cachePermisoSCT[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtPermisoSCT").removeClass("is-invalid");
+                    $("#txtPermisoSCT").removeClass("is-valid");
+                    $("#txtPermisoSCT").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtPermisoSCT").val(ui.item.label);
+                $("#txtIdPermisoSCT").val(ui.item.value);
+                $("#txtPermisoSCT").removeClass("is-invalid");
+                $("#txtPermisoSCT").removeClass("is-valid");
+                $("#txtPermisoSCT").addClass("is-valid");
+                $("#txtPermisoSCT").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+
+        $("#txtConfigVehicular").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtConfigVehicular").removeClass("is-invalid");
+                    $("#txtConfigVehicular").removeClass("is-valid");
+                    $("#txtConfigVehicular").addClass("is-invalid");
+                    if (term in cacheConfigVehicular) {
+                        response(cacheConfigVehicular[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerConfigVe", "Catalogos")", request, function (data, status, xhr) {
+                        cacheConfigVehicular[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtConfigVehicular").removeClass("is-invalid");
+                    $("#txtConfigVehicular").removeClass("is-valid");
+                    $("#txtConfigVehicular").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                console.log(ui);
+                $("#txtConfigVehicular").val(ui.item.label);
+                $("#txtIdConfigVehicular").val(ui.item.value);
+                $("#txtConfigVehicular").removeClass("is-invalid");
+                $("#txtConfigVehicular").removeClass("is-valid");
+                $("#txtConfigVehicular").addClass("is-valid");
+                $("#txtConfigVehicular").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+
+        $("#txtSubTipRem").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtSubTipRem").removeClass("is-invalid");
+                    $("#txtSubTipRem").removeClass("is-valid");
+                    $("#txtSubTipRem").addClass("is-invalid");
+                    if (term in cacheSubRemolque) {
+                        response(cacheSubRemolque[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerSubRemolque", "Catalogos")", request, function (data, status, xhr) {
+                        cacheSubRemolque[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtSubTipRem").removeClass("is-invalid");
+                    $("#txtSubTipRem").removeClass("is-valid");
+                    $("#txtSubTipRem").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                console.log(ui);
+                $("#txtSubTipRem").val(ui.item.label);
+                $("#txtIdSubTipRem").val(ui.item.value);
+                $("#txtSubTipRem").removeClass("is-invalid");
+                $("#txtSubTipRem").removeClass("is-valid");
+                $("#txtSubTipRem").addClass("is-valid");
+                $("#txtSubTipRem").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+    });
+
+    function nuevoAutotransporte() {
+        document.forms["guardarAutotransporte.CartaPorte"].reset();
+
+        $("#txtIdAutotransporte").val(0);
+
+        $("#txtIdPermisoSCT").val("");
+        $("#txtPermisoSCT").removeClass("is-invalid");
+        $("#txtPermisoSCT").removeClass("is-valid");
+
+        $("#txtNumPermisoSCT").val("");
+        $("#txtNumPermisoSCT").removeClass("is-invalid");
+        $("#txtNumPermisoSCT").removeClass("is-valid");
+
+        $("#txtIdConfigVehicular").val("");
+        $("#txtConfigVehicular").removeClass("is-invalid");
+        $("#txtConfigVehicular").removeClass("is-valid");
+
+        $("#txtPlacaVM").val("");
+        $("#txtPlacaVM").removeClass("is-invalid");
+        $("#txtPlacaVM").removeClass("is-valid");
+
+        $("#txtAnioModeloVM").val("");
+        $("#txtAnioModeloVM").removeClass("is-invalid");
+        $("#txtAnioModeloVM").removeClass("is-valid");
+
+        $("#txtAsegRespCivil").val("");
+        $("#txtAsegRespCivil").removeClass("is-invalid");
+        $("#txtAsegRespCivil").removeClass("is-valid");
+
+        $("#txtPolizaRespCivil").val("");
+        $("#txtPolizaRespCivil").removeClass("is-invalid");
+        $("#txtPolizaRespCivil").removeClass("is-valid");
+
+        $("#txtAsegMedAmbiente").val("");
+        $("#txtAsegMedAmbiente").removeClass("is-invalid");
+        $("#txtAsegMedAmbiente").removeClass("is-valid");
+
+        $("#txtPolizaMedAmbiente").val("");
+        $("#txtPolizaMedAmbiente").removeClass("is-invalid");
+        $("#txtPolizaMedAmbiente").removeClass("is-valid");
+
+        $("#txtAsegCarga").val("");
+        $("#txtAsegCarga").removeClass("is-invalid");
+        $("#txtAsegCarga").removeClass("is-valid");
+
+        $("#txtPolCarga").val("");
+        $("#txtPolCarga").removeClass("is-invalid");
+        $("#txtPolCarga").removeClass("is-valid");
+
+        $("#txtPrimSeguro").val(0);
+        $("#txtPrimSeguro").removeClass("is-invalid");
+        $("#txtPrimSeguro").removeClass("is-valid");
+
+        $("#txtIdSubTipRem").val("");
+        $("#txtSubTipRem").removeClass("is-invalid");
+        $("#txtSubTipRem").removeClass("is-valid");
+
+        $("#txtPlaca").val("");
+        $("#txtPlaca").removeClass("is-invalid");
+        $("#txtPlaca").removeClass("is-valid");
+
+        $("#btn-EditarRemolque").hide();
+        $("#btn-CancelarRemolque").hide();
+        $("#btn-AgregarRemolque").show();
+
+        TableRemolques.clear().draw(false);
+    }
+
+    function cancelarRemolque() {
+        $("#btn-EditarRemolque").hide();
+        $("#btn-CancelarRemolque").hide();
+        $("#btn-AgregarRemolque").show();
+
+        var noAutotransporte = $("#txtIdAutotransporte").val();
+        var idPermisoSCT = $("#txtIdPermisoSCT").val();
+        var PermisoSCT= $("#txtPermisoSCT").val();
+        var NumeroPermisoSCT = $("#txtNumPermisoSCT").val();
+        var idConfigVehicular = $("#txtIdConfigVehicular").val();
+        var ConfigVehicular = $("#txtConfigVehicular").val();
+        var PlacaVM = $("#txtPlacaVM").val();
+        var AnioModelo = $("#txtAnioModeloVM").val();
+        var AsegRespCivil = $("#txtAsegRespCivil").val();
+        var PolizaResCivil = $("#txtPolizaRespCivil").val();
+        var AsegMedAmbiente = $("#txtAsegMedAmbiente").val();
+        var PolizaMedAmbiente = $("#txtPolizaMedAmbiente").val();
+        var AsegCarga = $("#txtAsegCarga").val();
+        var PolCarga = $("#txtPolCarga").val();
+        var PrimSeguro = $("#txtPrimSeguro").val();
+
+        document.forms["guardarAutotransporte.CartaPorte"].reset();
+
+        $("#txtPermisoSCT").val(PermisoSCT);
+        $("#txtNumPermisoSCT").val(NumeroPermisoSCT);
+        $("#txtConfigVehicular").val(ConfigVehicular);
+        $("#txtPlacaVM").val(PlacaVM);
+        $("#txtAnioModeloVM").val(AnioModelo);
+        $("#txtAsegRespCivil").val(AsegRespCivil);
+        $("#txtPolizaRespCivil").val(PolizaResCivil);
+        $("#txtAsegMedAmbiente").val(AsegMedAmbiente);
+        $("#txtPolizaMedAmbiente").val(PolizaMedAmbiente);
+        $("#txtAsegCarga").val(AsegCarga);
+        $("#txtPolCarga").val(PolCarga);
+        $("#txtPrimSeguro").val(PrimSeguro);
+
+        $("#txtSubTipRem").removeClass("is-invalid");
+        $("#txtSubTipRem").removeClass("is-valid");
+
+        $("#txtIdAutotransporte").val(noAutotransporte);
+        $("#txtIdPermisoSCT").val(idPermisoSCT);
+        $("#txtIdConfigVehicular").val(idConfigVehicular);
+
+        $("#btn-EditarRemolque").hide();
+        $("#btn-CancelarRemolque").hide();
+        $("#btn-AgregarRemolque").show();
+
+        $("#txtIdSubTipRem").val("");
+
+    }
+
+    function agregarConcepto() {
+        var $validationForm = $(document.forms["guardarAutotransporte.CartaPorte"]);
+
+        var a = $validationForm.serialize();
+
+        return false;
+    }
+
+    function guardarAutotransporte() {
+
+        var $Form = document.forms["guardarAutotransporte.CartaPorte"];
+
+        if ($Form["txtIdPermisoSCT"].value != "") {
+            if ($("#txtPermisoSCT").hasClass("is-invalid")) {
+                notificacionAlert("Debe seleccionar un Permiso SCT válido","danger");
+            }
+            else {
+                if ($Form["txtIdConfigVehicular"].value != "") {
+                    if ($("#txtConfigVehicular").hasClass("is-invalid")) {
+                        notificacionAlert("Debe seleccionar una Configuración Vehicular válida.","danger");
+                    }
+                    else {
+                        if ($("#txtNumPermisoSCT").val() == "") {
+                            notificacionAlert("Debe capturar un Número de Permiso SCT.","danger");
+                        }
+                        else {
+                            if ($("#txtPlacaVM").val() == "") {
+                                notificacionAlert("Debe capturar una Placa VM.","danger");
+                            }
+                            else {
+                                if ($("#txtAnioModeloVM").val() == "") {
+                                    notificacionAlert("Debe capturar un Año de Modelo VM.","danger");
+                                }
+                                else {
+                                    if ($("#txtAsegRespCivil").val() == "") {
+                                        notificacionAlert("Debe capturar una Aseguradora Responsabilidad Civil","danger");
+                                    }
+                                    else {
+                                        if ($("#txtPolizaRespCivil").val() == "") {
+                                            notificacionAlert("Debe capturar una Póliza de Responsabilidad Civil.", "danger");
+                                        }
+                                        else {
+                                            var array = TableRemolques.rows().data().toArray();
+                                            if (array.length == 0) {
+                                                notificacionAlert("Debe haber por lo menos un Remolque para agregar el Autotransporte.","danger");
+                                            }
+                                            else {
+                                                if (array.length > 2) {
+                                                    notificacionAlert("No debe de haber mas de 2 Remolques para agregar el Autotransporte.","danger");
+                                                }
+                                                else {
+                                                    abrirCargando();
+                                                    $.ajax({
+                                                        type: "POST",
+                                                        contentType: "application/json; charset=utf-8",
+                                                        dataType: "json",
+                                                        url: '@Url.Action("guardarAutotransporte", "CartaPorte")',
+                                                        data: JSON.stringify({ 'conceptos': array, 'txtIdAutotransporte': $Form["txtIdAutotransporte"].value, 'txtIdPermisoSCT': $Form["txtIdPermisoSCT"].value, 'txtNumPermisoSCT': $Form["txtNumPermisoSCT"].value, 'txtIdConfigVehicular': $Form["txtIdConfigVehicular"].value, 'txtPlacaVM': $Form["txtPlacaVM"].value, 'txtAnioModeloVM': $Form["txtAnioModeloVM"].value, 'txtAsegRespCivil': $Form["txtAsegRespCivil"].value, 'txtPolizaRespCivil': $Form["txtPolizaRespCivil"].value, 'txtAsegMedAmbiente': $Form["txtAsegMedAmbiente"].value, 'txtPolizaMedAmbiente': $Form["txtPolizaMedAmbiente"].value, 'txtAsegCarga': $Form["txtAsegCarga"].value, 'txtPolCarga': $Form["txtPolCarga"].value, 'txtPrimSeguro': $Form["txtPrimSeguro"].value }),
+                                                        success: function (data) {
+                                                            var response = data;
+                                                            if (response.Estatus == 1) {
+                                                                window.location = '@Url.Action("AutoTransporte", "CartaPorte")';
+                                                            }
+                                                            else {
+                                                                notificacionAlert(response.Mensaje, "danger");
+                                                            }
+                                                            cerrarCargando();
+                                                        }
+                                                    });
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                else {
+                    notificacionAlert("No ha seleccionado una Configuración Vehicular válida.", "danger");
+                    $("#txtConfigVehicular").removeClass("is-invalid");
+                    $("#txtConfigVehicular").removeClass("is-valid");
+                    $("#txtConfigVehicular").addClass("is-invalid");
+                    return false;
+                }
+            }
+        }
+        else {
+            notificacionAlert("No ha seleccionado un Permiso SCT válido.","danger");
+            $("#txtPermisoSCT").removeClass("is-invalid");
+            $("#txtPermisoSCT").removeClass("is-valid");
+            $("#txtPermisoSCT").addClass("is-invalid");
+            return false;
+        }
+    }
+
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.29.0/docxtemplater.js"></script>
+<script src="https://unpkg.com/pizzip@3.1.1/dist/pizzip.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.js"></script>
+<script src="https://unpkg.com/pizzip@3.1.1/dist/pizzip-utils.js"></script>

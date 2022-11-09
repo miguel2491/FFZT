@@ -1,0 +1,912 @@
+﻿@model IEnumerable<Facturafast.Models.tbd_Figuras>
+@using Facturafast.Models
+@{
+    BD_FFEntities db = new BD_FFEntities();
+    tbc_Usuarios usuario = Session["tbc_Usuarios"] as tbc_Usuarios;
+}
+<h2 class="mb-3">Figuras</h2>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-actions float-end">
+
+                </div>
+                <form method="post" action="@Url.Action("Figuras","CartaPorte")">
+                    <div class="row">
+                        <div class="col-md-2">
+
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control form-control-lg" id="txtFechaInicial" name="txtFechaInicial" placeholder="Fecha Inicial" value="@ViewBag.Inicio.ToString("yyyy-MM-dd")" required>
+                                <label for="txtFechaInicial">Fecha Inicial</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control form-control-lg" id="txtFechaFinal" name="txtFechaFinal" placeholder="Fecha Final" value="@ViewBag.Final.ToString("yyyy-MM-dd")" required>
+                                <label for="txtFechaFinal">Fecha Final</label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 text-center">
+                            <button type="submit" class="btn btn-success btn-lg" style="margin-top:10px;"><i class="fas fa-search"></i>&nbsp; Buscar Figura</button>
+                        </div>
+                    </div>
+                </form>
+                <br />
+                <hr />
+                <div class="row">
+                    <div class="col-md-4">
+                        @*<button type="submit" class="btn btn-primary" style="margin-top:10px;"><i class="fas fa-check-square"></i></button> &nbsp;
+                <button type="submit" class="btn btn-danger" style="margin-top:10px;"><i class="far fa-fw fa-square"></i></button>*@
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <button type="submit" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#modalFigura" onclick="nuevaFigura();"><i class="fas fa-plus"></i> Agregar Figura</button>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        @*<button type="submit" class="btn btn-success btn-lg" style="margin-top:10px;"><i class="fas fa-search"></i>&nbsp; Buscar Notas de Ventas</button>*@
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <table id="datatables-cartaporte-figuras" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>Tipo Figura</th>
+                            <th>RFC</th>
+                            <th>Nombre</th>
+                            <th>Num. Licencía</th>
+                            <th>Dirección</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+
+                            //tbc_Tipos_Ubicacion ubicacion = db.tbc_Tipos_Ubicacion.Where(s => s.id_tipo_ubicacion == item.id_tipo_ubicacion).Single();
+                            tbc_Figuras_Transporte figuras = db.tbc_Figuras_Transporte.Where(s => s.id_figura_transporte == item.id_figura_transporte).Single();
+                            //tbc_Partes_Transporte partetransporte = db.tbc_Partes_Transporte.Where(s => s.id_partes_transporte == item.id_partes_transporte).Single();
+                            tbc_Estados estado = db.tbc_Estados.Where(s => s.id_estado == item.id_estado).Single();
+                            tbc_Paises pais = db.tbc_Paises.Where(s => s.id_pais == item.id_pais).Single();
+                            tbc_Paises DomicilioFiscal = db.tbc_Paises.Where(s => s.id_pais == item.residencia_fiscal_id_pais).Single();
+                            //tbc_Partes_Transporte partesTransporte = db.tbc_Partes_Transporte.Where(s => s.id_partes_transporte == item.id_partes_transporte).Single();
+                            tbc_Localidades localidad = db.tbc_Localidades.Where(s => s.id_localidad == item.id_localidad).Single();
+                            <tr>
+                                <td></td>
+                                <td>
+                                    <table>
+                                        @*<tr>
+                                            <td style="padding:0px 5px;">
+                                                <button class="btn btn-warning btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#modalFigura" onclick="actualizarFigura(@item.id_figura, @item.id_figura_transporte, '@item.rfc_figura', '@item.num_licencia', '@item.nombre_figura', '@item.num_reg_id_trib_figura', '@item.residencia_fiscal_id_pais', '@DomicilioFiscal.clave_pais', '@DomicilioFiscal.descripcion', '@item.calle', '@item.num_exterior', '@item.num_interiror', '@item.colonia', '@item.id_localidad', '@localidad.c_localidad', '@localidad.descripcion', '@item.referencia', '@item.municipio', '@item.id_estado', '@estado.c_estado', '@estado.nombre_estado', '@item.id_pais', '@pais.clave_pais', '@pais.descripcion', '@item.codigo_postal');"><i class="fas fa-edit"></i></button>
+                                            </td>
+                                        </tr>*@
+                                    </table>
+                                </td>
+                                <td>@figuras.descripcion</td>
+                                <td>@item.rfc_figura</td>
+                                <td>@item.nombre_figura</td>
+                                <td>@item.num_licencia</td>
+                               @* <td>@partetransporte.descripcion</td>*@
+                                <td>@item.calle @item.num_exterior / @item.num_interiror, @item.colonia, @item.municipio, @estado.nombre_estado, @item.codigo_postal, @pais.descripcion </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form name="guardarFiguras.CartaPorte" action="@Url.Action("guardarFiguras","CartaPorte")" method="post">
+    <input type="hidden" id="txtIdFigura" name="txtIdFigura">
+    <input type="hidden" id="txtIdDomicilioFiscal" name="txtIdDomicilioFiscal">
+    <input type="hidden" id="txtIdLocalidad" name="txtIdLocalidad">
+    <input type="hidden" id="txtIdEstado" name="txtIdEstado">
+    <input type="hidden" id="txtIdPais" name="txtIdPais">
+
+    <div class="modal fade" id="modalFigura" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Formulario de Figura</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body m-3">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbTipoFigura" name="cmbTipoFigura" aria-label="Tipo Figura">
+                                    <option value="1">Operador</option>
+                                    <option value="2">Propietario</option>
+                                    <option value="3">Arrendador</option>
+                                    <option value="4">Notificado</option>
+                                </select>
+                                <label for="cmbTipoFigura">Tipo Fifura</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="12" maxlength="13" pattern="^[A-Z0-9]+" title="Solo letras mayúsculas y números." id="txtRFCFigura" name="txtRFCFigura" placeholder="RFC Figura">
+                                <label for="txtRFCFigura">RFC Figura</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="6" maxlength="16" pattern="^[0-9]+" title="Solo números." id="txtNumLicencia" name="txtNumLicencia" placeholder="Número de Licencía">
+                                <label for="txtNumLicencia">Número de Licencía</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" maxlength="254" pattern="^[A-Za-z ]+" title="Solo letras." id="txtNombreFigura" name="txtNombreFigura" placeholder="Nombre Figura">
+                                <label for="txtNombreFigura">Nombre Figura</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg text-uppercase" minlength="6" maxlength="40" pattern="^[0-9]+" id="txtNumRegIdTribPropietario" name="txtNumRegIdTribPropietario" placeholder="Número de Identificación o Registro Fiscal">
+                                <label for="txtNumRegIdTribPropietario">Número de Identificación o Registro Fiscal</label>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg text-uppercase" id="txtDomicilioFiscal" name="txtDomicilioFiscal" placeholder="Domicilio Fiscal" required>
+                                <label for="txtDomicilioFiscal">Domicilio Fiscal</label>
+                            </div>
+                        </div>
+                    </div>
+                    <h1 class="h3 mb-3">Domicilio</h1>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" pattern="^[a-zA-Z ]+" title="Solo letras." id="txtCalle" name="txtCalle" placeholder="Calle" required>
+                                <label for="txtCalle">Calle</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control form-control-lg" min="0" id="txtNumExt" name="txtNumExt" placeholder="Núm Ext">
+                                <label for="txtNumExt">Núm Ext</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control form-control-lg" min="0" id="txtNumInt" name="txtNumInt" placeholder="Núm Int">
+                                <label for="txtNumInt">Núm Int</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" pattern="^[a-zA-Z ]+" title="Solo letras." id="txtColonia" name="txtColonia" placeholder="Colonia">
+                                <label for="txtColonia">Colonia</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtLocalidad" name="txtLocalidad" placeholder="Localidad" required>
+                                <label for="txtLocalidad">Localidad</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtReferencia" name="txtReferencia" placeholder="Referencia">
+                                <label for="txtReferencia">Referencia</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" pattern="[a-zA-Z ]+" id="txtMunicipio" name="txtMunicipio" placeholder="Municipio">
+                                <label for="txtMunicipio">Municipio</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtEstado" name="txtEstado" placeholder="Estado" required>
+                                <label for="txtEstado">Estado</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtPais" name="txtPais" placeholder="País" required>
+                                <label for="txtPais">País</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="5" maxlength="5" pattern="[0-9]+" title="Solo números." id="txtCodigoPostal" name="txtCodigoPostal" placeholder="Código Postal" required>
+                                <label for="txtCodigoPostal">Código Postal</label>
+                            </div>
+                        </div>
+                    </div>
+                    <h1 class="h3 mb-3">Partes Transporte</h1>
+                    <input type="hidden" id="txtIdParteTransporte" name="txtIdParteTransporte">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg text-uppercase" @*pattern="^[a-zA-Z0-9]{,}"*@ id="txtParteTransporte" name="txtParteTransporte" placeholder="Parte Transporte">
+                                <label for="txtParteTransporte">Parte Transporte</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-secondary btn-lg" style="margin-top:10px;" id="btn-CancelarTransporte" onclick="cancelarTransporte();"><i class="fas fa-remove"></i>&nbsp; Cancelar</button>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success btn-lg" style="margin-top:10px;" id="btn-AgregarTransporte"><i class="fas fa-plus"></i>&nbsp; Agregar Parte Transporte</button>
+                                <button type="submit" class="btn btn-warning btn-lg" style="margin-top:10px;" id="btn-EditarTransporte"><i class="fas fa-edit"></i>&nbsp; Editar Parte Transporte</button>
+
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table id="datatables-conceptos-transporte" class="table table-striped table-secondary" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th>Parte Transporte </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <hr />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+                    <button type="button" class="btn btn-success" onclick="guardarFigura();"><i class="fas fa-save"></i>&nbsp; Guardar Datos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+<script>
+    var cacheDomicilioFiscal = {};
+    var cacheParteTransporte = {};
+    var cacheLocalidad = {};
+    var cacheEstado = {};
+    var cachePais = {};
+
+    var TableTransporte;
+    var dataEdit;
+    document.addEventListener("DOMContentLoaded", function () {
+
+        $("#btn-EditarTransporte").hide();
+        $("#btn-CancelarTransporte").hide();
+        $("#btn-AgregarTransporte").show();
+
+        $(document.forms["guardarFiguras.CartaPorte"]).on('submit', function (e) {
+            var $btn = $(e.originalEvent.submitter);
+            var $Form = document.forms["guardarFiguras.CartaPorte"];
+            var t = TableTransporte;
+
+            if ($btn.attr('id') == "btn-AgregarTransporte") {
+
+                if ($Form["txtIdParteTransporte"].value != "") {
+                    if ($("#txtParteTransporte").val() == "" || $("#txtParteTransporte").hasClass("is-invalid")) {
+                        notificacionAlert("Debe seleccionar un Tipo de Contenedor válido.", "danger");
+                        return false;
+                    }
+
+                }
+                else {
+                    notificacionAlert("No ha seleccionado una Parte de Transporte válida.", "danger");
+                    $("#txtParteTransporte").removeClass("is-invalid");
+                    $("#txtParteTransporte").removeClass("is-valid");
+                    $("#txtParteTransporte").addClass("is-invalid");
+                    return false;
+                }
+
+                t.row.add(
+                    {
+                        "seleccion": "",
+                        "acciones": '<a href="#" class="btn btn-warning btn-sm icon-editar" title="Editar Concepto"><i class="fas fa-edit"></i></a> &nbsp;&nbsp; <a href="#" class="btn btn-danger btn-sm icon-delete" title="Eliminar Concepto"><i class="fas fa-trash"></i></a>',
+                        //
+
+                        "id_parte_transporte": $Form["txtIdParteTransporte"].value,
+                        "ParteTransporte": $Form["txtParteTransporte"].value
+
+                        //
+                    }
+                );
+                t.columns.adjust().draw(false);
+                cancelarTransporte();
+                notificacionAlert("El concepto se agrego correctamente.", "success");
+                return false;
+            }
+
+            if ($btn.attr('id') == "btn-EditarTransporte") {
+
+                if ($Form["txtIdParteTransporte"].value != "") {
+                    if ($("#txtParteTransporte").hasClass("is-invalid")) {
+                        notificacionAlert("Debe seleccionar un Tipo de Contenedor válido.", "danger");
+                        return false;
+                    }
+                }
+                else {
+                    $("#txtParteTransporte").removeClass("is-invalid");
+                    $("#txtParteTransporte").removeClass("is-valid");
+                    $("#txtParteTransporte").addClass("is-invalid");
+                    return false;
+                }
+
+                var data = dataEdit.data();
+
+                data.id_parte_transporte = $Form["txtIdParteTransporte"].value;
+                data.ParteTransporte = $Form["txtParteTransporte"].value;
+
+                //
+                dataEdit.data(data).draw();
+                t.columns.adjust().draw(false);
+                notificacionAlert("El concepto se actualizo correctamente.", "success");
+                cancelarTransporte();
+                return false;
+            }
+        });
+
+
+        $("#datatables-cartaporte-figuras").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1] }
+            ],
+            order: [[2, 'asc']]
+        });
+
+        TableTransporte = $("#datatables-conceptos-transporte").DataTable({
+            responsive: true,
+            'columnDefs': [
+                //
+                { visible: true, orderable: false, searchable: false, targets: 0, name: "seleccion", data: "seleccion" },
+                { visible: true, orderable: false, searchable: false, targets: 1, name: "acciones", data: "acciones" },
+
+                { visible: false, orderable: false, searchable: false, targets: 2, name: "id_parte_transporte", data: "id_parte_transporte" },
+                { visible: true, orderable: true, searchable: true, targets: 3, name: "ParteTransporte", data: "ParteTransporte" },
+                //
+            ],
+            order: [[3, 'asc']]
+        });
+
+        $('#datatables-conceptos-transporte tbody').on('click', '.icon-delete', function () {
+
+            if ($("#btn-EditarTransporte").is(":visible")) {
+                notificacionAlert("No se pueden eliminar el contenedor mientras se este editando alguno de ellos.", "danger");
+            }
+            else {
+                var t = TableTransporte;
+                t.row($(this).parents('tr')).remove();
+                t.columns.adjust().draw(false);
+            }
+        });
+
+
+        $('#datatables-conceptos-transporte tbody').on('click', '.icon-editar', function () {
+            $("#btn-EditarTransporte").show();
+            $("#btn-CancelarTransporte").show();
+            $("#btn-AgregarTransporte").hide();
+
+            var t = TableTransporte;
+            dataEdit = t.row($(this).parents('tr'));
+            var data = dataEdit.data();
+
+
+            $("#txtIdParteTransporte").val(data.id_parte_transporte);
+            $("#txtParteTransporte").val(data.ParteTransporte);
+            $("#txtParteTransporte").removeClass("is-invalid");
+            $("#txtParteTransporte").removeClass("is-valid");
+            $("#txtParteTransporte").addClass("is-valid");
+
+
+        });
+
+        //Autocompletar
+        $("#txtDomicilioFiscal").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtDomicilioFiscal").removeClass("is-invalid");
+                    $("#txtDomicilioFiscal").removeClass("is-valid");
+                    $("#txtDomicilioFiscal").addClass("is-invalid");
+                    if (term in cacheDomicilioFiscal) {
+                        response(cacheDomicilioFiscal[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerPais", "Catalogos")", request, function (data, status, xhr) {
+                        cacheDomicilioFiscal[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtDomicilioFiscal").removeClass("is-invalid");
+                    $("#txtDomicilioFiscal").removeClass("is-valid");
+                    $("#txtDomicilioFiscal").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtDomicilioFiscal").val(ui.item.label);
+                $("#txtIdDomicilioFiscal").val(ui.item.value);
+                $("#txtDomicilioFiscal").removeClass("is-invalid");
+                $("#txtDomicilioFiscal").removeClass("is-valid");
+                $("#txtDomicilioFiscal").addClass("is-valid");
+                $("#txtDomicilioFiscal").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+
+        $("#txtParteTransporte").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtParteTransporte").removeClass("is-invalid");
+                    $("#txtParteTransporte").removeClass("is-valid");
+                    $("#txtParteTransporte").addClass("is-invalid");
+                    if (term in cacheParteTransporte) {
+                        response(cacheParteTransporte[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerParteTransporte", "Catalogos")", request, function (data, status, xhr) {
+                        cacheParteTransporte[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtParteTransporte").removeClass("is-invalid");
+                    $("#txtParteTransporte").removeClass("is-valid");
+                    $("#txtParteTransporte").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtParteTransporte").val(ui.item.label);
+                $("#txtIdParteTransporte").val(ui.item.value);
+                $("#txtParteTransporte").removeClass("is-invalid");
+                $("#txtParteTransporte").removeClass("is-valid");
+                $("#txtParteTransporte").addClass("is-valid");
+                $("#txtParteTransporte").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+
+        $("#txtLocalidad").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtLocalidad").removeClass("is-invalid");
+                    $("#txtLocalidad").removeClass("is-valid");
+                    $("#txtLocalidad").addClass("is-invalid");
+                    if (term in cacheLocalidad) {
+                        response(cacheLocalidad[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerLocalidad", "Catalogos")", request, function (data, status, xhr) {
+                        cacheLocalidad[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtLocalidad").removeClass("is-invalid");
+                    $("#txtLocalidad").removeClass("is-valid");
+                    $("#txtLocalidad").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtLocalidad").val(ui.item.label);
+                $("#txtIdLocalidad").val(ui.item.value);
+                $("#txtLocalidad").removeClass("is-invalid");
+                $("#txtLocalidad").removeClass("is-valid");
+                $("#txtLocalidad").addClass("is-valid");
+                $("#txtLocalidad").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+
+        $("#txtEstado").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtEstado").removeClass("is-invalid");
+                    $("#txtEstado").removeClass("is-valid");
+                    $("#txtEstado").addClass("is-invalid");
+                    if (term in cacheEstado) {
+                        response(cacheEstado[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerEstado", "Catalogos")", request, function (data, status, xhr) {
+                        cacheEstado[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtEstado").removeClass("is-invalid");
+                    $("#txtEstado").removeClass("is-valid");
+                    $("#txtEstado").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtEstado").val(ui.item.label);
+                $("#txtIdEstado").val(ui.item.value);
+                $("#txtEstado").removeClass("is-invalid");
+                $("#txtEstado").removeClass("is-valid");
+                $("#txtEstado").addClass("is-valid");
+                $("#txtEstado").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+
+        $("#txtPais").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtPais").removeClass("is-invalid");
+                    $("#txtPais").removeClass("is-valid");
+                    $("#txtPais").addClass("is-invalid");
+                    if (term in cachePais) {
+                        response(cachePais[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerPais", "Catalogos")", request, function (data, status, xhr) {
+                        cachePais[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtPais").removeClass("is-invalid");
+                    $("#txtPais").removeClass("is-valid");
+                    $("#txtPais").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtPais").val(ui.item.label);
+                $("#txtIdPais").val(ui.item.value);
+                $("#txtPais").removeClass("is-invalid");
+                $("#txtPais").removeClass("is-valid");
+                $("#txtPais").addClass("is-valid");
+                $("#txtPais").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+        //Autocompletar Fin
+    });
+
+    function nuevaFigura() {
+        document.forms["guardarFiguras.CartaPorte"].reset();
+
+        $("#txtIdFigura").val(0);
+
+        $("#cmbTipoFigura").val(1);
+
+        $("#txtRFCFigura").val("");
+        $("#txtRFCFigura").removeClass("is-invalid");
+        $("#txtRFCFigura").removeClass("is-valid");
+
+        $("#txtNumLicencia").val("");
+        $("#txtNumLicencia").removeClass("is-invalid");
+        $("#txtNumLicencia").removeClass("is-valid");
+
+        $("#txtNombreFigura").val("");
+        $("#txtNombreFigura").removeClass("is-invalid");
+        $("#txtNombreFigura").removeClass("is-valid");
+
+        $("#txtNumRegIdTribPropietario").val("");
+        $("#txtNumRegIdTribPropietario").removeClass("is-invalid");
+        $("#txtNumRegIdTribPropietario").removeClass("is-valid");
+
+        $("#txtIdDomicilioFiscal").val("");
+        $("#txtDomicilioFiscal").removeClass("is-invalid");
+        $("#txtDomicilioFiscal").removeClass("is-valid");
+
+        $("#txtCalle").val("");
+        $("#txtCalle").removeClass("is-invalid");
+        $("#txtCalle").removeClass("is-valid");
+
+        $("#txtNumExt").val(0);
+        $("#txtNumExt").removeClass("is-invalid");
+        $("#txtNumExt").removeClass("is-valid");
+
+        $("#txtNumInt").val(0);
+        $("#txtNumInt").removeClass("is-invalid");
+        $("#txtNumInt").removeClass("is-valid");
+
+        $("#txtColonia").val("");
+        $("#txtColonia").removeClass("is-invalid");
+        $("#txtColonia").removeClass("is-valid");
+
+        $("#txtIdLocalidad").val("");
+        $("#txtLocalidad").removeClass("is-invalid");
+        $("#txtLocalidad").removeClass("is-valid");
+
+        $("#txtReferencia").val("");
+        $("#txtReferencia").removeClass("is-invalid");
+        $("#txtReferencia").removeClass("is-valid");
+
+        $("#txtMunicipio").val("");
+        $("#txtMunicipio").removeClass("is-invalid");
+        $("#txtMunicipio").removeClass("is-valid");
+
+        $("#txtIdEstado").val("");
+        $("#txtEstado").removeClass("is-invalid");
+        $("#txtEstado").removeClass("is-valid");
+
+        $("#txtIdPais").val("");
+        $("#txtPais").removeClass("is-invalid");
+        $("#txtPais").removeClass("is-valid");
+
+        $("#txtCodigoPostal").val("");
+        $("#txtCodigoPostal").removeClass("is-invalid");
+        $("#txtCodigoPostal").removeClass("is-valid");
+
+        $("#txtIdParteTransporte").val("");
+        $("#txtParteTransporte").removeClass("is-invalid");
+        $("#txtParteTransporte").removeClass("is-valid");
+
+        $("#btn-EditarTransporte").hide();
+        $("#btn-CancelarTransporte").hide();
+        $("#btn-AgregarTransporte").show();
+
+        TableTransporte.clear().draw(false);
+
+    }
+
+    function cancelarTransporte() {
+        $("#btn-EditarTransporte").hide();
+        $("#btn-CancelarTransporte").hide();
+        $("#btn-AgregarTransporte").show();
+        //
+
+        var noFigura = $("#txtIdFigura").val();
+        var idfigura = $("#cmbTipoFigura").val();
+        var rfcFigura = $("#txtRFCFigura").val();
+        var NumLicencia = $("#txtNumLicencia").val();
+        var nombrFigura = $("#txtNombreFigura").val();
+        var numIdentificacion = $("#txtNumRegIdTribPropietario").val();
+        var idDomFiscal = $("#txtIdDomicilioFiscal").val();
+        var DomFiscal = $("#txtDomicilioFiscal").val();
+        var Calle = $("#txtCalle").val();
+        var NumExt = $("#txtNumExt").val();
+        var NumInt = $("#txtNumInt").val();
+        var Colonia = $("#txtColonia").val();
+        var IdLocalidad = $("#txtIdLocalidad").val();
+        var Localidad = $("#txtLocalidad").val();
+        var Referencia = $("#txtReferencia").val();
+        var Municipio = $("#txtMunicipio").val();
+        var IdEstado = $("#txtIdEstado").val();
+        var Estado = $("#txtEstado").val();
+        var IdPais = $("#txtIdPais").val();
+        var Pais = $("#txtPais").val();
+        var CodigoPostal = $("#txtCodigoPostal").val();
+
+        //
+
+        document.forms["guardarFiguras.CartaPorte"].reset();
+        //
+        $("#txtRFCFigura").val(rfcFigura);
+        $("#txtNumLicencia").val(NumLicencia);
+        $("#txtNombreFigura").val(nombrFigura);
+        $("#txtNumRegIdTribPropietario").val(numIdentificacion);
+        $("#txtDomicilioFiscal").val(DomFiscal);
+        $("#txtCalle").val(Calle);
+        $("#txtNumExt").val(NumExt);
+        $("#txtNumInt").val(NumInt);
+        $("#txtColonia").val(Colonia);
+        $("#txtLocalidad").val(Localidad);
+        $("#txtReferencia").val(Referencia);
+        $("#txtMunicipio").val(Municipio);
+        $("#txtEstado").val(Estado);
+        $("#txtPais").val(Pais);
+        $("#txtCodigoPostal").val(CodigoPostal);
+
+        //
+        $("#txtParteTransporte").removeClass("is-invalid");
+        $("#txtParteTransporte").removeClass("is-valid");
+        //
+
+        $("#txtIdFigura").val(noFigura);
+        $("#cmbTipoFigura").val(idfigura);
+        $("#txtIdDomicilioFiscal").val(idDomFiscal);
+        $("#txtIdLocalidad").val(IdLocalidad);
+        $("#txtIdEstado").val(IdEstado);
+        $("#txtIdPais").val(IdPais);
+        //
+        $("#btn-EditarTransporte").hide();
+        $("#btn-CancelarTransporte").hide();
+        $("#btn-AgregarTransporte").show();
+
+        $("#txtIdParteTransporte").val(0);
+
+    }
+
+
+    function guardarFigura() {
+
+        var $Form = document.forms["guardarFiguras.CartaPorte"];
+
+        if ($Form["txtIdDomicilioFiscal"].value != "") {
+            if ($("#txtDomicilioFiscal").val() == "" || $("#txtDomicilioFiscal").hasClass("is-invalid")) {
+                notificacionAlert("Debe seleccionar un Domicilio Fiscal valido.", "danger");
+            }
+            else {
+                if ($Form["txtIdLocalidad"].value != "") {
+                    if ($("#txtLocalidad").val() == "" || $("#txtLocalidad").hasClass("is-invalid")) {
+                        notificacionAlert("Debe seleccionar una Localidad valida.", "danger")
+                    }
+                    else {
+                        if ($Form["txtIdEstado"].value != "") {
+                            if ($("#txtEstado").val() == "" || $("#txtEstado").hasClass("is-invalid")) {
+                                notificacionAlert("Debe seleccionar un Estado valido.", "danger");
+                            }
+                            else {
+                                if ($Form["txtIdPais"].value != "") {
+                                    if ($("#txtPais").val() == "" || $("#txtPais").hasClass("is-invalid")) {
+                                        notificacionAlert("Debe seleccionar un País valido.", "danger");
+                                    }
+                                    else {
+                                        if ($("#txtCalle").val() == "") {
+                                            notificacionAlert("Debe capturar una Calle válida", "danger");
+                                        }
+                                        else {
+                                            if ($("#txtCodigoPostal").val() == "") {
+                                                notificacionAlert("Debe capturar un Código Postal válida", "danger");
+                                            }
+                                            else {
+                                                var array = TableTransporte.rows()
+                                                    .data().toArray();
+                                                if (array.length > 0) {
+                                                    abrirCargando();
+                                                    $.ajax({
+                                                        type: "POST",
+                                                        contentType: "application/json; charset=utf-8",
+                                                        dataType: "json",
+                                                        url: '@Url.Action("guardarFiguras", "CartaPorte")',
+                                                        data: JSON.stringify({ 'conceptos': array, 'txtIdFigura': $Form["txtIdFigura"].value, 'cmbTipoFigura': $Form["cmbTipoFigura"].value, 'txtRFCFigura': $Form["txtRFCFigura"].value, 'txtNumLicencia': $Form["txtNumLicencia"].value, 'txtNombreFigura': $Form["txtNombreFigura"].value, 'txtNumRegIdTribPropietario': $Form["txtNumRegIdTribPropietario"].value, 'txtIdDomicilioFiscal': $Form["txtIdDomicilioFiscal"].value, 'txtCalle': $Form["txtCalle"].value, 'txtNumExt': $Form["txtNumExt"].value, 'txtNumInt': $Form["txtNumInt"].value, 'txtColonia': $Form["txtColonia"].value, 'txtIdLocalidad': $Form["txtIdLocalidad"].value, 'txtReferencia': $Form["txtReferencia"].value, 'txtMunicipio': $Form["txtMunicipio"].value, 'txtIdEstado': $Form["txtIdEstado"].value, 'txtIdPais': $Form["txtIdPais"].value, 'txtCodigoPostal': $Form["txtCodigoPostal"].value }),
+                                                        success: function (data) {
+                                                            var response = data;
+                                                            if (response.Estatus == 1) {
+                                                                window.location = '@Url.Action("Figuras","CartaPorte")';
+                                                            }
+                                                            else {
+                                                                notificacionAlert(response.Mensaje, "danger");
+                                                            }
+                                                            cerrarCargando();
+                                                        }
+                                                    });
+                                                }
+                                                else {
+                                                    abrirCargando();
+                                                    $.ajax({
+                                                        type: "POST",
+                                                        contentType: "application/json; charset=utf-8",
+                                                        dataType: "json",
+                                                        url: '@Url.Action("guardarFigurasST", "CartaPorte")',
+                                                        data: JSON.stringify({ 'txtIdFigura': $Form["txtIdFigura"].value, 'cmbTipoFigura': $Form["cmbTipoFigura"].value, 'txtRFCFigura': $Form["txtRFCFigura"].value, 'txtNumLicencia': $Form["txtNumLicencia"].value, 'txtNombreFigura': $Form["txtNombreFigura"].value, 'txtNumRegIdTribPropietario': $Form["txtNumRegIdTribPropietario"].value, 'txtIdDomicilioFiscal': $Form["txtIdDomicilioFiscal"].value, 'txtCalle': $Form["txtCalle"].value, 'txtNumExt': $Form["txtNumExt"].value, 'txtNumInt': $Form["txtNumInt"].value, 'txtColonia': $Form["txtColonia"].value, 'txtIdLocalidad': $Form["txtIdLocalidad"].value, 'txtReferencia': $Form["txtReferencia"].value, 'txtMunicipio': $Form["txtMunicipio"].value, 'txtIdEstado': $Form["txtIdEstado"].value, 'txtIdPais': $Form["txtIdPais"].value, 'txtCodigoPostal': $Form["txtCodigoPostal"].value}),
+                                                        success: function (data) {
+                                                            var response = data;
+                                                            if (response.Estatus == 1) {
+                                                                window.location = '@Url.Action("Figuras","CartaPorte")';
+                                                            }
+                                                            else {
+                                                                notificacionAlert(response.Mensaje, "danger");
+                                                            }
+                                                            cerrarCargando();
+                                                        }
+                                                    })
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                else {
+                                    notificacionAlert("No ha seleccionado un País valido.", "danger");
+                                    $("#txtPais").removeClass("is-invalid");
+                                    $("#txtPais").removeClass("is-valid");
+                                    $("#txtPais").addClass("is-invalid");
+                                    return false;
+                                }
+                            }
+                        }
+                        else {
+                            notificacionAlert("No ha seleccionado un Estado valido.", "danger");
+                            $("#txtEstado").removeClass("is-invalid");
+                            $("#txtEstado").removeClass("is-valid");
+                            $("#txtEstado").addClass("is-invalid");
+                            return false;
+                        }
+                    }
+                }
+                else {
+                    notificacionAlert("No ha seleccionado una Localidad valida.", "danger");
+                    $("#txtLocalidad").removeClass("is-invalid");
+                    $("#txtLocalidad").removeClass("is-valid");
+                    $("#txtLocalidad").addClass("is-invalid");
+                    return false;
+                }
+            }
+        }
+        else {
+            notificacionAlert("No ha seleccionado un Domicilio Fiscal valido.", "danger");
+            $("#txtDomicilioFiscal").removeClass("is-invalid");
+            $("#txtDomicilioFiscal").removeClass("is-valid");
+            $("#txtDomicilioFiscal").addClass("is-invalid");
+            return false;
+        }
+
+        //if ($Form["txtIdCliente"].value != "") {
+        //    if ($("#txtRFC").val() == "" || $("#txtRFC").hasClass("is-invalid")) {
+        //        notificacionAlert("Debe seleccionar un RFC válido.", "danger");
+        //    }
+        //    else {
+        //        if ($("#txtSerie").val() == "") {
+        //            notificacionAlert("Debe capturar una Serie válida.", "danger");
+        //        }
+        //        else {
+        //            var array = TableConceptos.rows()
+        //                .data().toArray();
+        //            if (array.length == 0) {
+        //                notificacionAlert("Debe haber por lo menos un concepto para hacer la nota de venta.", "danger");
+        //            }
+        //            else {
+
+
+        //            }
+        //        }
+        //    }
+        //}
+        //else {
+        //    notificacionAlert("No ha seleccionado un RFC válido.", "danger");
+        //    $("#txtRFC").removeClass("is-invalid");
+        //    $("#txtRFC").removeClass("is-valid");
+        //    $("#txtRFC").addClass("is-invalid");
+        //    return false;
+        //}
+
+
+    }
+
+
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.29.0/docxtemplater.js"></script>
+<script src="https://unpkg.com/pizzip@3.1.1/dist/pizzip.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.js"></script>
+<script src="https://unpkg.com/pizzip@3.1.1/dist/pizzip-utils.js"></script>

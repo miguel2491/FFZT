@@ -1,0 +1,562 @@
+﻿@model IEnumerable<Facturafast.Models.tbd_Transporte_Aereo>
+@using Facturafast.Models
+@{
+    BD_FFEntities db = new BD_FFEntities();
+    tbc_Usuarios usuario = Session["tbc_Usuarios"] as tbc_Usuarios;
+}
+
+<h1 class="h3 mb-3">Transporte Aéreo</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-actions float-end">
+
+                </div>
+                <form method="post" action="@Url.Action("TransporteAereo","CartaPorte")">
+                    <div class="row">
+                        <div class="col-md-2">
+
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control form-control-lg" id="txtFechaInicial" name="txtFechaInicial" placeholder="Fecha Inicial" value="@ViewBag.Inicio.ToString("yyyy-MM-dd")" required>
+                                <label for="txtFechaInicial">Fecha Inicial</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control form-control-lg" id="txtFechaFinal" name="txtFechaFinal" placeholder="Fecha Final" value="@ViewBag.Final.ToString("yyyy-MM-dd")" required>
+                                <label for="txtFechaFinal">Fecha Final</label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 text-center">
+                            <button type="submit" class="btn btn-success btn-lg" style="margin-top:10px;"><i class="fas fa-search"></i>&nbsp; Buscar Transporte Aéreo</button>
+                        </div>
+                    </div>
+                </form>
+                <br />
+                <hr />
+                <div class="row">
+                    <div class="col-md-4">
+                        @*<button type="submit" class="btn btn-primary" style="margin-top:10px;"><i class="fas fa-check-square"></i></button> &nbsp;
+                            <button type="submit" class="btn btn-danger" style="margin-top:10px;"><i class="far fa-fw fa-square"></i></button>*@
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#modalTransporteAereo" onclick="nuevoTransporteAereo();"><i class="fas fa-plus"></i> Agregar Transporte Aéreo</button>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        @*<button type="submit" class="btn btn-success btn-lg" style="margin-top:10px;"><i class="fas fa-search"></i>&nbsp; Buscar Notas de Ventas</button>*@
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <table id="datatables-cartaporte-transporte-aereo" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>Tipo Permiso SCT</th>
+                            <th>Número Permiso SCT</th>
+                            <th>Matrícula Aeronave</th>
+                            <th>Nombre Aseguradora</th>
+                            <th>Núero Póliza Aseguradora</th>
+                            <th>Número de Guía</th>
+                            <th>Lugar Contrato</th>
+                            <th>RFC Transportista</th>
+                            <th>Código Transportista</th>
+                            <th>Número Identificación Transportista</th>
+                            <th>Residencia Fiscal Transportista</th>
+                            <th>Nombre Transportista</th>
+                            <th>RFC Embarcador</th>
+                            <th>Número Identificación Embarcador</th>
+                            <th>Residencia Fiscal Embarcador</th>
+                            <th>Nombre del Embarcador</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            tbc_Tipos_Permiso permiso = db.tbc_Tipos_Permiso.Where(s => s.id_tipo_permiso == item.id_tipo_permiso).Single();
+                            tbc_Codigo_Transporte_Aereo codigo = db.tbc_Codigo_Transporte_Aereo.Where(s => s.id_codigo_transporte_aereo == item.id_codigo_transporte_aereo).Single();
+                            tbc_Paises paisTranspor = db.tbc_Paises.Where(s => s.id_pais == item.id_pais_transpor).Single();
+                            tbc_Paises paisEmbarca = db.tbc_Paises.Where(s => s.id_pais == item.id_pais_embarc).Single();
+                            <tr>
+                                <td></td>
+                                <td>
+                                    <table>
+                                            <tr>
+                                                <td style="padding:0px 5px;">
+                                                    <button class="btn btn-warning btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#modalTransporteAereo" onclick="actualizarTransporteAereo(@item.id_transporte_aereo, @item.id_tipo_permiso, '@permiso.clave', '@permiso.descripcion', '@item.num_permiso_sct',
+    '@item.matricula_aeronave', '@item.nombre_aseg', '@item.num_poliza_seguro', '@item.numero_guia', '@item.lugar_contrato', '@item.rfc_transportista', @item.id_codigo_transporte_aereo, '@codigo.clave_identificacion', '@codigo.nombre_aerolinea', '@item.num_reg_id_trib_transpor', @paisTranspor.id_pais,
+    '@paisTranspor.clave_pais', '@paisTranspor.descripcion', '@item.nombre_transportista', '@item.rfc_embarcador', '@item.num_reg_id_trib_embarc', @paisEmbarca.id_pais, '@paisEmbarca.clave_pais', '@paisEmbarca.descripcion', '@item.nombre_embarcador');"><i class="fas fa-edit"></i></button>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                </td>
+                                <td>[@permiso.clave] @permiso.descripcion</td>
+                                <td>@item.num_permiso_sct</td>
+                                <td>@item.matricula_aeronave</td>
+                                <td>@item.nombre_aseg</td>
+                                <td>@item.num_poliza_seguro</td>
+                                <td>@item.numero_guia</td>
+                                <td>@item.lugar_contrato</td>
+                                <td>@item.rfc_transportista</td>
+                                <td>[@codigo.clave_identificacion] @codigo.nombre_aerolinea</td>
+                                <td>@item.num_reg_id_trib_transpor</td>
+                                <td>[@paisTranspor.clave_pais] @paisTranspor.descripcion</td>
+                                <td>@item.nombre_transportista</td>
+                                <td>@item.rfc_embarcador</td>
+                                <td>@item.num_reg_id_trib_embarc</td>
+                                <td>[@paisEmbarca.clave_pais] @paisEmbarca.descripcion</td>
+                                <td>@item.nombre_embarcador</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form name="guardarTransporteAereo.CartaPorte" action="@Url.Action("guardarTransporteAereo","CartaPorte")" method="post" onsubmit="return validateForm();">
+    <div class="modal fade" id="modalTransporteAereo" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Formulario de Transporte Aéreo</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body m-3">                    
+                    <input type="hidden" id="txtIdTransporteAereo" name="txtIdTransporteAereo">
+                    <input type="hidden" id="txtIdPermisoSCT" name="txtIdPermisoSCT">
+                    <input type="hidden" id="txtIdCodigoTransportista" name="txtIdCodigoTransportista">
+                    <input type="hidden" id="txtIdResFiscTrans" name="txtIdResFiscTrans">
+                    <input type="hidden" id="txtIdResDiscEmbarcador" name="txtIdResDiscEmbarcador">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg text-uppercase" title="Permiso Invalido." id="txtPermisoSCT" name="txtPermisoSCT" placeholder="Permiso SCT" required />
+                                <label for="txtPermisoSCT">Permiso SCT</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="1" maxlength="50" pattern="^[A-Z0-9]+" title="Solo letras mayúsculas y números." id="txtNumPermSCT" name="txtNumPermSCT" placeholder="Número de Permiso SCT" required>
+                                <label for="txtNumPermSCT">Número de Permiso SCT</label>
+                            </div>
+                        </div>                        
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="5" maxlength="10" pattern="[A-Z0-9._%+-]+-[A-Z0-9.-]+" title="Letras mayúsculas y números, incluir -." id="txtMatAeronave" name="txtMatAeronave" placeholder="Matrícula Aeronave">
+                                <label for="txtMatAeronave">Matrícula Aeronave</label>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="3" maxlength="50" id="txtNombreAseguradora" name="txtNombreAseguradora" placeholder="Nombre de la Aseguradora">
+                                <label for="txtNombreAseguradora">Nombre de la Aseguradora</label>
+                            </div>
+                        </div>                        
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="3" maxlength="30" pattern="^[0-9]+" title="Solo números." id="txtNumeroPolizaSeguro" name="txtNumeroPolizaSeguro" placeholder="Número de Póliza de Seguro">
+                                <label for="txtNumeroPolizaSeguro">Número de Póliza de Seguro</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="12" maxlength="15" pattern="^[0-9]+" title="Solo números." id="txtNumeroGuia" name="txtNumeroGuia" placeholder="Número de Guía" required>
+                                <label for="txtNumeroGuia">Número de Guía</label>
+                            </div>
+                        </div>                       
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtLugarContrato" name="txtLugarContrato" placeholder="Lugar del Contrato">
+                                <label for="txtLugarContrato">Lugar del Contrato</label>
+                            </div>
+                        </div>                        
+                    </div>
+                    <h3>Transportista</h3>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="12" maxlength="13" id="txtRFCTransportista" name="txtRFCTransportista" pattern="^[A-Z0-9]+" placeholder="RFC del Transportista">
+                                <label for="txtRFCTransportista">RFC del Transportista</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtCodigoTransportista" name="txtCodigoTransportista" placeholder="Código Transportista" required>
+                                <label for="txtCodigoTransportista">Código Transportista</label>
+                            </div>
+                        </div>    
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" pattern="^[A-Za-z ]+" id="txtNombreTrans" name="txtNombreTrans" placeholder="Nombre del Transportista">
+                                <label for="txtNombreTrans">Nombre del Transportista</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="6" maxlength="40" id="txtNumRegFisTrans" name="txtNumRegFisTrans" placeholder="Número de Identificación o Registro Fiscal del Transportista">
+                                <label for="txtNumRegFisTrans">Número de Identificación o Registro Fiscal del Transportista</label>
+                            </div>
+                        </div>             
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtResFiscTrans" name="txtResFiscTrans" placeholder="Residencía Fiscal Transportista">
+                                <label for="txtResFiscTrans">Residencía Fiscal Transportista</label>
+                            </div>
+                        </div>
+                    </div>
+                    <h3>Embarcador</h3>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtRFCEmbarcador" name="txtRFCEmbarcador" placeholder="RFC del Embarcador">
+                                <label for="txtRFCEmbarcador">RFC del Embarcador</label>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" minlength="6" maxlength="40" id="txtNumIdenRegFiscEmba" name="txtNumIdenRegFiscEmba" placeholder="Número de Identificación o Registro Fiscal del Embarcador">
+                                <label for="txtNumIdenRegFiscEmba">Número de Identificación o Registro Fiscal del Embarcador</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtResDiscEmbarcador" name="txtResDiscEmbarcador" placeholder="Residencia Fiscal del Embarcador">
+                                <label for="txtResDiscEmbarcador">Residencia Fiscal del Embarcador</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" pattern="^[A-Za-z ]+" id="txtNombreEmbarcador" name="txtNombreEmbarcador" placeholder="Nombre del Embarcador">
+                                <label for="txtNombreEmbarcador">Nombre del Embarcador</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+                    <button type="submit" id="" class="btn btn-success"><i class="fas fa-save"></i>&nbsp; Guardar Datos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+<script>
+    var cachePermisoSCT = {};
+    var cacheCodigoTransportista = {};
+    var cacheResFiscTrans = {};
+    var cacheResDiscembar = {};
+
+    document.addEventListener("DOMContentLoaded", function () {
+        //Tabla Inicio
+        $("#datatables-cartaporte-transporte-aereo").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1] }
+            ],
+            order: [[2, 'asc']]
+        });
+
+        //Autocompletar
+        $("#txtPermisoSCT").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtPermisoSCT").removeClass("is-invalid");
+                    $("#txtPermisoSCT").removeClass("is-valid");
+                    $("#txtPermisoSCT").addClass("is-invalid");
+                    if (term in cachePermisoSCT) {
+                        response(cachePermisoSCT[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerTipoPermiso", "Catalogos")", request, function (data, status, xhr) {
+                        cachePermisoSCT[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtPermisoSCT").removeClass("is-invalid");
+                    $("#txtPermisoSCT").removeClass("is-valid");
+                    $("#txtPermisoSCT").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtPermisoSCT").val(ui.item.label);
+                $("#txtIdPermisoSCT").val(ui.item.value);
+                $("#txtPermisoSCT").removeClass("is-invalid");
+                $("#txtPermisoSCT").removeClass("is-valid");
+                $("#txtPermisoSCT").addClass("is-valid");
+                $("#txtPermisoSCT").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+
+        $("#txtCodigoTransportista").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtCodigoTransportista").removeClass("is-invalid");
+                    $("#txtCodigoTransportista").removeClass("is-valid");
+                    $("#txtCodigoTransportista").addClass("is-invalid");
+                    if (term in cacheCodigoTransportista) {
+                        response(cacheCodigoTransportista[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerCodigoTransporteAereo", "Catalogos")", request, function (data, status, xhr) {
+                        cacheCodigoTransportista[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtCodigoTransportista").removeClass("is-invalid");
+                    $("#txtCodigoTransportista").removeClass("is-valid");
+                    $("#txtCodigoTransportista").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtCodigoTransportista").val(ui.item.label);
+                $("#txtIdCodigoTransportista").val(ui.item.value);
+                $("#txtCodigoTransportista").removeClass("is-invalid");
+                $("#txtCodigoTransportista").removeClass("is-valid");
+                $("#txtCodigoTransportista").addClass("is-valid");
+                $("#txtCodigoTransportista").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+
+        $("#txtResFiscTrans").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtResFiscTrans").removeClass("is-invalid");
+                    $("#txtResFiscTrans").removeClass("is-valid");
+                    $("#txtResFiscTrans").addClass("is-invalid");
+                    if (term in cacheResFiscTrans) {
+                        response(cacheResFiscTrans[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerPais", "Catalogos")", request, function (data, status, xhr) {
+                        cacheResFiscTrans[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtResFiscTrans").removeClass("is-invalid");
+                    $("#txtResFiscTrans").removeClass("is-valid");
+                    $("#txtResFiscTrans").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtResFiscTrans").val(ui.item.label);
+                $("#txtIdResFiscTrans").val(ui.item.value);
+                $("#txtResFiscTrans").removeClass("is-invalid");
+                $("#txtResFiscTrans").removeClass("is-valid");
+                $("#txtResFiscTrans").addClass("is-valid");
+                $("#txtResFiscTrans").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+
+        $("#txtResDiscEmbarcador").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtResDiscEmbarcador").removeClass("is-invalid");
+                    $("#txtResDiscEmbarcador").removeClass("is-valid");
+                    $("#txtResDiscEmbarcador").addClass("is-invalid");
+                    if (term in cacheResDiscembar) {
+                        response(cacheResDiscembar[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerPais","Catalogos")", request, function (data, status, xhr) {
+                        cacheResDiscembar[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtResDiscEmbarcador").removeClass("is-invalid");
+                    $("txtResDiscEmbarcador").removeClass("is-valid");
+                    $("#txtResDiscEmbarcador").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtResDiscEmbarcador").val(ui.item.label);
+                $("#txtIdResDiscEmbarcador").val(ui.item.value);
+                $("#txtResDiscEmbarcador").removeClass("is-invalid");
+                $("#txtResDiscEmbarcador").removeClass("is-valid");
+                $("#txtResDiscEmbarcador").addClass("is-valid");
+                $("#txtResDiscEmbarcador").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+    });
+
+    function validateForm() {
+        let NumPermSCT = document.forms["guardarTransporteAereo.CartaPorte"]["txtNumPermSCT"].value;
+        //Validar
+        var $Form = document.forms["guardarTransporteAereo.CartaPorte"];
+
+
+        if ($Form["txtIdPermisoSCT"].value != "") {
+            if ($("#txtPermisoSCT").val() == "" || $("#txtPermisoSCT").hasClass("is-invalid"))  {
+                notificacionAlert("Debe seleccionar un Permiso SCT válido.", "danger");
+                return false;
+            }
+        }
+        else {
+            notificacionAlert("No ha seleccionado un Permiso SCT válido.", "danger");
+            $("#txtPermisoSCT").removeClass("is-invalid");
+            $("#txtPermisoSCT").removeClass("is-valid");
+            $("#txtPermisoSCT").addClass("is-invalid");
+            return false;
+        }
+
+        if ($Form["txtIdCodigoTransportista"].value != "") {
+            if ($("#txtCodigoTransportista").val() == "" || $("#txtCodigoTransportista").hasClass("is-invalid")) {
+                notificacionAlert("Debe seleccionar un Codigo de Transportista válido.", "danger");
+                return false;
+            }
+        }
+        else {
+            notificacionAlert("No ha seleccionado un Codigo de Transportista válido.", "danger");
+            $("#txtCodigoTransportista").removeClass("is-invalid");
+            $("#txtCodigoTransportista").removeClass("is-valid");
+            $("#txtCodigoTransportista").addClass("is-invalid");
+            return false;
+        }        
+
+
+        if ($Form["txtIdResFiscTrans"].value == "") {
+            if ($("#txtResFiscTrans").hasClass("is-invalid")) {
+                notificacionAlert("Debe seleccionar una Residencía Fiscal Transportista válida.", "danger");
+                return false;
+            }
+            else {
+                $("#txtIdResFiscTrans").val(150);
+            }            
+        }
+        else {
+            if ($("#txtResFiscTrans").hasClass("is-invalid") ){
+                notificacionAlert("Debe seleccionar una Residencía Fiscal Transportista válida.", "danger");
+                return false;
+            }
+        }
+
+
+        if ($Form["txtIdResDiscEmbarcador"].value == "") {
+            if ($("#txtResDiscEmbarcador").hasClass("is-invalid")) {
+                notificacionAlert("Debe seleccionar una Residencía Fiscal Embarcador válida.", "danger");
+                return false;
+            }
+            else {
+                $("#txtIdResDiscEmbarcador").val(150);
+            }            
+        }
+        else {
+            if ($("#txtResDiscEmbarcador").hasClass("is-invalid") ){
+                notificacionAlert("Debe seleccionar una Residencía Fiscal Embarcador válida.", "danger");
+                return false;
+            }
+        }       
+        
+        if (NumPermSCT != "") {
+            bootstrap.Modal.getOrCreateInstance(document.getElementById("modalTransporteAereo")).hide();
+            abrirCargando();
+
+            return true;
+        }
+        return false;
+    }
+
+    function nuevoTransporteAereo() {        
+        document.forms["guardarTransporteAereo.CartaPorte"].reset();
+
+        document.forms["guardarTransporteAereo.CartaPorte"]["txtIdTransporteAereo"].value = 0;
+
+        $("#txtIdPermisoSCT").val("");
+        $("#txtPermisoSCT").removeClass("is-invalid");
+        $("#txtPermisoSCT").removeClass("is-valid");
+
+        $("#txtIdCodigoTransportista").val("");
+        $("#txtCodigoTransportista").removeClass("is-invalid");
+        $("#txtCodigoTransportista").removeClass("is-valid");
+
+        $("#txtIdResFiscTrans").val("");
+        $("#txtResFiscTrans").removeClass("is-invalid");
+        $("#txtResFiscTrans").removeClass("is-valid");
+
+        $("#txtIdResDiscEmbarcador").val("");
+        $("#txtResDiscEmbarcador").removeClass("is-invalid");
+        $("#txtResDiscEmbarcador").removeClass("is-valid");
+    }
+
+    function actualizarTransporteAereo(a,      b, c, d,     e,f,g,h,i,j,k,   l,m,n,  o,  p,q,r,  s,t,u,  v,w,x,   y) {
+        document.forms["guardarTransporteAereo.CartaPorte"]["txtIdTransporteAereo"].value = a;
+        document.forms["guardarTransporteAereo.CartaPorte"]["txtIdPermisoSCT"].value = b;
+        document.forms["guardarTransporteAereo.CartaPorte"]["txtPermisoSCT"].value = '[' + c + '] ' + d;
+
+        document.forms["guardarTransporteAereo.CartaPorte"]["txtNumPermSCT"].value = e;
+        document.forms["guardarTransporteAereo.CartaPorte"]["txtMatAeronave"].value = f;
+        document.forms["guardarTransporteAereo.CartaPorte"]["txtNombreAseguradora"].value = g;
+        document.forms["guardarTransporteAereo.CartaPorte"]["txtNumeroPolizaSeguro"].value = h;
+        document.forms["guardarTransporteAereo.CartaPorte"]["txtNumeroGuia"].value = i;
+        document.forms["guardarTransporteAereo.CartaPorte"]["txtLugarContrato"].value = j;
+        document.forms["guardarTransporteAereo.CartaPorte"]["txtRFCTransportista"].value = k;
+
+
+        document.forms["guardarTransporteAereo.CartaPorte"]["txtIdCodigoTransportista"].value = l;
+        document.forms["guardarTransporteAereo.CartaPorte"]["txtCodigoTransportista"].value = '[' + m + '] ' + n;
+
+        document.forms["guardarTransporteAereo.CartaPorte"]["txtNumRegFisTrans"].value = o;
+
+        document.forms["guardarTransporteAereo.CartaPorte"]["txtIdResFiscTrans"].value = p;
+        document.forms["guardarTransporteAereo.CartaPorte"]["txtResFiscTrans"].value = '[' + q + '] ' + r;
+
+        document.forms["guardarTransporteAereo.CartaPorte"]["txtNombreTrans"].value = s;
+        document.forms["guardarTransporteAereo.CartaPorte"]["txtRFCEmbarcador"].value = t;
+        document.forms["guardarTransporteAereo.CartaPorte"]["txtNumIdenRegFiscEmba"].value = u;
+
+        document.forms["guardarTransporteAereo.CartaPorte"]["txtIdResDiscEmbarcador"].value = v;
+        document.forms["guardarTransporteAereo.CartaPorte"]["txtResDiscEmbarcador"].value = '[' + w + '] ' + x;
+
+        document.forms["guardarTransporteAereo.CartaPorte"]["txtNombreEmbarcador"].value = y;
+
+    }
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.29.0/docxtemplater.js"></script>
+<script src="https://unpkg.com/pizzip@3.1.1/dist/pizzip.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.js"></script>
+<script src="https://unpkg.com/pizzip@3.1.1/dist/pizzip-utils.js"></script>

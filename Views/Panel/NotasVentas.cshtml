@@ -1,0 +1,1370 @@
+﻿@model IEnumerable<Facturafast.Models.tbd_Notas_Venta>
+@using Facturafast.Models
+@{
+    BD_FFEntities db = new BD_FFEntities();
+    tbc_Usuarios usuario = Session["tbc_Usuarios"] as tbc_Usuarios;
+}
+<h1 class="h3 mb-3">Notas de Venta</h1>
+&nbsp;
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-actions float-end">
+
+                </div>
+                <form method="post" action="@Url.Action("NotasVentas","Panel")">
+                    <div class="row">
+                        <div class="col-md-2">
+
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control form-control-lg" id="txtFechaInicial" name="txtFechaInicial" placeholder="Fecha Inicial" value="@ViewBag.Inicio.ToString("yyyy-MM-dd")" required>
+                                <label for="txtFechaInicial">Fecha Inicial</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control form-control-lg" id="txtFechaFinal" name="txtFechaFinal" placeholder="Fecha Final" value="@ViewBag.Final.ToString("yyyy-MM-dd")" required>
+                                <label for="txtFechaFinal">Fecha Final</label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 text-center">
+                            <button type="submit" class="btn btn-success btn-lg" style="margin-top:10px;"><i class="fas fa-search"></i>&nbsp; Buscar Notas de Ventas</button>
+                        </div>
+                    </div>
+                </form>
+                <br />
+                <hr />
+                <div class="row">
+                    <div class="col-md-4">
+                        @*<button type="submit" class="btn btn-primary" style="margin-top:10px;"><i class="fas fa-check-square"></i></button> &nbsp;
+                            <button type="submit" class="btn btn-danger" style="margin-top:10px;"><i class="far fa-fw fa-square"></i></button>*@
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <button type="submit" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#modalNotaVenta" onclick="nuevaNotaVenta();" style="margin-top:10px;"><i class="fas fa-plus"></i>&nbsp; Nueva Nota de Venta</button>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        @*<button type="submit" class="btn btn-success btn-lg" style="margin-top:10px;"><i class="fas fa-search"></i>&nbsp; Buscar Notas de Ventas</button>*@
+                    </div>
+                </div>
+
+            </div>
+            <div class="card-body">
+                <table id="datatables-reporte-ingresos" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>Acciones</th>
+                            <th>Nombre / Razón Social</th>
+                            <th>RFC</th>
+                            <th>Estatus</th>
+                            <th>Fecha</th>
+                            <th>Núm</th>
+                            <th>Subtotal</th>
+                            <th>IVA</th>
+                            <th>Total</th>
+                            <th>Fecha de Envío</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            tbc_Clientes cliente = db.tbc_Clientes.Where(s => s.id_cliente == item.id_cliente).Single();
+                            tbc_Estatus estatus = db.tbc_Estatus.Where(s => s.id_estatus == item.id_estatus).Single();
+                            tbc_Cuentas_Bancarias banco = db.tbc_Cuentas_Bancarias.Where(s => s.id_cuenta_bancaria == item.id_cuenta_bancaria).Single();
+                            String JSONPDf = "{\"serie\":\"" + item.serie + "\"," +
+                                                              "\"folio\":\"" + item.folio + "\"," +
+                                                              "\"nombre_razon\":\"" + usuario.nombre_razon + "\"," +
+                                                              "\"rfc_emisor\":\"" + usuario.rfc + "\"," +
+                                                              "\"direccion_fiscal\":\"" +
+                                                              ("Calle: " + usuario.calle + " Núm Ext " + usuario.num_ext +
+                                                              (usuario.num_int != "" ? " Núm Int " + usuario.num_int : "") +
+                                                              " Col " + usuario.colonia + ", CP " + usuario.cp + ", " + usuario.localidad + ", " + usuario.municipio + ", " + usuario.estado) + "\"," +
+                                                              "\"expedicion\":\"" + usuario.cp + "\"," +
+                                                              "\"rfc\":\"" + cliente.rfc + "\"," +
+                                                              "\"direccion_cliente\":\"" + cliente.direccion_fiscal + "\"," +
+                                                              "\"razon_cliente\":\"" + cliente.nombre_razon + "\"," +
+                                                              "\"fecha\":\"" + item.fecha_creacion.ToString("dd/MM/yyyy") + "\"," +
+                                                              "\"subtotal\":\"" + item.subtotal.ToString("c") + "\"," +
+                                                              "\"iva\":\"" + item.iva.ToString("c") + "\"," +
+                                                              "\"iva_ret\":\"" + item.iva_ret.ToString("c") + "\"," +
+                                                              "\"isr_ret\":\"" + item.isr_ret.ToString("c") + "\"," +
+                                                              "\"descuento\":\"" + item.descuento.ToString("c") + "\"," +
+                                                              "\"total\":\"" + item.total.ToString("c") + "\"," +
+                                                              "\"total_letra\":\"" + item.total.NumeroALetras() + "\"," +
+
+                                                              "\"banco\":\"" + banco.banco + "\"," +
+                                                              "\"propietario\":\"" + banco.propietario + "\"," +
+                                                              "\"clabe\":\"" + banco.clabe + "\"," +
+
+                                                              "\"productos\":[" + String.Join(", ", db.tbd_Conceptos_Nota_Venta
+                                                              .Where(s => s.id_nota_venta == item.id_nota_venta)
+                                                              .Select(s => "{\"cant\":\"" + s.cantidad + "\",\"uni\":\"" + db.tbc_Unidades_Medida.Where(u => u.id_unidad_medida == s.id_unidad_medida).Select(uni => uni.clave + " " + uni.descripcion).FirstOrDefault() + "\",\"sat\":\"" + db.tbc_ProdServ.Where(u => u.id_sat == s.id_sat).Select(uni => uni.c_pord_serv).FirstOrDefault() + "\",\"desc\":\"" + s.concepto + "\",\"pu\":\"" + s.precio_unitario + "\",\"imp\":\"" + s.importe + "\" }").ToList()) + "]" +
+                                                              "}";
+                            Decimal restante = item.total - db.tbd_Pagos_Nota_Venta.Where(s => s.id_nota_venta == item.id_nota_venta).Select(s => s.total_pagado).DefaultIfEmpty(0).Sum();
+                            var ultima_fecha = db.tbd_Envios_Correo_Nota.Where(s => s.id_nota_venta == item.id_nota_venta).OrderByDescending(s => s.fecha_enviado).FirstOrDefault();
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td>
+                                    <table>
+                                        <tr>
+                                            <td style="padding:0px 5px;">
+                                                <a href="#" class="btn btn-info btn-sm" title="Descargar Nota de Venta" onclick="@(item.url_pdf != "" ? "descargarPDF("+ item.id_nota_venta +");" : "generarPDF("+ item.id_nota_venta +",'"+ JSONPDf +"');")"><i class="fas fa-file"></i></a>
+                                            </td>
+                                            @if (item.id_estatus == 1)
+                                            {
+                                                <td style="padding:0px 5px;">
+                                                    <a href="#" class="btn btn-primary btn-sm" title="Enviar Nota de Venta" data-bs-toggle="modal" data-bs-target="#modalEnviarCorreo" onclick="enviarCorreo(@item.id_nota_venta, '@cliente.rfc', '@cliente.nombre_razon', @cliente.id_cliente);"><i class="fas fa-envelope"></i></a>
+                                                </td>
+                                                <td style="padding:0px 5px;">
+                                                    <a href="#" class="btn btn-danger btn-sm" title="Cancelar Nota de Venta" data-bs-toggle="modal" data-bs-target="#modalCancelarNota" onclick="cancelarNota(@item.id_nota_venta, '@cliente.nombre_razon', '@item.total.ToString("c")');"><i class="fas fa-ban"></i></a>
+                                                </td>
+
+                                            }
+                                            @if (item.id_estatus == 7)
+                                            {
+                                                <td style="padding:0px 5px;">
+                                                    <a href="#" class="btn btn-danger btn-sm" title="Descargar Factura"><i class="fas fa-file-pdf"></i></a>
+                                                </td>
+                                            }
+
+                                            @if (item.id_estatus != 6)
+                                            {
+                                                <td style="padding:0px 5px;">
+                                                    <a href="#" class="btn btn-success btn-sm" title="Pagos" data-bs-toggle="modal" data-bs-target="#modalPagoNota" onclick="pagarNota(@item.id_nota_venta, @restante);"><i class="fas fa-money-bill-wave"></i></a>
+                                                </td>
+                                            }
+
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td>@cliente.nombre_razon</td>
+                                <td>@cliente.rfc</td>
+                                <td>@estatus.estatus</td>
+                                <td>@item.fecha_creacion.ToString("yyyy/MM/dd HH:mm")</td>
+                                <td>@item.serie - @item.folio</td>
+                                <td>@item.subtotal.ToString("c")</td>
+                                <td>@item.iva.ToString("c")</td>
+                                <td>@item.total.ToString("c")</td>
+                                <td>@(ultima_fecha != null ? ultima_fecha.fecha_enviado.ToString("yyyy/MM/dd HH:mm") : "")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<form name="GuardarNotaVenta.Panel" action="@Url.Action("GuardarNotaVenta","Panel")" method="post">
+    <input type="hidden" id="txtIdNotaVenta" name="txtIdNotaVenta">
+    <input type="hidden" id="txtIdCliente" name="txtIdCliente">
+    <div class="modal fade" id="modalNotaVenta" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Formulario Nota de Venta</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body m-3">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg text-uppercase" pattern="^[a-zA-Z0-9]{12,13}" id="txtRFC" name="txtRFC" placeholder="RFC / Razón Social" required>
+                                <label for="txtRFC">RFC / Razón Social</label>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg text-uppercase" id="txtNombreRazonCliente" name="txtNombreRazonCliente" placeholder="Nombre / Razón Social" readonly>
+                                <label for="txtNombreRazonCliente">Nombre / Razón Social</label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg text-uppercase" id="txtSerie" name="txtSerie" placeholder="Serie" required>
+                                <label for="txtSerie">Serie</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                        </div>
+                        <div class="col-md-9">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbCuentas" name="cmbCuentas" aria-label="Cuenta Bancaria">
+                                </select>
+                                <label for="cmbCuentas">Cuenta Bancaria</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h1 class="h3 mb-3">Conceptos</h1>
+                    <input type="hidden" id="txtIdUnidad" name="txtIdUnidad">
+                    <input type="hidden" id="txtIdSAT" name="txtIdSAT">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtConcepto" name="txtConcepto" placeholder="Concepto" required>
+                                <label for="txtConcepto">Concepto</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtIDSat" placeholder="ID SAT" required>
+                                <label for="txtIDSat">ID SAT</label>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtClaveInterna" name="txtClaveInterna" placeholder="Clave">
+                                <label for="txtClaveInterna">Clave (Interna)</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control form-control-lg" id="txtCantidad" name="txtCantidad" placeholder="Cantidad" required>
+                                <label for="txtCantidad">Cantidad</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtUnidad" name="txtUnidad" placeholder="Unidad" required>
+                                <label for="txtUnidad">Unidad</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="number" step="0.01" class="form-control form-control-lg" id="txtPrecioUnitario" name="txtPrecioUnitario" placeholder="Precio Unitario" required>
+                                <label for="txtPrecioUnitario">Precio Unitario</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-1">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbDescuento" name="cmbDescuento" aria-label="Desc">
+                                    <option value="1">%</option>
+                                    <option value="2">$</option>
+                                </select>
+                                <label for="cmbDescuento">Desc</label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control form-control-lg" id="txtDescuento" name="txtDescuento" placeholder="Descuento">
+                                <label for="txtDescuento">Descuento</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbIVA" name="cmbIVA" aria-label="IVA">
+                                </select>
+                                <label for="cmbIVA">IVA</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbIVARet" name="cmbIVARet" aria-label="IVA Ret">
+                                </select>
+                                <label for="cmbIVARet">IVA Ret</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbISR" name="cmbISR" aria-label="ISR Ret">
+                                </select>
+                                <label for="cmbISR">ISR Ret</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-secondary btn-lg" style="margin-top:10px;" id="btn-CancelarConcepto" onclick="cancelarConcepto();"><i class="fas fa-remove"></i>&nbsp; Cancelar</button>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success btn-lg" style="margin-top:10px;" id="btn-AgregarConcepto"><i class="fas fa-plus"></i>&nbsp; Agregar Concepto</button>
+                                <button type="submit" class="btn btn-warning btn-lg" style="margin-top:10px;" id="btn-EditarConcepto"><i class="fas fa-edit"></i>&nbsp; Editar Concepto</button>
+
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table id="datatables-conceptos-nota" class="table table-striped table-secondary" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th></th>
+                                        <th>Clave</th>
+                                        <th>Concepto</th>
+                                        <th></th>
+                                        <th>ID SAT</th>
+                                        <th>Cantidad</th>
+                                        <th></th>
+                                        <th>Unidad</th>
+                                        <th>Precio Unitario</th>
+                                        <th>Importe</th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th>IVA</th>
+                                        <th>IVA Ret</th>
+                                        <th>ISR Ret</th>
+                                        <th></th>
+                                        <th></th>
+                                        <th>Descuento</th>
+                                        <th>Total</th>
+                                        <th></th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtTotalImporte" placeholder="Subtotal" style="text-align:right;" readonly>
+                                <label for="txtTotalImporte">Subtotal</label>
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtTotalIVA" placeholder="Total IVA" style="text-align:right;" readonly>
+                                <label for="txtTotalIVA">Total IVA</label>
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtTotalIVARet" placeholder="IVA Ret" style="text-align:right;" readonly>
+                                <label for="txtTotalIVARet">Total IVA Ret</label>
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtTotalISRRet" placeholder="ISR Ret" style="text-align:right;" readonly>
+                                <label for="txtTotalISRRet">Total ISR Ret</label>
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtTotalDescuento" placeholder="Descuento" style="text-align:right;" readonly>
+                                <label for="txtTotalDescuento">Descuento</label>
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtTotal" placeholder="Total" style="text-align:right;" readonly>
+                                <label for="txtTotal">Total</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+                            <button type="button" class="btn btn-success" onclick="guardarNotaVenta();"><i class="fas fa-save"></i>&nbsp; Guardar Datos</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+<form id="CancelarNotaVenta.Panel" method="get" action="@Url.Action("CancelarNotaVenta","Panel")" onsubmit="return validateCancelar();">
+    <div class="modal fade" id="modalCancelarNota" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Cancelar Nota de Venta</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body m-3">
+                    <input type="hidden" id="id_nota_venta" name="id_nota_venta" required />
+                    <div class="row">
+                        <div class="col-md-7">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtClienteRazon" placeholder="Cliente" readonly>
+                                <label for="txtClienteRazon">Cliente</label>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtTotalNota" placeholder="Total" readonly>
+                                <label for="txtTotalNota">Total</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+                    <button type="submit" class="btn btn-danger" data-bs-dismiss="modal"><i class="fas fa-ban"></i>&nbsp; Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form id="PagarNotaVenta.Panel" method="post" action="@Url.Action("PagarNotaVenta","Panel")" onsubmit="return validatePagar();" enctype="multipart/form-data">
+    <div class="modal fade" id="modalPagoNota" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Pagar Nota de Venta</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body m-3">
+                    <input type="hidden" id="id_nota_venta_pago" name="id_nota_venta_pago" required />
+                    <input type="hidden" id="txtFechaPago" name="txtFechaPago" required />
+                    <div class="row">
+                        <div class="col-md-7">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbFormaPago" name="cmbFormaPago" aria-label="Forma de Pago">
+                                </select>
+                                <label for="cmbFormaPago">Forma de Pago</label>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control form-control-lg" id="txtTotalPagoNota" name="txtTotalPagoNota" placeholder="Total" min="1" pattern="^[0-9]+" required>
+                                <label for="txtTotalPagoNota">Total</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-7">
+                            <small>Selecciona tu archivo de <strong>comprobande de pago</strong> </small>
+                            <div class="input-group mb-3">
+                                <input type="file" class="form-control form-control-lg" id="fileComprobantePago" name="fileComprobantePago">
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtFechaPagoValido" name="txtFechaPagoValido" placeholder="Fecha de Pago" value="@DateTime.Now.ToString("dd/MM/yyyy HH:mm")" required>
+                                <label for="txtFechaPagoValido">Fecha de Pago</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbUsoCFDI" name="cmbUsoCFDI" aria-label="Uso CFDI">
+                                </select>
+                                <label for="cmbUsoCFDI">Uso CFDI</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table id="datatables-historico-pagos" class="table table-striped" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th></th>
+                                        <th>Fecha</th>
+                                        <th>Tipo Pago</th>
+                                        <th>Abono</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyHistoricoPagos">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+                    <button type="submit" class="btn btn-success" id="btnHacerPago"><i class="fas fa-money-bill"></i>&nbsp; Pagar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+
+<div class="modal fade" id="modalEnviarCorreo" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Enviar Nota de Venta</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body m-3">
+                <input type="hidden" id="txtIdNotaVentaCorreo" />
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg text-uppercase" id="txtRFCClienteContactos" placeholder="RFC" readonly>
+                            <label for="txtRFCClienteContactos">RFC</label>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg text-uppercase" id="txtNombreRazonClienteContactos" placeholder="Nombre / Razón Social" readonly>
+                            <label for="txtNombreRazonClienteContactos">Nombre / Razón Social</label>
+                        </div>
+                    </div>
+                </div>
+                <hr /><br />
+                <div class="row">
+                    <div class="col-md-12">
+                        <table id="datatables-contactos-clientes" class="table table-striped" style="width:100%;">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    <th>Nombre Completo</th>
+                                    <th>Puesto</th>
+                                    <th>Correo Electrónico</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyContactosClientes"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="enviarNotaSeleccion();"><i class="fas fa-envelope"></i>&nbsp; Enviar Nota de Venta</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    var tbHistoricoPagos;
+    var tbContactosCliente;
+    function enviarNotaSeleccion() {
+        var array = tbContactosCliente.rows()
+            .data().toArray();
+        var listaCorreos = [];
+        var rowcollection = tbContactosCliente.$("[type=checkbox]", { "page": "all" });
+        rowcollection.each(function (index, elem) {
+            if (elem.checked) {
+                var item = array[index]
+                var nombre = item[2];
+                var puesto = item[3];
+                var correo = item[4];
+                var rfc = $("#txtRFCClienteContactos").val();
+                var nombre_razon = $("#txtNombreRazonClienteContactos").val();
+                listaCorreos.push({
+                    nombre: nombre,
+                    puesto: puesto,
+                    correo: correo,
+                    rfc: rfc,
+                    nombre_razon, nombre_razon
+                });
+            }
+        });
+
+        if (listaCorreos.length == 0) {
+            notificacionAlert("Debe seleccionar por lo menos un correo de la lista.", "danger");
+        }
+        else {
+            abrirCargando();
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                url: '@Url.Action("enviarCorreosNota","Panel")',
+                data: JSON.stringify({ 'correos': listaCorreos, 'txtIdNotaVenta': $("#txtIdNotaVentaCorreo").val() }),
+                success: function (data) {
+                    var response = data;
+                    if (response.Estatus == 1) {
+                        notificacionAlert(response.Mensaje, "success");
+                    }
+                    else {
+                        notificacionAlert(response.Mensaje, "danger");
+                    }
+                    cerrarCargando();
+                }
+            });
+        }
+    }
+
+    function enviarCorreo(a, b, c, d) {
+        $("#txtIdNotaVentaCorreo").val(a);
+        $("#txtRFCClienteContactos").val(b);
+        $("#txtNombreRazonClienteContactos").val(c);
+        abrirCargando();
+        tbContactosCliente.destroy();
+        $.get("@Url.Action("obtenerContactosEnvio", "Catalogos")?id="+ d, function (data) {
+            $("#tbodyContactosClientes").html(data);
+            tbContactosCliente = $("#datatables-contactos-clientes").DataTable({
+                responsive: true,
+                'columnDefs': [
+                    { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1] }
+                ],
+                order: [[2, 'asc']]
+            });
+            cerrarCargando();
+        });
+    }
+
+    function validatePagar() {
+		$("#txtFechaPago").val($("#txtFechaPagoValido").data('daterangepicker').startDate.format('YYYY/MM/DD HH:mm'));
+        let nota = document.forms["CancelarNotaVenta.Panel"]["id_nota_venta_pago"].value;
+        if (nota != "") {
+
+            abrirCargando();
+            return true;
+        }
+        return false;
+    }
+
+    function validateCancelar() {
+        let nota = document.forms["CancelarNotaVenta.Panel"]["id_nota_venta"].value;
+        if (nota != "") {
+            abrirCargando();
+            return true;
+        }
+        return false;
+    }
+
+    function pagarNota(a, b) {
+        abrirCargando();
+        if (b == 0) {
+            $("#btnHacerPago").hide();
+        }
+        else {
+            $("#btnHacerPago").show();
+        }
+        $("#id_nota_venta_pago").val(a);
+        $("#cmbFormaPago").val($("#cmbFormaPago option:first").val());
+        $("#txtTotalPagoNota").val(b);
+        $("#txtTotalPagoNota").prop("max", b);
+        $("#cmbUsoCFDI").val(13);
+
+        $("#txtFechaPagoValido").val(moment().format("DD/MM/YYYY HH:mm"));
+
+
+        tbHistoricoPagos.destroy();
+        $.get("@Url.Action("obtenerHistoricoPagos", "Panel")?id=" + a, async function (data) {
+            $("#tbodyHistoricoPagos").html(data);
+
+            tbHistoricoPagos = $("#datatables-historico-pagos").DataTable({
+                responsive: true,
+                'columnDefs': [
+                    { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1, 2, 3, 4, 5] }
+                ],
+                order: [[2, 'asc']]
+            });
+            cerrarCargando();
+        });
+    }
+
+    function cancelarNota(a, b, c) {
+        $("#id_nota_venta").val(a);
+        $("#txtClienteRazon").val(b);
+        $("#txtTotalNota").val(c);
+    }
+
+    var cacheUnidad = {};
+    var cacheSAT = {};
+    var cacheRFC = {};
+    var cacheConcepto = {};
+    var TableConceptos;
+    var dataEdit;
+    document.addEventListener("DOMContentLoaded", function () {
+
+        tbContactosCliente = $("#datatables-contactos-clientes").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1] }
+            ],
+            order: [[2, 'asc']]
+        });
+
+        tbHistoricoPagos = $("#datatables-historico-pagos").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1, 2, 3, 4, 5] }
+            ],
+            order: [[2, 'asc']]
+        });
+
+        $('#txtFechaPagoValido').daterangepicker({
+            singleDatePicker: true,
+            timePicker: true,
+            timePicker24Hour: true,
+            locale: {
+                format: "DD/MM/YYYY HH:mm"
+            }
+        });
+
+
+        $.get("@Url.Action("obtenerFormaPago", "Catalogos")", function (data) {
+            $("#cmbFormaPago").html(data);
+        });
+
+         $.get("@Url.Action("obtenerUsoCFDI", "Catalogos")", function (data) {
+            $("#cmbUsoCFDI").html(data);
+         });
+
+        $.get("@Url.Action("obtenerCuentas", "Catalogos")", function (data) {
+            $("#cmbCuentas").html(data);
+        });
+
+
+
+        $("#btn-EditarConcepto").hide();
+        $("#btn-CancelarConcepto").hide();
+        $("#btn-AgregarConcepto").show();
+
+        $(document.forms["GuardarNotaVenta.Panel"]).on('submit', function (e) {
+            var $btn = $(e.originalEvent.submitter);
+            var $Form = document.forms["GuardarNotaVenta.Panel"];
+            var t = TableConceptos;
+
+            if ($Form["txtPrecioUnitario"].value <= 0) {
+                notificacionAlert("Debe capturar un precio unitario mayor a cero.", "danger");
+                return false;
+            }
+
+
+            if ($btn.attr('id') == "btn-AgregarConcepto") {
+
+                if ($Form["txtIdSAT"].value != "") {
+                    if ($("#txtIDSat").hasClass("is-invalid")) {
+                        notificacionAlert("Debe seleccionar un ID SAT válido.", "danger");
+                        return false;
+                    }
+                }
+                else {
+                    notificacionAlert("No ha seleccionado un ID SAT.", "danger");
+                    $("#txtIDSat").removeClass("is-invalid");
+                    $("#txtIDSat").removeClass("is-valid");
+                    $("#txtIDSat").addClass("is-invalid");
+                    return false;
+                }
+
+                if ($Form["txtIdUnidad"].value != "") {
+                    if ($("#txtUnidad").hasClass("is-invalid")) {
+                        notificacionAlert("Debe seleccionar una unidad de medida válida.", "danger");
+                        return false;
+                    }
+                }
+                else {
+                    notificacionAlert("No ha seleccionado una unidad de medida.", "danger");
+                    $("#txtUnidad").removeClass("is-invalid");
+                    $("#txtUnidad").removeClass("is-valid");
+                    $("#txtUnidad").addClass("is-invalid");
+                    return false;
+                }
+
+                t.row.add(
+                    {
+                        "seleccion": "",
+                        "acciones": '<a href="#" class="btn btn-warning btn-sm icon-editar" title="Editar Concepto"><i class="fas fa-edit"></i></a> &nbsp;&nbsp; <a href="#" class="btn btn-danger btn-sm icon-delete" title="Eliminar Concepto"><i class="fas fa-trash"></i></a>',
+                        "clave": $Form["txtClaveInterna"].value,
+                        "concepto": $Form["txtConcepto"].value,
+                        "id_sat": $Form["txtIdSAT"].value,
+                        "clave_sat": $Form["txtIDSat"].value,
+                        "cantidad": $Form["txtCantidad"].value,
+                        "id_unidad_medida": $Form["txtIdUnidad"].value,
+                        "unidad": $Form["txtUnidad"].value,
+                        "precio_unitario": $Form["txtPrecioUnitario"].value,
+                        "importe": 0,
+                        "id_iva": $Form["cmbIVA"].value,
+                        "id_iva_ret": $Form["cmbIVARet"].value,
+                        "id_isr": $Form["cmbISR"].value,
+                        "total_iva": 0,
+                        "total_iva_ret": 0,
+                        "total_isr": 0,
+                        "tipo_descuento": $Form["cmbDescuento"].value,
+                        "descuento": $Form["txtDescuento"].value,
+                        "total_descuento": 0,
+                        "total": 0,
+                        "id_detalle_nota_venta": 0,
+                        "id_nota_venta": 0
+                    }
+                );
+                t.columns.adjust().draw(false);
+                cancelarConcepto();
+                notificacionAlert("El concepto se agrego correctamente.", "success");
+                calcularImporte();
+                return false;
+            }
+
+            if ($btn.attr('id') == "btn-EditarConcepto") {
+
+
+                if ($Form["txtIdSAT"].value != "") {
+                    if ($("#txtIDSat").hasClass("is-invalid")) {
+                        notificacionAlert("Debe seleccionar un ID SAT válido.", "danger");
+                        return false;
+                    }
+                }
+                else {
+                    notificacionAlert("No ha seleccionado un ID SAT.", "danger");
+                    $("#txtIDSat").removeClass("is-invalid");
+                    $("#txtIDSat").removeClass("is-valid");
+                    $("#txtIDSat").addClass("is-invalid");
+                    return false;
+                }
+
+                if ($Form["txtIdUnidad"].value != "") {
+                    if ($("#txtUnidad").hasClass("is-invalid")) {
+                        notificacionAlert("Debe seleccionar una unidad de medida válida.", "danger");
+                        return false;
+                    }
+                }
+                else {
+                    notificacionAlert("No ha seleccionado una unidad de medida.", "danger");
+                    $("#txtUnidad").removeClass("is-invalid");
+                    $("#txtUnidad").removeClass("is-valid");
+                    $("#txtUnidad").addClass("is-invalid");
+                    return false;
+                }
+
+
+                var data = dataEdit.data();
+
+                data.clave = $Form["txtClaveInterna"].value;
+                data.concepto = $Form["txtConcepto"].value;
+                data.id_sa = $Form["txtIdSAT"].value;
+                data.clave_sat = $Form["txtIDSat"].value;
+                data.cantidad = $Form["txtCantidad"].value;
+                data.id_unidad_medida = $Form["txtIdUnidad"].value;
+                data.unidad = $Form["txtUnidad"].value;
+                data.precio_unitario = $Form["txtPrecioUnitario"].value;
+                data.id_iva = $Form["cmbIVA"].value;
+                data.id_iva_ret = $Form["cmbIVARet"].value;
+                data.id_isr = $Form["cmbISR"].value;
+                data.tipo_descuento = $Form["cmbDescuento"].value;
+                data.descuento = $Form["txtDescuento"].value;
+
+                dataEdit.data(data).draw();
+                t.columns.adjust().draw(false);
+                notificacionAlert("El concepto se actualizo correctamente.", "success");
+                cancelarConcepto();
+                calcularImporte();
+                return false;
+            }
+        });
+
+        $("#datatables-reporte-ingresos").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1, 2] }
+            ],
+            order: [[6, 'desc']]
+        });
+
+        TableConceptos = $("#datatables-conceptos-nota").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { visible: true, orderable: false, searchable: false, targets: 0, name: "seleccion", data: "seleccion" },
+                { visible: true, orderable: false, searchable: false, targets: 1, name: "acciones", data: "acciones" },
+                { visible: true, orderable: true, searchable: true, targets: 2, name: "clave", data: "clave" },
+                { visible: true, orderable: true, searchable: true, targets: 3, name: "concepto", data: "concepto" },
+                { visible: false, orderable: false, searchable: false, targets: 4, name: "id_sat", data: "id_sat" },
+                { visible: true, orderable: true, searchable: true, targets: 5, name: "clave_sat", data: "clave_sat" },
+                { visible: true, orderable: true, searchable: true, targets: 6, name: "cantidad", data: "cantidad" },
+                { visible: false, orderable: false, searchable: false, targets: 7, name: "id_unidad_medida", data: "id_unidad_medida" },
+                { visible: true, orderable: true, searchable: true, targets: 8, name: "unidad", data: "unidad" },
+                { visible: true, orderable: true, searchable: true, targets: 9, name: "precio_unitario", data: "precio_unitario" },
+                { visible: true, orderable: true, searchable: true, targets: 10, name: "importe", data: "importe" },
+                { visible: false, orderable: false, searchable: false, targets: 11, name: "id_iva", data: "id_iva" },
+                { visible: false, orderable: false, searchable: false, targets: 12, name: "id_iva_ret", data: "id_iva_ret" },
+                { visible: false, orderable: false, searchable: false, targets: 13, name: "id_isr", data: "id_isr" },
+                { visible: true, orderable: true, searchable: true, targets: 14, name: "total_iva", data: "total_iva" },
+                { visible: false, orderable: false, searchable: false, targets: 15, name: "total_iva_ret", data: "total_iva_ret" },
+                { visible: false, orderable: false, searchable: false, targets: 16, name: "total_isr", data: "total_isr" },
+                { visible: false, orderable: false, searchable: false, targets: 17, name: "tipo_descuento", data: "tipo_descuento" },
+                { visible: false, orderable: false, searchable: false, targets: 18, name: "descuento", data: "descuento" },
+                { visible: false, orderable: false, searchable: false, targets: 19, name: "total_descuento", data: "total_descuento" },
+                { visible: true, orderable: true, searchable: true, targets: 20, name: "total", data: "total" },
+                { visible: false, orderable: false, searchable: false, targets: 21, name: "id_detalle_nota_venta", data: "id_detalle_nota_venta" },
+                { visible: false, orderable: false, searchable: false, targets: 22, name: "id_nota_venta", data: "id_nota_venta" }
+            ],
+            order: [[3, 'asc']]
+        });
+
+        $('#datatables-conceptos-nota tbody').on('click', '.icon-delete', function () {
+
+            if ($("#btn-EditarConcepto").is(":visible")) {
+                notificacionAlert("No se pueden eliminar conceptos mientras se este editando alguno de ellos.", "danger");
+            }
+            else {
+                var t = TableConceptos;
+                t.row($(this).parents('tr')).remove();
+                t.columns.adjust().draw(false);
+                calcularImporte();
+            }
+        });
+
+        $('#datatables-conceptos-nota tbody').on('click', '.icon-editar', function () {
+            $("#btn-EditarConcepto").show();
+            $("#btn-CancelarConcepto").show();
+            $("#btn-AgregarConcepto").hide();
+
+            var t = TableConceptos;
+            dataEdit = t.row($(this).parents('tr'));
+            var data = dataEdit.data();
+            $("#txtClaveInterna").val(data.clave);
+            $("#txtConcepto").val(data.concepto);
+
+            $("#txtPrecioUnitario").val(data.precio_unitario);
+            $("#txtCantidad").val(data.cantidad);
+
+            $("#txtIdSAT").val(data.id_sat);
+            $("#txtIDSat").val(data.clave_sat);
+            $("#txtIDSat").removeClass("is-invalid");
+            $("#txtIDSat").removeClass("is-valid");
+            $("#txtIDSat").addClass("is-valid");
+
+            $("#txtIdUnidad").val(data.id_unidad_medida);
+            $("#txtUnidad").val(data.unidad);
+            $("#txtUnidad").removeClass("is-invalid");
+            $("#txtUnidad").removeClass("is-valid");
+            $("#txtUnidad").addClass("is-valid");
+
+            $("#cmbDescuento").val(data.tipo_descuento);
+            $("#txtDescuento").val(data.descuento);
+            $("#cmbIVA").val(data.id_iva);
+            $("#cmbIVARet").val(data.id_iva_ret);
+            $("#cmbISR").val(data.id_isr);
+
+
+        });
+
+        $.get("@Url.Action("obtenerIVA", "Catalogos")", function (data) {
+            $("#cmbIVA").html(data);
+        });
+        $.get("@Url.Action("obtenerIVARet", "Catalogos")", function (data) {
+            $("#cmbIVARet").html(data);
+        });
+        $.get("@Url.Action("obtenerISR", "Catalogos")", function (data) {
+            $("#cmbISR").html(data);
+        });
+
+        $("#txtUnidad").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 1) {
+                    $("#txtUnidad").removeClass("is-invalid");
+                    $("#txtUnidad").removeClass("is-valid");
+                    $("#txtUnidad").addClass("is-invalid");
+                    if (term in cacheUnidad) {
+                        response(cacheUnidad[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerUnidadesMedida", "Catalogos")", request, function (data, status, xhr) {
+                        cacheUnidad[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtUnidad").removeClass("is-invalid");
+                    $("#txtUnidad").removeClass("is-valid");
+                    $("#txtUnidad").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtUnidad").val(ui.item.label);
+                $("#txtIdUnidad").val(ui.item.value);
+                $("#txtUnidad").removeClass("is-invalid");
+                $("#txtUnidad").removeClass("is-valid");
+                $("#txtUnidad").addClass("is-valid");
+                $("#txtUnidad").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+
+        $("#txtIDSat").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+                if (term.length > 2) {
+                    $("#txtIDSat").removeClass("is-invalid");
+                    $("#txtIDSat").removeClass("is-valid");
+                    $("#txtIDSat").addClass("is-invalid");
+                    if (term in cacheSAT) {
+                        response(cacheSAT[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obteneridSAT", "Catalogos")", request, function (data, status, xhr) {
+                        cacheSAT[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtIDSat").removeClass("is-invalid");
+                    $("#txtIDSat").removeClass("is-valid");
+                    $("#txtIDSat").addClass("is-invalid");
+                    response([]);
+                }
+            },
+            select: function (event, ui) {
+                $("#txtIDSat").val(ui.item.label);
+                $("#txtIdSAT").val(ui.item.value);
+                $("#txtIDSat").removeClass("is-invalid");
+                $("#txtIDSat").removeClass("is-valid");
+                $("#txtIDSat").addClass("is-valid");
+                $("#txtIDSat").removeClass("ui-autocomplete-loading");
+                return false;
+            }
+        });
+
+        $("#txtRFC").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+
+                if (term.length > 2) {
+                    $("#txtRFC").removeClass("is-invalid");
+                    $("#txtRFC").removeClass("is-valid");
+                    $("#txtRFC").addClass("is-invalid");
+                    if (term in cacheRFC) {
+                        response(cacheRFC[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerRFCCliente", "Catalogos")", request, function (data, status, xhr) {
+                        cacheRFC[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    $("#txtRFC").removeClass("is-invalid");
+                    $("#txtRFC").removeClass("is-valid");
+                    $("#txtRFC").addClass("is-invalid");
+                    response([]);
+                }
+
+            },
+            select: function (event, ui) {
+                $("#txtRFC").val(ui.item.rfc);
+                $("#txtIdCliente").val(ui.item.value);
+                $("#txtNombreRazonCliente").val(ui.item.name);
+                $("#txtRFC").removeClass("is-invalid");
+                $("#txtRFC").removeClass("is-valid");
+                $("#txtRFC").addClass("is-valid");
+                return false;
+            }
+        });
+
+        $("#txtConcepto").autocomplete({
+            minLength: 1,
+            source: function (request, response) {
+                var term = request.term;
+
+                if (term.length > 3) {
+                    if (term in cacheConcepto) {
+                        response(cacheConcepto[term]);
+                        return;
+                    }
+                    $.getJSON("@Url.Action("obtenerProductos", "Catalogos")", request, function (data, status, xhr) {
+                        cacheConcepto[term] = data;
+                        response(data);
+                    });
+                }
+                else {
+                    response([]);
+                }
+
+            },
+            select: function (event, ui) {
+                $("#txtConcepto").val(ui.item.label);
+
+                $("#txtIdUnidad").val(ui.item.id_unidad);
+                $("#txtUnidad").val(ui.item.unidad);
+                $("#txtIdSAT").val(ui.item.id_sat);
+                $("#txtIDSat").val(ui.item.c_sat);
+
+                $("#txtClaveInterna").val(ui.item.clave);
+                $("#txtPrecioUnitario").val(ui.item.precio);
+
+                $("#cmbIVA").val(ui.item.id_iva);
+                $("#cmbIVARet").val(ui.item.id_iva_ret);
+                $("#cmbISR").val(ui.item.id_isr_ret);
+
+                $("#txtUnidad").addClass("is-valid");
+                $("#txtUnidad").removeClass("ui-autocomplete-loading");
+
+                $("#txtIDSat").addClass("is-valid");
+                $("#txtIDSat").removeClass("ui-autocomplete-loading");
+
+                return false;
+            }
+        });
+    });
+
+    function nuevaNotaVenta() {
+        document.forms["GuardarNotaVenta.Panel"].reset();
+        $("#txtIdNotaVenta").val(0);
+        $("#txtIdCliente").val("");
+        $("#txtSerie").val("");
+        $("#cmbDescuento").val(1);
+        $("#txtDescuento").val(0);
+        $("#cmbIVA").val($("#cmbIVA option:first").val());
+        $("#cmbIVARet").val($("#cmbIVARet option:last").val());
+        $("#cmbISR").val($("#cmbISR option:last").val());
+
+        $("#txtUnidad").removeClass("is-invalid");
+        $("#txtUnidad").removeClass("is-valid");
+        $("#txtIDSat").removeClass("is-invalid");
+        $("#txtIDSat").removeClass("is-valid");
+
+        $("#txtRFC").removeClass("is-invalid");
+        $("#txtRFC").removeClass("is-valid");
+
+        $("#txtSerie").removeClass("is-invalid");
+        $("#txtSerie").removeClass("is-valid");
+
+        $("#btn-EditarConcepto").hide();
+        $("#btn-CancelarConcepto").hide();
+        $("#btn-AgregarConcepto").show();
+
+        $("#txtIdUnidad").val(0);
+        $("#txtIdSAT").val(0);
+
+        $("#txtTotalIVA").val(formatoMoneda(0));
+        $("#txtTotalIVARet").val(formatoMoneda(0));
+        $("#txtTotalISRRet").val(formatoMoneda(0));
+        $("#txtTotalDescuento").val(formatoMoneda(0));
+        $("#txtTotal").val(formatoMoneda(0));
+        $("#txtTotalImporte").val(formatoMoneda(0));
+        TableConceptos.clear().draw(false);
+
+    }
+
+    function cancelarConcepto() {
+        $("#btn-EditarConcepto").hide();
+        $("#btn-CancelarConcepto").hide();
+        $("#btn-AgregarConcepto").show();
+
+        var noVenta = $("#txtIdNotaVenta").val();
+        var idCliente = $("#txtIdCliente").val();
+        var txtCliente = $("#txtNombreRazonCliente").val();
+        var txtRFC = $("#txtRFC").val();
+        var txtSerie = $("#txtSerie").val();
+        var a = $("#txtTotalIVA").val();
+        var b = $("#txtTotalIVARet").val();
+        var c = $("#txtTotalISRRet").val();
+        var d = $("#txtTotalDescuento").val();
+        var e = $("#txtTotal").val();
+        var idCuenta = $("#cmbCuentas").val();
+
+        document.forms["GuardarNotaVenta.Panel"].reset();
+        $("#txtIdNotaVenta").val(noVenta);
+        $("#txtIdCliente").val(idCliente);
+        $("#txtNombreRazonCliente").val(txtCliente);
+        $("#txtRFC").val(txtRFC);
+        $("#txtSerie").val(txtSerie);
+        $("#txtTotalIVA").val(a);
+        $("#txtTotalIVARet").val(b);
+        $("#txtTotalISRRet").val(c);
+        $("#txtTotalDescuento").val(d);
+        $("#txtTotal").val(e);
+        $("#cmbCuentas").val(idCuenta);
+
+
+        $("#cmbDescuento").val(1);
+        $("#txtDescuento").val(0);
+        $("#cmbIVA").val($("#cmbIVA option:first").val());
+        $("#cmbIVARet").val($("#cmbIVARet option:last").val());
+        $("#cmbISR").val($("#cmbISR option:last").val());
+
+        $("#txtUnidad").removeClass("is-invalid");
+        $("#txtUnidad").removeClass("is-valid");
+        $("#txtIDSat").removeClass("is-invalid");
+        $("#txtIDSat").removeClass("is-valid");
+
+        $("#btn-EditarConcepto").hide();
+        $("#btn-CancelarConcepto").hide();
+        $("#btn-AgregarConcepto").show();
+
+        $("#txtIdUnidad").val(0);
+        $("#txtIdSAT").val(0);
+
+    }
+
+    function agregarConcepto() {
+
+        var $validationForm = $(document.forms["GuardarNotaVenta.Panel"]);
+
+        var a = $validationForm.serialize();
+
+
+        return false;
+    }
+
+    function calcularImporte() {
+
+        var array = TableConceptos.rows()
+            .data().toArray();
+        if (array.length > 0) {
+            abrirCargando();
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                url: '@Url.Action("calcularImportes","Panel")',
+                data: JSON.stringify({ 'conceptos': array }),
+                success: function (data) {
+                    var response = data;
+
+                    $("#txtTotalIVA").val(formatoMoneda(response.Total_IVA));
+                    $("#txtTotalIVARet").val(formatoMoneda(response.Total_IVARet));
+                    $("#txtTotalISRRet").val(formatoMoneda(response.Total_ISRRet));
+                    $("#txtTotalDescuento").val(formatoMoneda(response.Total_Descuento));
+                    $("#txtTotal").val(formatoMoneda(response.Total));
+                    $("#txtTotalImporte").val(formatoMoneda(response.Total_Importe));
+                    TableConceptos.clear().draw(false);
+                    TableConceptos.rows.add(response.Data);
+                    TableConceptos.columns.adjust().draw(false);
+                    cerrarCargando();
+                }
+            });
+        } else {
+            $("#txtTotalIVA").val(0);
+            $("#txtTotalIVARet").val(0);
+            $("#txtTotalISRRet").val(0);
+            $("#txtTotalDescuento").val(0);
+            $("#txtTotal").val(0);
+            $("#txtTotalImporte").val(0);
+        }
+    }
+
+    function guardarNotaVenta() {
+
+        var $Form = document.forms["GuardarNotaVenta.Panel"];
+
+        if ($Form["txtIdCliente"].value != "") {
+            if ($("#txtRFC").val() == "" || $("#txtRFC").hasClass("is-invalid")) {
+                notificacionAlert("Debe seleccionar un RFC válido.", "danger");
+            }
+            else {
+                if ($("#txtSerie").val() == "") {
+                    notificacionAlert("Debe capturar una Serie válida.", "danger");
+                }
+                else {
+                    var array = TableConceptos.rows()
+                        .data().toArray();
+                    if (array.length == 0) {
+                        notificacionAlert("Debe haber por lo menos un concepto para hacer la nota de venta.", "danger");
+                    }
+                    else {
+                        abrirCargando();
+                        $.ajax({
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            url: '@Url.Action("guardarNotaVenta","Panel")',
+                            data: JSON.stringify({ 'conceptos': array, 'txtIdCliente': $Form["txtIdCliente"].value, 'txtIdNotaVenta': $Form["txtIdNotaVenta"].value, 'txtSerie': $Form["txtSerie"].value, 'txtIdCuenta': $Form["cmbCuentas"].value }),
+                            success: function (data) {
+                                var response = data;
+                                if (response.Estatus == 1) {
+                                    window.location = '@Url.Action("NotasVentas","Panel")';
+                                }
+                                else {
+                                    notificacionAlert(response.Mensaje, "danger");
+                                }
+                                cerrarCargando();
+                            }
+                        });
+                    }
+                }
+            }
+        }
+        else {
+            notificacionAlert("No ha seleccionado un RFC válido.", "danger");
+            $("#txtRFC").removeClass("is-invalid");
+            $("#txtRFC").removeClass("is-valid");
+            $("#txtRFC").addClass("is-invalid");
+            return false;
+        }
+
+
+    }
+
+    function descargarPDF(id) {
+        window.location = '@Url.Action("DescargarNotaVenta", "Panel")' + '?idNotaVenta=' + id;
+    }
+
+    function loadFile(url, callback) {
+        PizZipUtils.getBinaryContent(url, callback);
+    }
+    function generarPDF(id, render) {
+        var renderPDF = JSON.parse(render);
+        for (var i = 0; i < renderPDF.productos.length; i++) {
+            renderPDF.productos[i].pu = formatoMoneda(renderPDF.productos[i].pu);
+            renderPDF.productos[i].imp = formatoMoneda(renderPDF.productos[i].imp);
+        }
+        abrirCargando();
+        loadFile(
+            "../../Plantillas/NotaVenta_v12.docx",
+            function (error, content) {
+                if (error) {
+                    throw error;
+                }
+                var zip = new PizZip(content);
+                var doc = new window.docxtemplater(zip, {
+                    paragraphLoop: true,
+                    linebreaks: true,
+                });
+                doc.render(renderPDF);
+                var out = doc.getZip().generate({
+                    type: "blob",
+                    mimeType:
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    compression: "DEFLATE"
+                });
+                var fd = new FormData();
+                fd.append('docx', out);
+                fd.append('idNotaVenta', id);
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("AlmacenarNota", "Panel")',
+                    data: fd,
+                    processData: false,
+                    contentType: false
+                }).done(async function (data) {
+                    cerrarCargando();
+                    descargarPDF(id);
+                });
+            }
+        );
+    }
+
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.29.0/docxtemplater.js"></script>
+<script src="https://unpkg.com/pizzip@3.1.1/dist/pizzip.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.js"></script>
+<script src="https://unpkg.com/pizzip@3.1.1/dist/pizzip-utils.js"></script>

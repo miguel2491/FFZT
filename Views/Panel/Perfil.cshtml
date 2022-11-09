@@ -1,0 +1,313 @@
+﻿@model Facturafast.Models.tbc_Usuarios
+<h1 class="h3 mb-3">Información del Perfil</h1>
+
+<div class="row">
+    <div class="col-md-3 col-xl-2">
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Configuración</h5>
+            </div>
+
+            <div class="list-group list-group-flush" role="tablist">
+                <a class="list-group-item list-group-item-action @(ViewBag.TabPassword != null ? "" : "active")" data-bs-toggle="list" href="#account" role="tab">
+                    Cuenta
+                </a>
+                <a class="list-group-item list-group-item-action @(ViewBag.TabPassword != null ? "active" : "")" data-bs-toggle="list" href="#password" role="tab">
+                    Cambio de Contraseña
+                </a>
+                
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-9 col-xl-10">
+        <div class="tab-content">
+            <div class="tab-pane fade @(ViewBag.TabPassword != null ? "" : "show active")" id="account" role="tabpanel">
+                <form name="ActualizarPerfil.Panel" action="@Url.Action("ActualizarPerfil","Panel")"  method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-actions float-end">
+
+                            </div>
+                            <h5 class="card-title mb-0">Información General</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control form-control-lg" id="txtRFC" name="txtRFC" placeholder="RFC" value="@Model.rfc" required>
+                                        <label for="txtRFC">RFC</label>
+                                    </div>
+                                    <div class="form-floating mb-3">
+                                        <textarea type="text" class="form-control form-control-lg" id="txtNombreRazon" name="txtNombreRazon" style="height:120px;" placeholder="Nombre / Razón Social" required>@Model.nombre_razon</textarea>
+                                        <label for="txtNombreRazon">Nombre / Razón Social</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="text-center">
+                                        <img src="~/img/logos/@Model.url_imagen" class="rounded-circle img-responsive mt-2" width="128" height="128" />
+                                        <div class="mt-2">
+                                            <div class="row">
+                                                <div class="col-md-2">
+
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <input type="file" class="form-control " id="imgImagen" name="imgImagen" accept=".png">
+                                                </div>
+                                                <div class="col-md-2">
+
+                                                </div>
+                                            </div>
+                                            
+                                        </div>
+                                        <small>Use una imagen de al menos 128 x 128 px en formato png</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3">
+                                        <select class="form-select form-select-lg" id="cmbTipoPersona" name="cmbTipoPersona" aria-label="Tipo de Persona">
+                                            <option value="1">Física</option>
+                                            <option value="2">Moral</option>
+                                        </select>
+                                        <label for="cmbTipoPersona">Tipo de Persona</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3">
+                                        <select class="form-select form-select-lg" id="cmbRegimenFiscal" name="cmbRegimenFiscal" aria-label="Régimen Fiscal">
+                                            <option value="1">Sueldos y Salarios e Ingresos Asimilados a Salarios</option>
+                                            <option value="2">Arrendamiento</option>
+                                            <option value="3">Demás ingresos</option>
+                                            <option value="4">Residentes en el Extranjero sin Establecimiento Permanente en México</option>
+                                            <option value="5">Ingresos por Dividendos (socios y accionistas)</option>
+                                            <option value="6">Personas Físicas con Actividades Empresariales y Profesionales</option>
+                                            <option value="7">Ingresos por intereses</option>
+                                            <option value="8">Régimen de los ingresos por obtención de premios</option>
+                                            <option value="9">Sin obligaciones fiscales</option>
+                                            <option value="10">Incorporación Fiscal</option>
+                                            <option value="11">Actividades Agrícolas, Ganaderas, Silvícolas y Pesqueras</option>
+                                            <option value="12">Régimen de las Actividades Empresariales con ingresos a través de Plataformas Tecnológicas</option>
+                                            <option value="13">Régimen Simplificado de Confianza</option>
+                                            <option value="14">De los Regímenes Fiscales Preferentes y de las Empresas Multinacionales</option>
+                                            <option value="15">Enajenación de acciones en bolsa de valores</option>
+                                            <option value="16">General de Ley Personas Morales</option>
+                                        </select>
+                                        <label for="cmbRegimenFiscal">Régimen Fiscal</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control form-control-lg" id="txtTelefono" name="txtTelefono" placeholder="Teléfono" value="@Model.telefono" required>
+                                        <label for="txtTelefono">Teléfono</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3">
+                                        <input type="email" class="form-control form-control-lg" id="txtCorreoElectronico" name="txtCorreoElectronico" placeholder="Correo Electrónico" value="@Model.correo_electronico" required>
+                                        <label for="txtCorreoElectronico">Correo Electrónico</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control form-control-lg" id="txtRegistroPatronal" name="txtRegistroPatronal" placeholder="Registro Patronal" value="@Model.registro_patronal">
+                                        <label for="txtRegistroPatronal">Registro Patronal</label>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-actions float-end">
+
+                            </div>
+                            <h5 class="card-title mb-0">Dirección Fiscal</h5>
+                        </div>
+                        <div class="card-body">
+                            
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control form-control-lg" id="txtCP" name="txtCP" placeholder="Código Postal" maxlength="5" value="@Model.cp" required>
+                                            <label for="txtCP">Código Postal</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control form-control-lg" id="txtCalle" name="txtCalle" placeholder="Calle" value="@Model.calle">
+                                            <label for="txtCalle">Calle</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control form-control-lg" id="txtNumExt" name="txtNumExt" placeholder="Núm Exterior" value="@Model.num_ext">
+                                            <label for="txtNumExt">Núm Exterior</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control form-control-lg" id="txtNumInt" name="txtNumInt" placeholder="Núm Interior" value="@Model.num_int">
+                                            <label for="txtNumInt">Núm Interior</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control form-control-lg" id="txtColonia" name="txtColonia" placeholder="Colonia" value="@Model.colonia">
+                                            <label for="txtColonia">Colonia</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control form-control-lg" id="txtLocalidad" name="txtLocalidad" placeholder="Localidad" value="@Model.localidad">
+                                            <label for="txtLocalidad">Localidad</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control form-control-lg" id="txtMunicipio" name="txtMunicipio" placeholder="Municipio" value="@Model.municipio">
+                                            <label for="txtMunicipio">Municipio</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-floating mb-3">
+                                            <select class="form-select form-select-lg" id="cmbEstado" name="cmbEstado" aria-label="Estado">
+                                                <option value="Aguascalientes" data-code="AGS" >Aguascalientes</option>
+                                                <option value="Baja California" data-code="BC">Baja California</option>
+                                                <option value="Baja California Sur" data-code="BCS">Baja California Sur</option>
+                                                <option value="Campeche" data-code="CAMP">Campeche</option>
+                                                <option value="Chiapas" data-code="CHIS">Chiapas</option>
+                                                <option value="Chihuahua" data-code="CHIH">Chihuahua</option>
+                                                <option value="Coahuila" data-code="COAH">Coahuila</option>
+                                                <option value="Colima" data-code="COL">Colima</option>
+                                                <option value="Ciudad de Mexico">Ciudad de Mexico</option>
+                                                <option value="Durango" data-code="DGO">Durango</option>
+                                                <option value="Guanajuato" data-code="GTO">Guanajuato</option>
+                                                <option value="Guerrero" data-code="GRO">Guerrero</option>
+                                                <option value="Hidalgo" data-code="HGO">Hidalgo</option>
+                                                <option value="Jalisco" data-code="JAL">Jalisco</option>
+                                                <option value="Estado de México" data-code="MEX">Estado de México</option>
+                                                <option value="Michoacán" data-code="MICH">Michoacán</option>
+                                                <option value="Morelos" data-code="MOR">Morelos</option>
+                                                <option value="Nayarit" data-code="NAY">Nayarit</option>
+                                                <option value="Nuevo León" data-code="NL">Nuevo León</option>
+                                                <option value="Oaxaca" data-code="OAx">Oaxaca</option>
+                                                <option value="Puebla" data-code="PUE">Puebla</option>
+                                                <option value="Querétaro" data-code="QRO">Querétaro</option>
+                                                <option value="Quintana Roo" data-code="Q ROO">Quintana Roo</option>
+                                                <option value="San Luis Potosí" data-code="SLP">San Luis Potosí</option>
+                                                <option value="Sinaloa" data-code="SIN">Sinaloa</option>
+                                                <option value="Sonora" data-code="SON">Sonora</option>
+                                                <option value="Tabasco" data-code="TAB">Tabasco</option>
+                                                <option value="Tamaulipas" data-code="TAMPS">Tamaulipas</option>
+                                                <option value="Tlaxcala" data-code="TLAX">Tlaxcala</option>
+                                                <option value="Veracruz" data-code="VER">Veracruz</option>
+                                                <option value="Yucatán" data-code="YUC">Yucatán</option>
+                                                <option value="Zacatecas" data-code="ZAC">Zacatecas</option>
+                                            </select>
+                                            <label for="cmbEstado">Estado</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-12 text-center">
+                                        <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-save"></i>&nbsp; Guardar Información</button>
+                                    </div>
+                                </div>
+
+                           
+
+                        </div>
+                    </div>
+                </form>
+                
+
+            </div>
+            <div class="tab-pane fade @(ViewBag.TabPassword != null ? "show active" : "")" id="password" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-actions float-end">
+
+                        </div>
+                        <h5 class="card-title mb-0">Cambio de Contraseña</h5>
+                    </div>
+                    <div class="card-body">
+                        <form name="CambiarPassword.Panel" action="@Url.Action("CambiarPassword","Panel")" method="post" onsubmit="return validateFormPass()">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-floating mb-3">
+                                        <input type="password" class="form-control form-control-lg" id="txtPasswordActual" name="txtPasswordActual" placeholder="Contraseña Actual" required>
+                                        <label for="txtPasswordActual">Contraseña Actual</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-floating mb-3">
+                                        <input type="password" class="form-control form-control-lg" id="txtPasswordNueva" name="txtPasswordNueva" placeholder="Nueva Contraseña" required>
+                                        <label for="txtPasswordNueva">Nueva Contraseña</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-floating mb-3">
+                                        <input type="password" class="form-control form-control-lg" id="txtPasswordVerificar" name="txtPasswordVerificar" placeholder="Verificar Contraseña" required>
+                                        <label for="txtPasswordVerificar">Verificar Contraseña</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="row">
+                                <div class="col-12 text-center">
+                                    <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-save"></i>&nbsp; Cambiar Contraseña</button>
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        $("#cmbEstado").val("@Model.estado");
+        $("#cmbTipoPersona").val("@Model.id_tipo_persona");
+        $("#cmbRegimenFiscal").val("@Model.id_regimen_fiscal");
+    });
+
+
+    function validateForm() {
+        let rfc = document.forms["ActualizarPerfil.Panel"]["txtRFC"].value;
+        if (rfc != "") {
+            abrirCargando();
+            return true;
+        }
+        return false;
+    }
+
+    function validateFormPass() {
+        let passActual = document.forms["CambiarPassword.Panel"]["txtPasswordActual"].value;
+        if (passActual != "") {
+            abrirCargando();
+            return true;
+        }
+        return false;
+    }
+
+</script>

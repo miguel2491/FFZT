@@ -1,0 +1,323 @@
+﻿
+<style>
+    .maius {
+        text-transform: uppercase;
+    }
+</style>
+<h1 class="h3 mb-3">Lista Ferroviarios</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-4">
+                        <div class="form-floating mb-3">
+                            <input type="date" class="form-control form-control-lg" id="txtFechaInicial" name="txtFechaInicial" placeholder="Fecha Inicial" value="@ViewBag.Inicio.ToString("yyyy-MM-dd")" required>
+                            <label for="txtFechaInicial">Fecha Inicial</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating mb-3">
+                            <input type="date" class="form-control form-control-lg" id="txtFechaFinal" name="txtFechaFinal" placeholder="Fecha Final" value="@ViewBag.Final.ToString("yyyy-MM-dd")" required>
+                            <label for="txtFechaFinal">Fecha Final</label>
+                        </div>
+                    </div>
+                    <div class="col-md-2"></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-12 text-center">
+                        <button class="btn btn-success btn-lg" id="btnBuscar" style="margin-top:10px;"><i class="fas fa-search"></i>&nbsp; Buscar</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#modalFerroviario" onclick="nuevoFerroviario();"><i class="fas fa-plus"></i> Agregar Ferroviario</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <table id="datatables-ferroviario" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Tipo Derecho Paso</th>
+                            <th>Tipo de Carro</th>
+                            <th>Tipo Contenedor</th>
+                            <th>Km Pagado</th>
+                            <th>Fecha Creado</th>
+                            <th>Estatus</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody class="maius">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<form name="GuardarFerroviario.CartaPorte" action="@Url.Action("GuardarFerroviario","CartaPorte")" method="post">
+    <div class="modal fade" id="modalFerroviario" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Formulario de AutoTransporte Ferroviario</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body m-3">
+                    <input id="txtIdFerroviario" name="txtIdFerroviario" type="hidden" value="0" />
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbTipoServicio" name="cmbTipoServicio" aria-label="Tipo Servicio">
+                                    <option value="TS01">Tren unitario de carros ferroviarios</option>
+                                    <option value="TS02">Carros Ferroviarios intermodal</option>
+                                    <option value="TS03">Carros Ferroviarios</option>
+                                    <option value="TS04">Tren unitario Intermodal</option>
+                                </select>
+                                <label for="cmbTipoServicio">Tipo de Servicio</label>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbTipoDerecho" name="cmbTipoDerecho" aria-label="Tipo Derecho">   
+                                </select>
+                                <label for="cmbTipoDerecho">Tipo de Derecho de paso</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg text-uppercase" id="cmbTipoCarro" name="cmbTipoCarro" placeholder="TC01 FURGON" required>
+                                @*<select class="form-select form-select-lg" id="cmbTipoCarro" name="cmbTipoCarro" aria-label="Tipo Carro">
+                                        <option value="2">TC02 FURGON</option>
+                                        <option value="1" selected>TC01 FURGON</option>
+                                        <option value="3">TC03 GERFON</option>
+                                    </select>*@
+                                <label for="cmbTipoDerecho">Tipo de carro</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div>
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control form-control-lg text-uppercase" id="txtMatricula" name="txtMatricula" placeholder="Matricula" required>
+                                    <label for="txtMatricula">Matricula del Carro</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg text-uppercase" id="txtGuia" name="txtGuia" placeholder="Guia carro" required />
+                                <label for="txtGuia">Guía del Carro</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg text-uppercase enteros" id="txtToneladas" name="txtToneladas" placeholder="Toneladas netas del carro" required />
+                                <label for="txtToneladas">Toneladas neta del carro</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbTipoContenedor" name="cmbTipoContenedor" aria-label="Tipo Contenedor">
+                                    <option value="TC01" selected>[20] Contendor de 6.1 Mts de longitud</option>        
+                                    <option value="TC02">[40] Contendor de 12.2 Mts de longitud</option>
+                                    <option value="TC03">[45] Contendor de 13.7 Mts de longitud</option>
+                                    <option value="TC04">[48] Contendor de 14.6 Mts de longitud</option>
+                                    <option value="TC05">[53] Contendor de 16.1 Mts de longitud</option>
+                                </select>
+                                <label for="cmbTipoContenedor">Tipo de contenedor</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input class="form-control form-control-lg enteros" id="txtPesoVacio" name="txtPesoVacio" placeholder="Peso Vacío" required>
+                                <label for="txtPesoVacio">Peso del contenedor</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input class="form-control form-control-lg enteros" id="txtPesoNeto" name="txtPesoNeto" placeholder="Peso Neto">
+                                <label for="txtPesoNeto">Peso Neto mercancía</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg text-uppercase decimales" id="txtKmPagado" name="txtKmPagado" placeholder="Kilometraje pagado" required>
+                                <label for="txtKmPagado">Kilometraje pagado</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i>&nbsp; Guardar Datos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    var TableFerroviario;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        $(".decimales").inputmask({
+            alias: "decimal",
+            integerDigits: 6,
+            digits: 2,
+            allowMinus: false,
+            digitsOptional: false,
+            placeholder: "0"
+        });
+
+        $(".enteros").inputmask({
+            alias: "decimal",
+            integerDigits: 6,
+            digits: 0,
+            allowMinus: false,
+            digitsOptional: false,
+            placeholder: "0"
+        });
+
+        $.get("@Url.Action("getDerechosPaso", "CartaPorte")", async function (data) {
+            for (var a = 0; a < data.length; a++)
+            {
+                $("#cmbTipoDerecho").append("<option value=" + data[a].id_derecho + ">[" + data[a].clave + "] " + data[a].concecionario+ " </option>");
+            }
+            $("#cmbTipoDerecho").val($("#cmbTipoDerecho option:last").val());
+        });
+
+        TableFerroviario = $("#datatables-ferroviario").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { visible: true, orderable: false, searchable: false, targets: 0, name: "acciones", data: "acciones" },
+                { visible: true, orderable: false, searchable: false, targets: 1, name: "tipo_derecho", data: "tipo_derecho" },
+                { visible: true, orderable: false, searchable: false, targets: 2, name: "tipo_carro", data: "tipo_carro" },
+                { visible: true, orderable: true, searchable: true, targets: 3, name: "tipo_contenedor", data: "tipo_contenedor"},
+                { visible: true, orderable: true, searchable: true, targets: 4, name: "km_pagado", data: "km_pagado"},
+                { visible: true, orderable: false, searchable: false, targets: 5, name: "fca_creado", data: "fca_creado" },
+                { visible: true, orderable: false, searchable: false, targets: 6, name: "estatus", data: "estatus" },
+                { visible: false, orderable: false, searchable: false, targets: 7, name: "id", data: "id" }
+            ],
+            order: [[1, 'asc']]
+        });
+
+        let fi = $("#txtFechaInicial").val();
+        let ff = $("#txtFechaFinal").val();
+
+        getListFerroviario(fi, ff);
+
+        $('#datatables-ferroviario tbody').on('click', '.icon-delete', function () {
+            var t = TableFerroviario;
+            dataEdit = t.row($(this).parents('tr'));
+            var data = dataEdit.data();
+            console.log(data)
+            let id_ = data.id;
+            $.get("@Url.Action("delFerroviario", "CartaPorte")?id=" + id_, async function (data) {
+                console.log(data);
+            });
+        });
+
+        $("#btnBuscar").click(function () {
+            let fi = $("#txtFechaInicial").val();
+            let ff = $("#txtFechaFinal").val();
+            getListFerroviario(fi,ff);
+        });
+
+    });
+
+    function getListFerroviario(fi,ff)
+    {
+        //----------------------------------------------------------------------------------------------------
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            url: '@Url.Action("getListFerroviario", "CartaPorte")',
+            data: JSON.stringify({ 'fecha_i': fi, 'fecha_f': ff }),
+            success: function (data) {
+                var t = TableFerroviario;
+                var t_obj = data.length;
+                t.clear().draw(false);
+                for (var x = 0; x < t_obj; x++) {
+                    let acciones = '<button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalFerroviario" onclick="actualizarFerroviario(' + data[x].id_ferroviario + ')"><i class="fas fa-edit"></i></button>';
+                    let accion2 = data[x].id_estatus == "1" ? '<button class="btn btn-danger btn-sm icon-delete" onclick="eliminarFerro(' + data[x].id_ferroviario + ',2)" title="Desactivar"><i class="fas fa-trash"></i></button>' : '<button class="btn btn-info btn-sm" onclick="eliminarFerro(' + data[x].id_ferroviario + ',1)" title="Activar"><i class="fas fa-lightbulb"></i></button>';
+                    let derecho = $("#cmbTipoDerecho").val(data[x].id_derecho);
+                    t.row.add(
+                        {
+                            "id": data[x].id_ferroviario,
+                            "acciones": acciones + " " + accion2,
+                            "tipo_derecho": data[x].id_derecho,
+                            "tipo_carro": data[x].tipo_carro,
+                            "tipo_contenedor": data[x].tipo_contenedor,
+                            "km_pagado": data[x].km_pagado+" (Km)",
+                            "fca_creado": data[x].fecha_creacion,
+                            "estatus": data[x].id_estatus == "1" ? 'Activo':'Desactivado'
+                        }
+                    );
+                    t.columns.adjust().draw(false);
+                }
+                return false;
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                cerrarCargando();
+            }
+        });
+        //----------------------------------------------------------------------------------------------------
+    }
+
+    function envCartaPorte(id)
+    {
+        $.get("@Url.Action("getCartaPorte", "CartaPorte")?id=" + id, async function (data) { });
+    }
+
+    function validateForm() {
+        let rfc = document.forms["GuardarFerroviario.CartaPorte"]["txtIdFerroviario"].value;
+        if (rfc != "") {
+
+            bootstrap.Modal.getOrCreateInstance(document.getElementById("modalFerroviario")).hide();
+            abrirCargando();
+
+            return true;
+        }
+        return false;
+    }
+
+    function nuevoFerroviario() {
+        document.forms["GuardarFerroviario.CartaPorte"].reset();
+
+    }
+
+    function actualizarFerroviario(a)
+    {
+        $.get("@Url.Action("getCatalogoF", "CartaPorte")?id=" + a, async function (data) {
+            document.forms["GuardarFerroviario.CartaPorte"]["txtIdFerroviario"].value = data[0].id_ferroviario;
+            document.forms["GuardarFerroviario.CartaPorte"]["txtKmPagado"].value = data[0].km_pagado;
+            document.forms["GuardarFerroviario.CartaPorte"]["txtMatricula"].value = data[0].matriculada;
+            document.forms["GuardarFerroviario.CartaPorte"]["txtGuia"].value = data[0].guia;
+            document.forms["GuardarFerroviario.CartaPorte"]["txtToneladas"].value = data[0].peso_neta;
+            document.forms["GuardarFerroviario.CartaPorte"]["txtPesoVacio"].value = data[0].peso_vacio;
+            document.forms["GuardarFerroviario.CartaPorte"]["txtPesoNeto"].value = data[0].peso_neta;
+            $("#cmbTipoDerecho").val(data[0].id_derecho);
+            $("#cmbTipoCarro").val(data[0].tipo_carro);
+            $("#cmbTipoContenedor").val(data[0].tipo_contenedor);
+        });
+    }
+
+    function eliminarFerro(id,tipo)
+    {
+        $.get("@Url.Action("delFerroviario", "CartaPorte")?id=" + id+"&tipo="+tipo, async function (data) {
+            getListFerroviario();
+        });
+    }
+
+</script>

@@ -1,0 +1,131 @@
+﻿@model IEnumerable<Facturafast.Models.tbd_Cobros>
+@using Facturafast.Models
+@{
+    BD_FFEntities db = new BD_FFEntities();
+}
+<h1 class="h3 mb-3">Mis Compras</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-actions float-end">
+
+                </div>
+            </div>
+            <div class="card-body">
+                <table id="datatables-pagos" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>Concepto</th>
+                            <th>Fecha de Pago</th>
+                            <th>Total</th>
+                            <th>Estatus</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            tbc_Paquetes paquete = db.tbc_Paquetes.Where(s => s.id_paquete == item.id_paquete).Single();
+                            if (paquete.costo == item.total)
+                            {
+                                <tr>
+                                    <td></td>
+                                    <td>
+                                        <table>
+                                            <tr>
+                                                @if (item.status != "approved")
+                                                {
+                                                    <td style="padding:0px 5px;">
+                                                        <a href="@Url.Action("ReintentarPago","Panel", new { id = item.id_cobro })" class="btn btn-sm btn-primary"><i class="fas fa-credit-card"></i> &nbsp; Pagar</a>
+                                                    </td>
+                                                    <td style="padding:0px 5px;">
+                                                        <button data-bs-toggle="modal" data-bs-target="#modalEliminarCobro" onclick="eliminarCobro(@item.id_cobro, '@paquete.nombre_paquete', '@item.total.ToString("c")');" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                                                    </td>
+                                                }
+                                                else
+                                                {
+                                                    <td style="padding:0px 5px;">
+                                                        <a href="#" class="btn btn-danger btn-sm"><i class="fas fa-file-pdf"></i></a>
+                                                    </td>
+                                                    <td style="padding:0px 5px;">
+                                                        <a href="#" class="btn btn-info btn-sm"><i class="fas fa-file-archive"></i></a>
+                                                    </td>
+                                                }
+                                            </tr>
+                                        </table>
+                                    </td>
+                                    <td>@paquete.nombre_paquete</td>
+                                    <td>@item.fecha_cobro.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td>@item.total.ToString("c")</td>
+                                    <td>@Html.Raw(item.status == "approved" ? "<i class='fas fa-check text-success'></i>&nbsp; Pagado" : "<i class='fas fa-times text-danger'></i>&nbsp; Rechazado")</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="EliminarCobro.Panel" method="get" action="@Url.Action("EliminarCobro","Panel")" onsubmit="return validateForm();">
+    <div class="modal fade" id="modalEliminarCobro" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Eliminar Registro de Cobro</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body m-3">
+                    <input type="hidden" id="id_cobro_eliminar" name="id_cobro_eliminar" required />
+                    <div class="row">
+                        <div class="col-md-7">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtConceptoCobro" placeholder="Concepto" readonly>
+                                <label for="txtConceptoCobro">Concepto</label>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtCostoCobro" placeholder="Costo" readonly>
+                                <label for="txtCostoCobro">Costo</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+                    <button type="submit" class="btn btn-danger" data-bs-dismiss="modal" onclick=""><i class="fas fa-trash"></i>&nbsp; Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        $("#datatables-pagos").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1] }
+            ],
+            order: [[3, 'asc']]
+        });
+    });
+    function validateForm() {
+        let pass = document.forms["EliminarCobro.Panel"]["id_cobro_eliminar"].value;
+        if (pass != "") {
+            abrirCargando();
+            return true;
+        }
+        return false;
+    }
+    function eliminarCobro(a, b, c) {
+        $("#id_cobro_eliminar").val(a);
+        $("#txtConceptoCobro").val(b);
+        $("#txtCostoCobro").val(c);
+    }
+</script>

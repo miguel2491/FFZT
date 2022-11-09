@@ -1,0 +1,385 @@
+﻿@model IEnumerable<Facturafast.Models.tbc_Usuarios>
+@using Facturafast.Models
+@{
+    BD_FFEntities db = new BD_FFEntities();
+}
+<h1 class="h3 mb-3">Lista de Vendedores</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-actions float-end">
+
+                </div>
+                <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#modalVendedor" onclick="nuevoVendedor();"><i class="fas fa-plus"></i> Agregar Vendedor</button>
+            </div>
+            <div class="card-body">
+                <table id="datatables-vendedores" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>Usuario</th>
+                            <th>Nombre</th>
+                            <th>Clientes</th>
+                            <th>Total Comprado</th>
+                            <th>Paquetes Comprados</th>
+                            <th>Comisión Total</th>
+                            <th>Correo Electrónico</th>
+                            <th>Teléfono</th>
+                            <th>Estatus</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            tbc_Vendedores vendedor = db.tbc_Vendedores.Where(s => s.id_usuario == item.id_usuario).Single();
+
+                            <tr>
+                                <td></td>
+                                <td>
+                                    <table>
+                                        <tr>
+                                            <td style="padding: 0px 5px;">
+                                                <button class="btn btn-warning btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#modalVendedor" onclick="actualizarVendedor(@item.id_usuario, '@item.usuario', '@item.nombre_razon', '@item.telefono', '@item.correo_electronico', @item.id_estatus);"><i class="fas fa-edit"></i></button>
+                                            </td>
+                                            <td style="padding: 0px 5px;">
+                                                <button class="btn btn-info btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#modalClientes" onclick="verClientes(@item.id_usuario, '@item.nombre_razon', '@item.usuario');"><i class="fas fa-users"></i></button>
+                                            </td>
+                                            <td style="padding: 0px 5px;">
+                                                <button class="btn btn-success btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#modalComisiones" onclick="verComisiones(@item.id_usuario, '@item.nombre_razon', '@item.usuario', '@vendedor.total_vendido.ToString("c")', '@vendedor.comision_total.ToString("c")');"><i class="fas fa-clock"></i></button>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td>@item.usuario</td>
+                                <td>@item.nombre_razon</td>
+                                <td>@vendedor.clientes_asignados</td>
+                                <td>@vendedor.total_vendido.ToString("c")</td>
+                                <td>@vendedor.paquetes_vendidos</td>
+                                <td>@vendedor.comision_total.ToString("c")</td>
+                                <td>@item.correo_electronico</td>
+                                <td>@item.telefono</td>
+                                <td>@db.tbc_Estatus.Where(s => s.id_estatus == item.id_estatus).Single().estatus</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form name="GuardarVendedor.Administracion" action="@Url.Action("GuardarVendedor","Administracion")" method="post" onsubmit="return validateForm();">
+    <div class="modal fade" id="modalVendedor" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Formulario del Vendedor</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body m-3">
+                    <input type="hidden" id="txtIdUsuario" name="txtIdUsuario" />
+                    <div class="row">
+                        <div class="col-md-7">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtUsuario" name="txtUsuario" onblur="keyPress();" placeholder="Usuario" required>
+                                <label for="txtUsuario">Usuario</label>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbEstatus" name="cmbEstatus" aria-label="Estatus">
+                                    <option value="1">Activo</option>
+                                    <option value="2">Inactivo</option>
+                                </select>
+                                <label for="cmbEstatus">Estatus</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-floating mb-3">
+                                <textarea type="text" class="form-control form-control-lg" id="txtNombreUsuario" name="txtNombreUsuario" style="height:100px;" placeholder="Nombre" required></textarea>
+                                <label for="txtNombreUsuario">Nombre</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-7">
+                            <div class="form-floating mb-3">
+                                <input type="email" class="form-control form-control-lg" id="txtCorreoElectronicoUsuario" name="txtCorreoElectronicoUsuario" placeholder="Correo Electrónico" required>
+                                <label for="txtCorreoElectronicoUsuario">Correo Electrónico</label>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="form-floating mb-3">
+                                <input type="tel" class="form-control form-control-lg" pattern="^[0-9]{10}" id="txtTelefonoUsuario" name="txtTelefonoUsuario" placeholder="Teléfono" required>
+                                <label for="txtTelefonoUsuario">Teléfono</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-7">
+                            <div class="form-floating mb-3">
+                                <input type="password" class="form-control form-control-lg" id="txtPasswordUsuario" name="txtPasswordUsuario" placeholder="Contraseña">
+                                <label for="txtPasswordUsuario">Contraseña</label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i>&nbsp; Guardar Datos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+
+<div class="modal fade" id="modalClientes" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Lista de Clientes</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body m-3">
+                <div class="row">
+                    <div class="col-md-7">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtNombreVendedor" name="txtNombreVendedor" placeholder="Nombre del Vendedor" readonly>
+                            <label for="txtNombreVendedor">Nombre del Vendedor</label>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtUsuarioVendedor" name="txtUsuarioVendedor" placeholder="Usuario del Vendedor" readonly>
+                            <label for="txtUsuarioVendedor">Usuario del Vendedor</label>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <div class="col-md-12">
+                        <table id="datatables-vendedor-clientes" class="table table-striped" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    <th>Nombre / Razón Social</th>
+                                    <th>RFC</th>
+                                    <th>Fecha Asignación</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyClientes">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade" id="modalComisiones" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Comisiones del Vendedor</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body m-3">
+                <div class="row">
+                    <div class="col-md-7">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtNombreVendedorComision" name="txtNombreVendedorComision" placeholder="Nombre del Vendedor" readonly>
+                            <label for="txtNombreVendedorComision">Nombre del Vendedor</label>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtUsuarioVendedorComision" name="txtUsuarioVendedorComision" placeholder="Usuario del Vendedor" readonly>
+                            <label for="txtUsuarioVendedorComision">Usuario del Vendedor</label>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <div class="col-md-12">
+                        <table id="datatables-vendedor-comisiones" class="table table-striped" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    <th>Concepto</th>
+                                    <th>Cobrado</th>
+                                    <th>Comisión</th>
+                                    <th>Fecha de Compra</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyComisiones">
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th id="tdTotalCobrado"></th>
+                                    <th id="tdTotalComision"></th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    var tbVendedorClientes;
+    var tbVendedorComisiones;
+    document.addEventListener("DOMContentLoaded", function () {
+        $("#datatables-vendedores").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1] }
+            ],
+            order: [[2, 'asc']]
+        });
+
+
+        tbVendedorClientes = $("#datatables-vendedor-clientes").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1] }
+            ],
+            order: [[2, 'asc']]
+        });
+
+        tbVendedorComisiones = $("#datatables-vendedor-comisiones").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1] }
+            ],
+            order: [[5, 'asc']]
+        });
+    });
+
+    function validateForm() {
+        let rfc = document.forms["GuardarVendedor.Administracion"]["txtUsuario"].value;
+        if (rfc != "") {
+
+            if ($("#txtUsuario").hasClass("is-invalid")) {
+                notificacionAlert("El Usuario " + $("#txtUsuario").val() + " ya existe.", "danger");                
+                return false;
+            }
+
+            if ($("#txtUsuario").hasClass("is-valid")) {
+                bootstrap.Modal.getOrCreateInstance(document.getElementById("modalVendedor")).hide();
+                abrirCargando();
+                return true;
+            }
+            else {
+                notificacionAlert("El Usuario no cumple con la validación requerida.", "danger");                
+                $("#txtUsuario").addClass("is-invalid");
+                return false;
+            }
+        }
+        return false;
+    }
+
+    function nuevoVendedor() {
+        document.forms["GuardarVendedor.Administracion"].reset();
+        document.forms["GuardarVendedor.Administracion"]["txtIdUsuario"].value = 0;
+        $("#cmbEstatus").val(1);
+        $("#txtPasswordUsuario").prop("required", true);
+        $("#txtUsuario").removeClass("is-invalid");
+        $("#txtUsuario").removeClass("is-valid");
+    }
+
+    function actualizarVendedor(a, b, c, d, e, f) {
+        $("#txtPasswordUsuario").prop("required", false);
+        document.forms["GuardarVendedor.Administracion"]["txtIdUsuario"].value = a;
+        document.forms["GuardarVendedor.Administracion"]["txtUsuario"].value = b;
+        document.forms["GuardarVendedor.Administracion"]["txtNombreUsuario"].value = c;
+        document.forms["GuardarVendedor.Administracion"]["txtTelefonoUsuario"].value = d;
+        document.forms["GuardarVendedor.Administracion"]["txtCorreoElectronicoUsuario"].value = e;
+        $("#cmbEstatus").val(f);
+        $("#txtUsuario").removeClass("is-invalid");
+        $("#txtUsuario").removeClass("is-valid");
+        $("#txtUsuario").addClass("is-valid");
+    }
+
+    function verClientes(a, b, c) {
+        abrirCargando();
+        $("#txtNombreVendedor").val(b);
+        $("#txtUsuarioVendedor").val(c);
+        tbVendedorClientes.destroy();
+        $.get("@Url.Action("ObtenerClientesVendedor","Administracion")?id=" + a, async function (data) {
+            $("#tbodyClientes").html(data);
+
+            tbVendedorClientes = $("#datatables-vendedor-clientes").DataTable({
+                responsive: true,
+                'columnDefs': [
+                    { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1] }
+                ],
+                order: [[2, 'asc']]
+            });
+            cerrarCargando();
+        });
+    }
+
+    function verComisiones(a,b,c,d,e) {
+        abrirCargando();
+        $("#txtNombreVendedorComision").val(b);
+        $("#txtUsuarioVendedorComision").val(c);
+        $("#tdTotalCobrado").text(d);
+        $("#tdTotalComision").text(e);
+        tbVendedorComisiones.destroy();
+        $.get("@Url.Action("ObtenerComisionesVendedor","Administracion")?id=" + a, async function (data) {
+            $("#tbodyComisiones").html(data);
+
+            tbVendedorComisiones = $("#datatables-vendedor-comisiones").DataTable({
+                responsive: true,
+                'columnDefs': [
+                    { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1] }
+                ],
+                order: [[5, 'asc']]
+            });
+            cerrarCargando();
+        });
+    }
+
+
+    function keyPress() {
+
+        var len = $("#txtUsuario").val();
+        if (len.length > 5) {
+            $.get("@Url.Action("existeUsuario", "Administracion")?id=" + $("#txtIdUsuario").val() + "&usuario=" + len, async function (data) {
+                $Usuario = $("#txtUsuario");
+                $Usuario.removeClass("is-invalid");
+                $Usuario.removeClass("is-valid");
+                $Usuario.addClass(data);
+            });
+        }
+    }
+
+
+</script>

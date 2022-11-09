@@ -1,0 +1,193 @@
+﻿@model Facturafast.Models.tbd_Firmas
+
+<h1 class="h3 mb-3">Firmas Digitales</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-actions float-end">
+                </div>
+                <h5 class="card-title mb-0">Sellos Digitales (CSD)</h5>
+            </div>
+            <div class="card-body">
+                <form id="CargarSellos.Panel" action="@Url.Action("CargarSellos","Panel")" method="post" enctype="multipart/form-data" onsubmit="return validateFormSellos();">
+                    <input type="hidden" id="txtIdFirmaSello" name="txtIdFirmaSello" value="@Model.id_firma" />
+                    <div class="row">
+                        <div class="col-md-6 text-center">
+                            <small>Selecciona tu archivo <strong>.cer</strong> </small>
+                            <div class="input-group mb-3">
+                                <input type="file" class="form-control " id="fileCerSello" name="fileCerSello" accept=".cer" required>
+                            </div>
+
+                        </div>
+                        <div class="col-md-6 text-center">
+                            <small>Selecciona tu archivo <strong>.key</strong></small>
+                            <div class="input-group mb-3">
+                                <input type="file" class="form-control" id="fileKeySello" name="fileKeySello" accept=".key" required>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtPasswordSellos" name="txtPasswordSellos" placeholder="Contraseña de los Sellos Digitales" value="@Model.password_sello" required>
+                                <label for="txtPasswordSellos">Contraseña de los Sellos Digitales</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-6 text-center">
+                                    <br />
+                                    <a class="btn btn-success btn-sm" href="@(Model.url_cer_sello != "" ? "/Plantillas/Firmas/" + Model.rfc +"/"+ Model.url_cer_sello : "#")" @(Model.url_cer_sello != "" ? "download='" + Model.rfc + "_CSD.cer'" : "")><i class="fas fa-download"></i>&nbsp; .cer</a>
+                                </div>
+                                <div class="col-6 text-center">
+                                    <br />
+                                    <a class="btn btn-success btn-sm" href="@(Model.url_key_sello != "" ? "/Plantillas/Firmas/" + Model.rfc +"/"+ Model.url_key_sello : "#")" @(Model.url_key_sello != "" ? "download='" + Model.rfc + "_CSD.key'" : "")><i class="fas fa-download"></i>&nbsp; .key</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" placeholder="Número de Certificado" value="@Model.certificado_sello" readonly>
+                                <label for="txtSellosCertificado">Número de Certificado</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" placeholder="Vigencia" value="@(Model.fecha_sello != null ? Model.fecha_sello.Value.ToString("dd/MM/yyyy") : "")" readonly>
+                                <label for="txtSellosVigencia">Vigencia</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <br />
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="checkSellos" required>
+                                <label class="form-check-label text-black" for="checkSellos">Autorizo el almacenamiento de mis Sellos Digitales (CSD)</label>
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-12 text-center">
+                            <br />
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i>&nbsp; Cargar Sellos Digitales</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-actions float-end">
+                </div>
+                <h5 class="card-title mb-0">Firma Electrónica (FIEL)</h5>
+            </div>
+            <div class="card-body">
+                <form id="CargarFIEL.Panel" action="@Url.Action("CargarFIEL","Panel")" method="post" enctype="multipart/form-data" onsubmit="return validateFormFIEL();">
+                    <input type="hidden" id="txtIdFirmaFIEL" name="txtIdFirmaFIEL" value="@Model.id_firma" />
+                    <div class="row">
+                        <div class="col-md-6 text-center">
+                            <small>Selecciona tu archivo <strong>.cer</strong> </small>
+                            <div class="input-group mb-3">
+                                <input type="file" class="form-control" id="fileCerFIEL" name="fileCerFIEL" accept=".cer" required>
+
+                            </div>
+
+                        </div>
+                        <div class="col-md-6 text-center">
+                            <small>Selecciona tu archivo <strong>.key</strong></small>
+                            <div class="input-group mb-3">
+                                <input type="file" class="form-control" id="fileKeyFIEL" name="fileKeyFIEL" accept=".key" required>
+                            </div>
+
+                        </div>
+
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtPasswordFIEL" name="txtPasswordFIEL" placeholder="Contraseña de la Firma Electrónica" value="@Model.password_fiel" required>
+                                <label for="txtPasswordFIEL">Contraseña de la Firma Electrónica</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-6 text-center">
+                                    <br />
+                                    <a class="btn btn-success btn-sm" href="@(Model.url_cer_fiel != "" ? "~/doc/firmas/" + Model.url_cer_fiel : "#")" @(Model.url_cer_fiel != "" ? "download='" + Model.rfc + "_FIEL.cer'" : "")><i class="fas fa-download"></i>&nbsp; .cer</a>
+                                </div>
+                                <div class="col-6 text-center">
+                                    <br />
+                                    <a class="btn btn-success btn-sm" href="@(Model.url_key_fiel != "" ? "~/doc/firmas/" + Model.url_key_fiel : "#")" @(Model.url_key_fiel != "" ? "download='" + Model.rfc + "_FIEL.key'" : "")><i class="fas fa-download"></i>&nbsp; .key</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtFIELCertificado" placeholder="Número de Certificado" value="@Model.certificado_fiel" readonly>
+                                <label for="txtFIELCertificado">Número de Certificado</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtFIELVigencia" placeholder="Vigencia" value="@(Model.fecha_fiel != null ? Model.fecha_fiel.Value.ToString("dd/MM/yyyy") : "")" readonly>
+                                <label for="txtFIELVigencia">Vigencia</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <br />
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="checkFIEL" required>
+                                <label class="form-check-label text" for="checkFIEL">Autorizo el almacenamiento de mi Firma Electrónica (FIEL)</label>
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-12 text-center">
+                            <br />
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i>&nbsp; Cargar Firma Electrónica</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+
+    function validateFormSellos() {
+        let pass = document.forms["CargarSellos.Panel"]["txtPasswordSellos"].value;
+        if (pass != "") {            
+            abrirCargando();
+            return true;
+        }
+        return false;
+    }
+
+    function validateFormFIEL() {
+        let pass = document.forms["CargarFIEL.Panel"]["txtPasswordFIEL"].value;
+        if (pass != "") {            
+            abrirCargando();
+            return true;
+        }
+        return false;
+    }
+</script>

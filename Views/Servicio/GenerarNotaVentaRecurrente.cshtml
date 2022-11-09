@@ -1,0 +1,134 @@
+﻿@model Facturafast.Models.tbd_Notas_Venta
+@using Facturafast.Models
+@{
+    Layout = null;
+    BD_FFEntities db = new BD_FFEntities();
+    var item = Model;
+    String JSONPDf = "";
+    if (item.id_nota_venta != 0)
+    {
+        tbc_Usuarios usuario = db.tbc_Usuarios.Where(s => s.id_usuario == item.id_usuario).Single();
+        tbc_Clientes cliente = db.tbc_Clientes.Where(s => s.id_cliente == item.id_cliente).Single();
+        tbc_Estatus estatus = db.tbc_Estatus.Where(s => s.id_estatus == item.id_estatus).Single();
+        tbc_Cuentas_Bancarias banco = db.tbc_Cuentas_Bancarias.Where(s => s.id_cuenta_bancaria == item.id_cuenta_bancaria).Single();
+        JSONPDf = "{\"serie\":\"" + item.serie + "\"," +
+                          "\"folio\":\"" + item.folio + "\"," +
+                          "\"nombre_razon\":\"" + usuario.nombre_razon + "\"," +
+                          "\"rfc_emisor\":\"" + usuario.rfc + "\"," +
+                          "\"direccion_fiscal\":\"" +
+                          ("Calle: " + usuario.calle + " Núm Ext " + usuario.num_ext +
+                          (usuario.num_int != "" ? " Núm Int " + usuario.num_int : "") +
+                          " Col " + usuario.colonia + ", CP " + usuario.cp + ", " + usuario.localidad + ", " + usuario.municipio + ", " + usuario.estado) + "\"," +
+                          "\"expedicion\":\"" + usuario.cp + "\"," +
+                          "\"rfc\":\"" + cliente.rfc + "\"," +
+                          "\"direccion_cliente\":\"" + cliente.direccion_fiscal + "\"," +
+                          "\"fecha\":\"" + item.fecha_creacion.ToString("dd/MM/yyyy") + "\"," +
+                          "\"subtotal\":\"" + item.subtotal.ToString("c") + "\"," +
+                          "\"iva\":\"" + item.iva.ToString("c") + "\"," +
+                          "\"iva_ret\":\"" + item.iva_ret.ToString("c") + "\"," +
+                          "\"isr_ret\":\"" + item.isr_ret.ToString("c") + "\"," +
+                          "\"descuento\":\"" + item.descuento.ToString("c") + "\"," +
+                          "\"total\":\"" + item.total.ToString("c") + "\"," +
+                          "\"total_letra\":\"" + item.total.NumeroALetras() + "\"," +
+
+                          "\"banco\":\"" + banco.banco + "\"," +
+                          "\"propietario\":\"" + banco.propietario + "\"," +
+                          "\"clabe\":\"" + banco.clabe + "\"," +
+
+                          "\"productos\":[" + String.Join(", ", db.tbd_Conceptos_Nota_Venta
+                          .Where(s => s.id_nota_venta == item.id_nota_venta)
+                          .Select(s => "{\"cant\":\"" + s.cantidad + "\",\"uni\":\"" + db.tbc_Unidades_Medida.Where(u => u.id_unidad_medida == s.id_unidad_medida).Select(uni => uni.clave + " " + uni.descripcion).FirstOrDefault() + "\",\"sat\":\"" + db.tbc_ProdServ.Where(u => u.id_sat == s.id_sat).Select(uni => uni.c_pord_serv).FirstOrDefault() + "\",\"desc\":\"" + s.concepto + "\",\"pu\":\"" + s.precio_unitario + "\",\"imp\":\"" + s.importe + "\" }").ToList()) + "]" +
+                          "}";
+    }
+
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+</head>
+
+<body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-behavior="sticky">
+
+
+    @if (item.id_nota_venta != 0)
+    {
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+        <script>
+
+        function formatoMoneda(cantidad) {
+            const options = { style: 'currency', currency: 'USD' };
+            const numberFormat = new Intl.NumberFormat('en-US', options);
+
+            var valor = numberFormat.format(cantidad);
+
+            return valor;
+        }
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+            generarPDF(@Model.id_nota_venta, '@Html.Raw(JSONPDf)');
+
+
+    });
+
+     function loadFile(url, callback) {
+        PizZipUtils.getBinaryContent(url, callback);
+    }
+    function generarPDF(id, render) {
+        var renderPDF = JSON.parse(render);
+        for (var i = 0; i < renderPDF.productos.length; i++) {
+            renderPDF.productos[i].pu = formatoMoneda(renderPDF.productos[i].pu);
+            renderPDF.productos[i].imp = formatoMoneda(renderPDF.productos[i].imp);
+        }
+        loadFile(
+            "../../Plantillas/NotaVenta_v1.docx",
+            function (error, content) {
+                if (error) {
+                    throw error;
+                }
+                var zip = new PizZip(content);
+                var doc = new window.docxtemplater(zip, {
+                    paragraphLoop: true,
+                    linebreaks: true,
+                });
+                doc.render(renderPDF);
+                var out = doc.getZip().generate({
+                    type: "blob",
+                    mimeType:
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    compression: "DEFLATE"
+                });
+                var fd = new FormData();
+                fd.append('docx', out);
+                fd.append('idNotaVenta', id);
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("AlmacenarNota", "Panel")',
+                    data: fd,
+                    processData: false,
+                    contentType: false
+                });
+            }
+        );
+    }
+        </script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.29.0/docxtemplater.js"></script>
+        <script src="https://unpkg.com/pizzip@3.1.1/dist/pizzip.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.js"></script>
+        <script src="https://unpkg.com/pizzip@3.1.1/dist/pizzip-utils.js"></script>
+
+
+    }
+
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,629 @@
+﻿@model IEnumerable<Facturafast.Models.tbc_Empleados>
+@using Facturafast.Models
+@{
+    BD_FFEntities db = new BD_FFEntities();
+}
+<h1 class="h3 mb-3">Catálogos de Empleados</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-actions float-end">
+
+                </div>
+                <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#modalEmpleado" onclick="nuevoEmpleado()"><i class="fas fa-plus"></i> Agregar Empleado</button>
+            </div>
+            <div class="card-body">
+                <table id="datatables-catalogo-empleados" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>Num. Empleado</th>
+                            <th>Nombre del Empleado</th>
+                            <th>RFC</th>
+                            <th>NSS</th>
+                            <th>Grupo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            tbc_Grupos_Empleados grupo = db.tbc_Grupos_Empleados.Where(s => s.id_grupo_empleados == item.id_grupo_empleados).Single();
+                            <tr>
+                                <td></td>
+                                <td><button class="btn btn-warning btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#modalEmpleado" onclick="actualizarEmpleado(@item.id_empleado, '@item.nombre', '@item.apellido_paterno', '@item.apellido_materno', '@item.curp', '@item.rfc', '@item.nss', '@item.telefono', '@item.correo_electronico', @item.id_estatus, @item.id_grupo_empleados, '@item.num_empleado', '@item.puesto', '@item.departamento', @item.id_tipo_contrato, '@item.inicio_relacion_laboral.ToString("yyyy-MM-dd")', @item.salario_diario_integrado, @item.salario_diario_cuotas_apoprtaciones, @item.id_periodicidad_pago, @item.id_regimen_contratacion, @item.id_riesgo_puesto, @item.id_tipo_jornada, '@item.cp', '@item.calle', '@item.num_ext', '@item.num_int', '@item.colonia', '@item.localidad', '@item.municipio', '@item.estado');"><i class="fas fa-edit"></i></button></td>
+                                <td>@item.num_empleado</td>
+                                <td>@item.nombre @item.apellido_paterno @item.apellido_materno</td>
+                                <td>@item.rfc</td>
+                                <td>@item.nss</td>
+                                <td>@grupo.grupo</td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form name="GuardarEmpleado.Catalogos" action="@Url.Action("GuardarEmpleado","Catalogos")" method="post" onsubmit="return validateForm();">
+
+    <input type="hidden" id="txtIdEmpleado" name="txtIdEmpleado">
+    <div class="modal fade" id="modalEmpleado" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Formulario de Empleado</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body m-3">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtNombre" name="txtNombre" placeholder="Nombre" required>
+                                <label for="txtNombre">Nombre</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtApellidoPaterno" name="txtApellidoPaterno" placeholder="Apellido Paterno" required>
+                                <label for="txtApellidoPaterno">Apellido Paterno</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtApellidoMaterno" name="txtApellidoMaterno" placeholder="Apellido Materno">
+                                <label for="txtApellidoMaterno">Apellido Materno</label>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg text-uppercase" pattern="^[a-zA-Z0-9]{18}" id="txtCURP" name="txtCURP" placeholder="CURP" onblur="keyPressCURP();" required>
+                                <label for="txtCURP">CURP</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg text-uppercase" pattern="^[a-zA-Z0-9]{12,13}" id="txtRFC" name="txtRFC" placeholder="RFC" onblur="keyPressRFC();" required>
+                                <label for="txtRFC">RFC</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtNSS" name="txtNSS" placeholder="No. de Seguro Social" onblur="keyPressNSS();" required>
+                                <label for="txtNSS">Num. de Seguro Social</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="tel" class="form-control form-control-lg" pattern="^[0-9]{10}" id="txtTelefono" name="txtTelefono" placeholder="Teléfono" required>
+                                <label for="txtTelefono">Teléfono</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="email" class="form-control form-control-lg" id="txtCorreo" name="txtCorreo" placeholder="Correo Electrónico" required>
+                                <label for="txtCorreo">Correo Electrónico</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbEstatus" name="cmbEstatus" aria-label="Estatus">
+                                    <option value="1">Activo</option>
+                                    <option value="2">Inactivo</option>
+                                </select>
+                                <label for="cmbEstatus">Estatus</label>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-8">
+
+                            <div class="input-group mb-3">
+                                <div class="form-floating form-floating-group flex-grow-1">
+                                    <select class="form-select form-select-lg" id="cmbGrupo" name="cmbGrupo" aria-label="Grupo Empresarial">
+                                    </select>
+                                    <label for="cmbGrupo">Grupo Empresarial</label>
+                                </div>
+                                <button type="button" class="btn btn-success btn-lg input-group-text" data-bs-toggle="modal" data-bs-target="#modalGrupo">&nbsp;<i class="fas fa-plus"></i>&nbsp;</button>
+                            </div>
+                        </div>
+                    </div>
+                    <hr /><br />
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtNumEmpleado" name="txtNumEmpleado" onblur="keyPressNumEmpleado();" placeholder="No. de Empleado" required>
+                                <label for="txtNumEmpleado">No. de Empleado</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtPuesto" name="txtPuesto" placeholder="Puesto">
+                                <label for="txtPuesto">Puesto</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtDepartamento" name="txtDepartamento" placeholder="Departamento">
+                                <label for="txtDepartamento">Departamento</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbTipoContrato" name="cmbTipoContrato" aria-label="Tipo de Contrato">
+                                </select>
+                                <label for="cmbTipoContrato">Tipo de Contrato</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control form-control-lg" id="txtInicioRelacionLaboral" name="txtInicioRelacionLaboral" placeholder="Inicio Relación Laboral" required>
+                                <label for="txtInicioRelacionLaboral">Inicio Relación Laboral</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtSalarioDiarioIntegrado" name="txtSalarioDiarioIntegrado" placeholder="Salario Diario Integrado" required>
+                                <label for="txtSalarioDiarioIntegrado">Salario Diario Integrado</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtSalarioDiarioCuotasAportaciones" name="txtSalarioDiarioCuotasAportaciones" placeholder="Salario Diario Cuotas y Aportaciones" required>
+                                <label for="txtSalarioDiarioCuotasAportaciones">Salario Diario Cuotas y Aportaciones</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbPeriodicidadPago" name="cmbPeriodicidadPago" aria-label="Periodicidad de Pago">
+                                </select>
+                                <label for="cmbPeriodicidadPago">Periodicidad de Pago</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbRegimenContratacion" name="cmbRegimenContratacion" aria-label="Régimen de Contratación">
+                                </select>
+                                <label for="cmbRegimenContratacion">Régimen de Contratación</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbRiesgoPuesto" name="cmbRiesgoPuesto" aria-label="Riesgo del Puesto">
+                                </select>
+                                <label for="cmbRiesgoPuesto">Riesgo del Puesto</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbTipoJornada" name="cmbTipoJornada" aria-label="Tipo de Jornada">
+                                </select>
+                                <label for="cmbTipoJornada">Tipo de Jornada</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr /><br />
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtCP" name="txtCP" placeholder="Código Postal" maxlength="5" required>
+                                <label for="txtCP">Código Postal</label>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtCalle" name="txtCalle" placeholder="Calle" required>
+                                <label for="txtCalle">Calle</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtNumExt" name="txtNumExt" placeholder="Núm Exterior" required>
+                                <label for="txtNumExt">Núm Exterior</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtNumInt" name="txtNumInt" placeholder="Núm Interior">
+                                <label for="txtNumInt">Núm Interior</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtColonia" name="txtColonia" placeholder="Colonia" required>
+                                <label for="txtColonia">Colonia</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtLocalidad" name="txtLocalidad" placeholder="Localidad" required>
+                                <label for="txtLocalidad">Localidad</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtMunicipio" name="txtMunicipio" placeholder="Municipio" required>
+                                <label for="txtMunicipio">Municipio</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbEstado" name="cmbEstado" aria-label="Estado">
+                                    <option value="AGUASCALIENTES" data-code="AGS">Aguascalientes</option>
+                                    <option value="BAJA CALIFORNIA" data-code="BC">Baja California</option>
+                                    <option value="BAJA CALIFORNIA SUR" data-code="BCS">Baja California Sur</option>
+                                    <option value="CAMPECHE" data-code="CAMP">Campeche</option>
+                                    <option value="CHIAPAS" data-code="CHIS">Chiapas</option>
+                                    <option value="CHIHUAHUA" data-code="CHIH">Chihuahua</option>
+                                    <option value="COAHUILA" data-code="COAH">Coahuila</option>
+                                    <option value="COLIMA" data-code="COL">Colima</option>
+                                    <option value="CIUDAD DE MEXICO">Ciudad de Mexico</option>
+                                    <option value="DURANGO" data-code="DGO">Durango</option>
+                                    <option value="GUANAJUATO" data-code="GTO">Guanajuato</option>
+                                    <option value="GUERRERO" data-code="GRO">Guerrero</option>
+                                    <option value="HIDALGO" data-code="HGO">Hidalgo</option>
+                                    <option value="JALISCO" data-code="JAL">Jalisco</option>
+                                    <option value="ESTADO DE MEXICO" data-code="MEX">México</option>
+                                    <option value="MICHOACAN DE OCAMPO" data-code="MICH">Michoacán</option>
+                                    <option value="MORELOS" data-code="MOR">Morelos</option>
+                                    <option value="NAYARIT" data-code="NAY">Nayarit</option>
+                                    <option value="NUEVO LEON" data-code="NL">Nuevo León</option>
+                                    <option value="OAXACA" data-code="OAx">Oaxaca</option>
+                                    <option value="PUEBLA" data-code="PUE">Puebla</option>
+                                    <option value="QUERETARO" data-code="QRO">Querétaro</option>
+                                    <option value="QUINTANA ROO" data-code="Q ROO">Quintana Roo</option>
+                                    <option value="SAN LUIS POTOSI" data-code="SLP">San Luis Potosí</option>
+                                    <option value="SINALOA" data-code="SIN">Sinaloa</option>
+                                    <option value="SONORA" data-code="SON">Sonora</option>
+                                    <option value="TABASCO" data-code="TAB">Tabasco</option>
+                                    <option value="TAMAULIPAS" data-code="TAMPS">Tamaulipas</option>
+                                    <option value="TLAXCALA" data-code="TLAX">Tlaxcala</option>
+                                    <option value="VERACRUZ DE IGNACIO DE LA LLAVE" data-code="VER">Veracruz</option>
+                                    <option value="YUCATAN" data-code="YUC">Yucatán</option>
+                                    <option value="ZACATECAS" data-code="ZAC">Zacatecas</option>
+                                </select>
+                                <label for="cmbEstado">Estado</label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i>&nbsp; Guardar Datos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+<form name="GuardarGrupo.Catalogos" onsubmit="return validateFormGrupo();">
+    <div class="modal fade" id="modalGrupo" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Nuevo Grupo Empresarial</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body m-3">
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtGrupoEmpresarial" name="txtGrupoEmpresarial" placeholder="Grupo Empresarial" required>
+                                <label for="txtGrupoEmpresarial">Grupo Empresarial</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" id="txtGrupoRegistroPatronal" name="txtGrupoRegistroPatronal" placeholder="Registro Patronal" required>
+                                <label for="txtGrupoRegistroPatronal">Registro Patronal</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbGrupoEmpresarialEstado" name="cmbGrupoEmpresarialEstado" aria-label="Estado">
+                                    <option value="AGUASCALIENTES" data-code="AGS">Aguascalientes</option>
+                                    <option value="BAJA CALIFORNIA" data-code="BC">Baja California</option>
+                                    <option value="BAJA CALIFORNIA SUR" data-code="BCS">Baja California Sur</option>
+                                    <option value="CAMPECHE" data-code="CAMP">Campeche</option>
+                                    <option value="CHIAPAS" data-code="CHIS">Chiapas</option>
+                                    <option value="CHIHUAHUA" data-code="CHIH">Chihuahua</option>
+                                    <option value="COAHUILA" data-code="COAH">Coahuila</option>
+                                    <option value="COLIMA" data-code="COL">Colima</option>
+                                    <option value="CIUDAD DE MEXICO">Ciudad de Mexico</option>
+                                    <option value="DURANGO" data-code="DGO">Durango</option>
+                                    <option value="GUANAJUATO" data-code="GTO">Guanajuato</option>
+                                    <option value="GUERRERO" data-code="GRO">Guerrero</option>
+                                    <option value="HIDALGO" data-code="HGO">Hidalgo</option>
+                                    <option value="JALISCO" data-code="JAL">Jalisco</option>
+                                    <option value="ESTADO DE MEXICO" data-code="MEX">México</option>
+                                    <option value="MICHOACAN DE OCAMPO" data-code="MICH">Michoacán</option>
+                                    <option value="MORELOS" data-code="MOR">Morelos</option>
+                                    <option value="NAYARIT" data-code="NAY">Nayarit</option>
+                                    <option value="NUEVO LEON" data-code="NL">Nuevo León</option>
+                                    <option value="OAXACA" data-code="OAx">Oaxaca</option>
+                                    <option value="PUEBLA" data-code="PUE">Puebla</option>
+                                    <option value="QUERETARO" data-code="QRO">Querétaro</option>
+                                    <option value="QUINTANA ROO" data-code="Q ROO">Quintana Roo</option>
+                                    <option value="SAN LUIS POTOSI" data-code="SLP">San Luis Potosí</option>
+                                    <option value="SINALOA" data-code="SIN">Sinaloa</option>
+                                    <option value="SONORA" data-code="SON">Sonora</option>
+                                    <option value="TABASCO" data-code="TAB">Tabasco</option>
+                                    <option value="TAMAULIPAS" data-code="TAMPS">Tamaulipas</option>
+                                    <option value="TLAXCALA" data-code="TLAX">Tlaxcala</option>
+                                    <option value="VERACRUZ DE IGNACIO DE LA LLAVE" data-code="VER">Veracruz</option>
+                                    <option value="YUCATAN" data-code="YUC">Yucatán</option>
+                                    <option value="ZACATECAS" data-code="ZAC">Zacatecas</option>
+                                </select>
+                                <label for="cmbGrupoEmpresarialEstado">Estado</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalEmpleado"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i>&nbsp; Guardar Grupo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+
+
+
+        $("#datatables-catalogo-empleados").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1] }
+            ],
+            order: [[2, 'asc']]
+        });
+
+        $.get("@Url.Action("obtenerGrupos", "Catalogos")", function (data) {
+            $("#cmbGrupo").html(data);
+        });
+
+
+
+        $.get("@Url.Action("obtenerTipoContrato", "Catalogos")", function (data) {
+            $("#cmbTipoContrato").html(data);
+        });
+        $.get("@Url.Action("obtenerPeriodicidad", "Catalogos")", function (data) {
+            $("#cmbPeriodicidadPago").html(data);
+        });
+        $.get("@Url.Action("obtenerRegimenContratacion", "Catalogos")", function (data) {
+            $("#cmbRegimenContratacion").html(data);
+        });
+        $.get("@Url.Action("obtenerRiesgoPuesto", "Catalogos")", function (data) {
+            $("#cmbRiesgoPuesto").html(data);
+        });
+        $.get("@Url.Action("obtenerTipoJornada", "Catalogos")", function (data) {
+            $("#cmbTipoJornada").html(data);
+        });
+
+    });
+
+    function validateFormGrupo() {
+        var txtGrupo = document.forms["GuardarGrupo.Catalogos"]["txtGrupoEmpresarial"].value;
+        var txtRegistro = document.forms["GuardarGrupo.Catalogos"]["txtGrupoRegistroPatronal"].value;
+        var txtEstado = document.forms["GuardarGrupo.Catalogos"]["cmbGrupoEmpresarialEstado"].value;
+        if (txtGrupo != "") {
+            agregarGrupo(txtGrupo, txtRegistro, txtEstado);
+        }
+        return false;
+    }
+
+
+    function nuevoEmpleado() {
+        document.forms["GuardarEmpleado.Catalogos"].reset();
+        document.forms["GuardarEmpleado.Catalogos"]["txtIdEmpleado"].value = 0;
+
+        $("#txtSalarioDiarioIntegrado").val(0);
+        $("#txtSalarioDiarioCuotasAportaciones").val(0);
+
+        $("#cmbTipoContrato").val(1);
+        $("#cmbPeriodicidadPago").val(1);
+        $("#cmbRegimenContratacion").val(1);
+        $("#cmbRiesgoPuesto").val(1);
+        $("#cmbTipoJornada").val(1);
+        $("#cmbEstatus").val(1);
+        $("#cmbGrupo").val($("#cmbGrupo option:first").val());
+
+        
+        $("#txtInicioRelacionLaboral").val(formatDate(new Date()));
+
+        $("#txtCURP").removeClass("is-invalid");
+        $("#txtCURP").removeClass("is-valid");
+        $("#txtRFC").removeClass("is-invalid");
+        $("#txtRFC").removeClass("is-valid");
+        $("#txtNSS").removeClass("is-invalid");
+        $("#txtNSS").removeClass("is-valid");
+        $("#txtNumEmpleado").removeClass("is-invalid");
+        $("#txtNumEmpleado").removeClass("is-valid");
+    }
+
+
+    function actualizarEmpleado(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z, aa, ab, ac, ad) {
+        $("#txtIdEmpleado").val(a);
+        $("#txtNombre").val(b);
+        $("#txtApellidoPaterno").val(c);
+        $("#txtApellidoMaterno").val(d);
+        $("#txtCURP").val(e);
+        $("#txtRFC").val(f);
+        $("#txtNSS").val(g);
+        $("#txtTelefono").val(h);
+        $("#txtCorreo").val(i);
+        $("#cmbEstatus").val(j);
+        $("#cmbGrupo").val(k);
+        $("#txtNumEmpleado").val(l);
+        $("#txtPuesto").val(m);
+        $("#txtDepartamento").val(n);
+
+        $("#cmbTipoContrato").val(o);
+        $("#txtInicioRelacionLaboral").val(p);
+        $("#txtSalarioDiarioIntegrado").val(q);
+        $("#txtSalarioDiarioCuotasAportaciones").val(r);
+        $("#cmbPeriodicidadPago").val(s);
+        $("#cmbRegimenContratacion").val(t);
+        $("#cmbRiesgoPuesto").val(u);
+        $("#cmbTipoJornada").val(v);
+        $("#txtCP").val(w);
+        $("#txtCalle").val(x);
+        $("#txtNumExt").val(y);
+        $("#txtNumInt").val(z);
+
+        $("#txtColonia").val(aa);
+        $("#txtLocalidad").val(ab);
+        $("#txtMunicipio").val(ac);
+        $("#txtEstado").val(ad);
+
+        $("#txtCURP").removeClass("is-invalid");
+        $("#txtCURP").removeClass("is-valid");
+        $("#txtRFC").removeClass("is-invalid");
+        $("#txtRFC").removeClass("is-valid");
+        $("#txtNSS").removeClass("is-invalid");
+        $("#txtNSS").removeClass("is-valid");
+        $("#txtNumEmpleado").removeClass("is-invalid");
+        $("#txtNumEmpleado").removeClass("is-valid");
+
+        $("#txtCURP").addClass("is-valid");
+        $("#txtRFC").addClass("is-valid");
+        $("#txtNSS").addClass("is-valid");
+        $("#txtNumEmpleado").addClass("is-valid");
+
+    }
+
+
+    function validateForm() {
+        if ($("#txtCURP").hasClass("is-invalid")) {
+            notificacionAlert("La CURP " + $("#txtCURP").val().toUpperCase() + " ya existe en otro Empleado.", "danger");            
+            return false;
+        }
+        if ($("#txtRFC").hasClass("is-invalid")) {
+            notificacionAlert("El RFC " + $("#txtRFC").val().toUpperCase() + " ya existe en otro Empleado.", "danger");
+            return false;
+        }
+        if ($("#txtNSS").hasClass("is-invalid")) {
+            notificacionAlert("El NSS " + $("#txtNSS").val() + " ya existe en otro Empleado.", "danger");
+            return false;
+        }
+
+        if ($("#txtNumEmpleado").hasClass("is-invalid")) {
+            notificacionAlert("El Num. de Empleado " + $("#txtNumEmpleado").val() + " ya existe en otro Empleado.", "danger");
+            return false;
+        }
+
+        abrirCargando();
+        bootstrap.Modal.getOrCreateInstance(document.getElementById("modalEmpleado")).hide();
+        return true;
+    }
+
+
+
+
+    function agregarGrupo(a,b,c) {
+        $("#txtGrupoEmpresarial").removeClass("is-invalid");
+        var id_grupo = $("#cmbGrupo").val();
+        abrirCargando();
+        $.get("@Url.Action("guardarGrupo", "Catalogos")?grupo=" + a + "&reg=" + b + "&estado=" + c, async function (data) {
+            var response = JSON.parse(data);
+            cerrarCargando();
+            if (response.estatus == 1) {
+                bootstrap.Modal.getOrCreateInstance(document.getElementById("modalGrupo")).hide();
+                bootstrap.Modal.getOrCreateInstance(document.getElementById("modalEmpleado")).show();
+                $("#cmbGrupo").html(response.data);
+                notificacionAlert(response.mensaje, "success");                
+                $("cmbGrupo").val(id_grupo);
+            }
+            else {
+                notificacionAlert(response.mensaje, "danger");                
+                $("#txtGrupoEmpresarial").addClass("is-invalid");
+            }
+        });
+    }
+
+
+    function keyPressCURP() {
+
+        var len = $("#txtCURP").val();
+        if (len.length > 17) {
+            $.get("@Url.Action("existeCURPEmpleado", "Catalogos")?id=" + $("#txtIdEmpleado").val() + "&curp=" + len, async function (data) {
+                $input = $("#txtCURP");
+                $input.removeClass("is-invalid");
+                $input.removeClass("is-valid");
+                $input.addClass(data);
+            });
+        }
+    }
+
+    function keyPressRFC() {
+
+        var len = $("#txtRFC").val();
+        if (len.length > 12) {
+            $.get("@Url.Action("existeRFCEmpleado", "Catalogos")?id=" + $("#txtIdEmpleado").val() + "&rfc=" + len, async function (data) {
+                $input = $("#txtRFC");
+                $input.removeClass("is-invalid");
+                $input.removeClass("is-valid");
+                $input.addClass(data);
+            });
+        }
+    }
+
+    function keyPressNSS() {
+
+        var len = $("#txtNSS").val();
+        if (len.length > 9) {
+            $.get("@Url.Action("existeNSSEmpleado", "Catalogos")?id=" + $("#txtIdEmpleado").val() + "&nss=" + len, async function (data) {
+                $input = $("#txtNSS");
+                $input.removeClass("is-invalid");
+                $input.removeClass("is-valid");
+                $input.addClass(data);
+            });
+        }
+    }
+
+    function keyPressNumEmpleado() {
+
+        var len = $("#txtNumEmpleado").val();
+        if (len.length > 0) {
+            $.get("@Url.Action("existeNumEmpleado", "Catalogos")?id=" + $("#txtIdEmpleado").val() + "&numEmpleado=" + len, async function (data) {
+                $input = $("#txtNumEmpleado");
+                $input.removeClass("is-invalid");
+                $input.removeClass("is-valid");
+                $input.addClass(data);
+            });
+        }
+    }
+
+</script>

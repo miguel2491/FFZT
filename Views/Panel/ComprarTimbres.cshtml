@@ -1,0 +1,106 @@
+﻿@model IEnumerable<Facturafast.Models.tbc_Paquetes>
+
+<div class="row">
+    <div class="col-md-10 col-xl-8 mx-auto">
+        <h1 class="text-center">Paquetes de Timbres</h1>
+        <p class="lead text-center mb-4">Los paquetes tienen <strong>vigencia de 1 año</strong> a partir de su fecha de activación.</p>
+
+
+        @{
+            Int32 Indice = 1;
+            Boolean Flag = false;
+        }
+        @foreach (var item in Model)
+        {
+            Flag = false;
+            if (Indice == 1)
+            {
+                @: <div class="row py-4">
+                }
+                <div class="col-sm-4 mb-3 mb-md-0">
+                    <div class="card text-center h-100">
+                        <div class="card-body d-flex flex-column">
+                            <div class="mb-4">
+                                <span class="display-6">@item.costo.ToString("c")</span>
+                            </div>
+                            <h6>Incluye:</h6>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <h3><span class="badge rounded-pill bg-secondary">@item.descripcion_paquete</span></h3>
+                                </li>
+                            </ul>
+                            <div class="mt-auto">
+                                <a href="@Url.Action("SeleccionarPlan","Panel", new { id = item.id_paquete})" class="btn btn-lg btn-success"><i class="fas fa-cart-shopping"></i>&nbsp;  Comprar</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                if (Indice == 3)
+                {
+                @:  </div>
+                Indice = 0;
+                Flag = true;
+            }
+
+            Indice++;
+        }
+
+        @if (!Flag)
+        {
+        @:</div>
+        }
+
+        <hr />
+
+        <div class="text-center my-4">
+            <h2>Preguntas Frecuentes</h2>
+        </div>
+        <div class="row">
+            <div class="col-md-5 col-sm-6 ms-auto">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="h6 card-title">Do I need a credit card to sign up?</h5>
+                        <p class="mb-0">
+                            Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit
+                            vel, luctus pulvinar, hendrerit id, lorem.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5 col-sm-6 me-auto">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="h6 card-title">Do you offer a free trial?</h5>
+                        <p class="mb-0">
+                            Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit
+                            vel, luctus pulvinar, hendrerit id, lorem.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5 col-sm-6 ms-auto">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="h6 card-title">What if I decide to cancel my plan?</h5>
+                        <p class="mb-0">
+                            Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit
+                            vel, luctus pulvinar, hendrerit id, lorem.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5 col-sm-6 me-auto">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="h6 card-title">Can I cancel at anytime?</h5>
+                        <p class="mb-0">
+                            Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit
+                            vel, luctus pulvinar, hendrerit id, lorem.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

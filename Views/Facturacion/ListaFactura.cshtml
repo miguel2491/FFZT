@@ -1,0 +1,511 @@
+﻿@model IEnumerable<Facturafast.Models.tbd_Pre_Factura>
+@using Facturafast.Models
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+<h1 class="h3 mb-3">Lista de Facturas</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-4">
+                        <div class="form-floating mb-3">
+                            <input type="date" class="form-control form-control-lg" id="txtFechaInicial" name="txtFechaInicial" placeholder="Fecha Inicial" value="@ViewBag.Inicio.ToString("yyyy-MM-dd")" required>
+                            <label for="txtFechaInicial">Fecha Inicial</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating mb-3">
+                            <input type="date" class="form-control form-control-lg" id="txtFechaFinal" name="txtFechaFinal" placeholder="Fecha Final" value="@ViewBag.Final.ToString("yyyy-MM-dd")" required>
+                            <label for="txtFechaFinal">Fecha Final</label>
+                        </div>
+                    </div>
+                    <div class="col-md-2"></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <button class="btn btn-success btn-lg btnBuscar" onclick="filtrar()" style="margin-top:10px;"><i class="fas fa-search"></i>&nbsp; Buscar Pre Factura</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card-actions float-end">
+                        </div>
+                        <a class="btn btn-success btn-lg" href="@Url.Action("Factura","Facturacion")"><i class="fas fa-plus"></i> Agregar Factura</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <table id="datatables-pre-factura" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>RFC</th>
+                            <th>Nombre Cliente</th>
+                            <th>Método de Pago</th>
+                            <th>Forma de pago</th>
+                            <th>Uso CFDI</th>
+                            <th>Total</th>
+                            <th>Fecha Emisión</th>
+                            <th>Estatus</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalPreFactura" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger">
+                <h3 class="modal-title" style="color:white;margin-left:40%">Eliminar</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body m-3">
+                <input type="hidden" id="txtIdPreFactura" />
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="text-center mb-3">
+                            <label for="txtNombreRazonClienteContactos">¿Deseas eliminar la Pre Factura?</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cancelar</button>
+                <button class="btn btn-danger" id="btn-DeletePreFactura" onclick="d_PreFactura()"><i class="fas fa-trash"></i>&nbsp; Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- MODAL COMPRAS -->
+<div class="modal fade" id="modalTimbrado" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Timbrar</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body m-3">
+                <input type="hidden" id="idprefac_modal" />
+                <input type="hidden" id="correo_cliente" />
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="forma_pago">
+                            <label for="forma_pago">Forma Pago</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="metodo_pago">
+                            <label for="metodo_pago">Método Pago</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="total">
+                            <label for="total">Total</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <div class="form-floating mb-12">
+                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="uso_cfdi">
+                            <label for="uso_cfdi">Uso CFDI</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="rfc_receptor">
+                            <label for="rfc_emisor">RFC</label>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="razon_recpetor">
+                            <label for="razon_emisor">Razón Social</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+<!--MODAL CANCELAR-->
+<div class="modal fade" id="modalCancelar" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color:darkred">
+                <h3 class="modal-title" style="color:white">Factura</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body m-3">
+                <input type="hidden" id="id_factura" />
+                <div class="row dmensaje" style="display:none"></div>
+                <div class="row delimina" style="display:none">
+                    <div class="row">
+                        <div class='col-md-6'>
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control form-control-lg" disabled id="txtFolioFiscal" placeholder="Folio">
+                                <label for="txtUnidad">Folio Físcal</label>
+                            </div>
+                        </div>
+                        <div class='col-md-6'>
+                            <div class="form-floating mb-3">
+                                <select class='form-select form-select-lg' id='s_motivos' onchange='sTipoMotivo()'>
+                                    <option value='01'>Comprobante emitido con errores con relación</option>
+                                    <option value='02'>Comprobante emitido con errores sin relación</option>
+                                    <option value='03'>No se llevó a cabo la operación</option>
+                                    <option value='04'>Operación nominativa relacionada en una factura global</option>
+                                </select>
+                                <label>Motivo</label>
+                            </div>
+                        </div>
+                        <div class='col-md-6' id='folioDiv'>
+                            <div class="form-floating mb-3">
+                                <input type='text' class='form-control form-control-lg' id='folio_'>
+                                <label for="folio_">Folio</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="dbtn">
+                    <button class="btn btn-warning btn-sm" onclick="cancelaFactura()">Cancelar</button>
+                    <button class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+                <br />
+            </div>
+        </div>
+    </div>
+</div>
+<!--MODAL PRE FACTURA-->
+<div class="modal fade" id="modalPreFac" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">PreFactura</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body m-3">
+                <input type="hidden" id="idprefac_modal_" />
+                <input type="hidden" id="correo_cliente_" />
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="forma_pago_">
+                            <label for="forma_pago">Forma Pago</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="metodo_pago_">
+                            <label for="metodo_pago">Método Pago</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="total_">
+                            <label for="total">Total</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-12">
+                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="uso_cfdi_">
+                            <label for="uso_cfdi">Uso CFDI</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="rfc_receptor_">
+                            <label for="rfc_emisor">RFC</label>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="razon_recpetor_">
+                            <label for="razon_emisor">Razón Social</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnCerrar"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var TablePreFactura;
+    document.addEventListener("DOMContentLoaded", function () {
+        TablePreFactura = $("#datatables-pre-factura").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1] }
+            ],
+            order: [[2, 'asc']]
+        });
+        filtrar();
+        //-----------------
+        $('#modalCancelar').on('show.bs.modal', function (event) {
+            var myVal = $(event.relatedTarget).data('id');
+            var tipo = $(event.relatedTarget).data('tipo');
+            if (tipo == "Estatus") {
+                $.get("@Url.Action("getStatusXML", "CartaPorte")?id=" + myVal, async function (data) {
+                    console.log(data);
+                    var dd = data.split("|");
+                    $('.dmensaje').empty();
+                    $('.dmensaje').css('display', 'block');
+                    $('.delimina').css('display', 'none');
+                    $('.dbtn').css('display', 'none');
+                    if (dd[0] == "S")
+                    {
+                        $('.dmensaje').append("<div class='row'>" +
+                            "<div class='col-md-4'>" + dd[1] + "</div>" +
+                            "<div class='col-md-4'>" + dd[2] + "</div>" +
+                            "<div class='col-md-4'><span class='badge btn-danger'>" + dd[3] + "</span></div>" +
+                            "</div>");
+                    }
+                });
+            }
+            else
+            {
+                $('.dmensaje').css('display', 'none');
+                $('.delimina').css('display', 'block');
+                consultarfolio(myVal);
+            }
+            $(this).find("#id_factura").val(myVal);
+        });
+        getFirma();
+    });
+
+    function deletePreFactura(id)
+    {
+        $("#txtIdPreFactura").val(id);
+    }
+
+    function d_PreFactura()
+    {
+        var id = $("#txtIdPreFactura").val();
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            url: '@Url.Action("deleteFactura","Facturacion")',
+            data: JSON.stringify({ 'id_': id }),
+            success: function (data) {
+                var response = data;
+                $('#modalPreFactura').modal('hide');
+                console.log(response);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(data);
+            }
+        });
+    }
+
+    function timbrar(id)
+    {
+         bootstrap.Modal.getOrCreateInstance(document.getElementById("modalTimbrado")).show();
+        $.get("@Url.Action("getFacturas", "Facturacion")?id=" + id, async function (data) {
+            $("#idprefac_modal").val(id);
+            $("#correo_cliente").val(data[0].correo);
+            $("#forma_pago").val(data[0].forma_pago);
+            $("#metodo_pago").val(data[0].metodo_pago);
+            $("#uso_cfdi").val(data[0].uso_cfdi);
+            $("#total").val(data[0].total);
+            $("#rfc_receptor").val(data[0].n_rfc);
+            $("#razon_recpetor").val(data[0].rfc);
+            var f_pdf = data[0].url_pdf;
+            var f_doc = data[0].url_xml;
+            $(".modal-footer").html('<button class="btn btn-primary" onclick=sendcorreo()><i class="fas fa-envelope"></i>&nbsp; Enviar Correo</button>' +
+                '<a target="_blank" class="btn btn-success" href="../Plantillas/' + f_pdf + '"><i class="fas fa-file"></i>&nbsp; Descargar PDF</button>' +
+                '<a class="btn btn-info" href="../Plantillas/' + f_doc + '"><i class="fas fa-file"></i>&nbsp; Descargar XML</button>');
+        });
+    }
+
+    function sendcorreo()
+    {
+        abrirCargando();
+        let correo = $("#correo_cliente_").val();
+        let id = $("#idprefac_modal_").val();
+        //-------------------------------------------------------------------------
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            url: '/Facturacion/EnviarCorreo',
+            data: JSON.stringify({ 'id_': id, 'correo_': correo, 'tipo':'factura'}),
+            success: function (data) {
+                var response = data;
+                console.log(response);
+                cerrarCargando();
+                if (response == "Enviado") {
+                    notificacionAlert("Correo enviado satisfactoriamente.", "success");
+                    setTimeout(function () { window.location = '@Url.Action("ListaFactura", "Facturacion")' }, 3000);
+                } else {
+                    notificacionAlert("Ocurrio un problema al enviar el correo, intentelo mas tarde.", "danger");
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+            }
+        });
+        //-------------------------------------------------------------------------
+    }
+
+    function filtrar() {
+        let fi = $("#txtFechaInicial").val();
+        let ff = $("#txtFechaFinal").val();
+         $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            url: '@Url.Action("filtrarFacturas","Facturacion")',
+            data: JSON.stringify({ 'fecha_i': fi,'fecha_f': ff }),
+            success: function (data) {
+                var response = data;
+                var t = TablePreFactura;
+                var t_obj = data.length;
+                t.clear().draw(false);
+                for (var x = 0; x < t_obj; x++)
+                {
+                    var estatus = data[x].status == 1 ? '<span class="badge btn-primary"><i class="fa fa-times"></i>  Sin Timbradar</span>' : data[x].status == 2 ? '<span class="badge btn-warning"><i class="fa fa-check-circle"></i>  Timbrada</span>' : data[x].status == 3 ? '<span class="badge btn-danger"><i class="fa fa-times"></i>  Cancelada</span>':'';
+                    var op_editar = '<a href="../Facturacion/Factura?id=' + data[x].id + '" class="btn btn-warning btn-sm icon-edit" title="Editar"><i class="fas fa-edit"></i></a>';
+                    var op_ver = '<a href="../Facturacion/TimbrarFac?id='+data[x].id+'" class="btn btn-info btn-sm icon-preview" title="Preview"><i class="fas fa-eye"></i></a>';
+                    var op_del = '<a href="#" class="btn btn-danger btn-sm icon-delete" title="Eliminar"><i class="fas fa-trash"></i></a>';
+                    let send_c = '<a href="#" class="btn btn-info btn-sm icon-send" data-bs-toggle="modal" data-bs-target="#modalPreFac" onclick="envPreFac(' + data[x].id + ')" title="Enviar"><i class="fas fa-share"></i></a>';
+                    let g_xml = data[x].status == 2 ? '<a href="#" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalCancelar" data-id="' + data[x].id + '" data-tipo="Cancelacion" title="Cancelar XML"><i class="fas fa-window-close"></i></a>' : data[x].status == 3 ? '<a href="#" data-bs-toggle="modal" data-bs-target="#modalCancelar" data-tipo="Estatus" data-id="' + data[x].id + '" class="btn btn-success btn-sm"><i class="fas fa-receipt"></i></a>' : '';
+
+                    var accion = data[x].status != 1 ? op_ver + " " + op_del + " " + send_c + " "+ g_xml : op_editar + " " + op_ver + " " + op_del;
+                    t.row.add(
+                        {
+                            0: accion,
+                            1: data[x].nombre_rfc,
+                            2: data[x].rfc_cliente,
+                            3:data[x].metodo_pago,
+                            4:data[x].forma_pago,
+                            5:data[x].clave_uso_cfdi,
+                            6:formatoMoneda(data[x].total),
+                            7:formatoMoneda(data[x].total),
+                            8:estatus
+                        }
+                    );
+                    t.columns.adjust().draw(false);
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(data);
+            }
+        });
+    }
+
+    function sTipoMotivo() {
+        var v = $("#s_motivos option:selected").val();
+        if (v == "01") {
+            $("#folioDiv").css('display', 'block');
+        } else {
+            $("#folioDiv").css('display', 'none');
+        }
+    }
+
+    function consultarfolio(id)
+    {
+        $.get("@Url.Action("getFacturasUuid", "Facturacion")?id=" + id, async function (data)
+        {
+            $("#txtFolioFiscal").val(data[0].uuid);
+        });
+    }
+
+    function cancelaFactura()
+    {
+        //-------------------------------------------------------------------------
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            url: '/XML/setCancelar',
+            data: JSON.stringify({ 'id': $("#id_factura").val(), 'ffiscal': $("#txtFolioFiscal").val().trim(), 'motivo': $("#s_motivos").val(), 'folio_':$("#folio_").val()}),
+            success: function (data) {
+                var response = data.split("|");
+                console.log(response);
+                cerrarCargando();
+                if (response[0] == "Cancelado") {
+                    notificacionAlert("Se cancelo correctamente.", "success");
+                    setTimeout(function () { window.location = '@Url.Action("ListaFactura", "Facturacion")' }, 3000);
+                } else {
+                    notificacionAlert("Ocurrio un problema al cancelar, intentelo mas tarde.", "danger");
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                cerrarCargando();
+            }
+        });
+        //-------------------------------------------------------------------------
+    }
+
+    function getFirma()
+    {
+        //-------------------------------------------------------------------------
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            url: '/Facturacion/GetFirma',
+            success: function (data) {
+                if (!data)
+                {
+                    notificacionAlert("Aun no has cargado tu sello y llave para poder timbrar, vuelva a intentar", "danger");
+                    setTimeout(function () {
+                        window.location = "/Panel/Firmas";
+                    },3000)
+
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                cerrarCargando();
+            }
+        });
+        //-------------------------------------------------------------------------
+    }
+
+    function envPreFac(id)
+    {
+        $.get("@Url.Action("getFacturas", "Facturacion")?id=" + id, async function (data) {
+            console.log(data[0]);
+            console.log(data[0].fpago);
+            $("#correo_cliente_").val(data[0].correo);
+            $("#forma_pago_").val(data[0].fpago);
+            $("#metodo_pago_").val(data[0].metodo_pago_);
+            $("#uso_cfdi_").val(data[0].u_cfdi);
+            $("#total_").val(data[0].total);
+            $("#rfc_receptor_").val(data[0].rfc);
+            $("#razon_recpetor_").val(data[0].n_rfc);
+            $(".modal-footer").html('<button class="btn btn-primary" onclick=sendcorreo()><i class="fas fa-envelope"></i>&nbsp; Enviar Correo</button>' +
+                '<a target="_blank" class="btn btn-success" href="../Plantillas/' + data[0].url_pdf + '"><i class="fas fa-file"></i>&nbsp; Descargar PDF</a>' +
+                '<a class="btn btn-info" href="../Plantillas/' + data[0].url_xml + '"><i class="fas fa-file"></i>&nbsp; Descargar XML</a>');
+        });
+    }
+
+</script>

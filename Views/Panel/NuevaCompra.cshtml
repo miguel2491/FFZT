@@ -1,0 +1,298 @@
+﻿@model Facturafast.Models.tbc_Paquetes
+@using Facturafast.Models
+@{
+    tbc_Usuarios usuario = Session["tbc_Usuarios"] as tbc_Usuarios;
+}
+@*<script src="https://sdk.mercadopago.com/js/v2"></script>*@
+
+
+<div class="row">
+    <div class="col-md-10 col-xl-8 mx-auto">
+
+        <h1 class="text-center">Proceso de Compra de Timbres</h1>
+        <br />
+
+        <form id="smartwizard-validation" class="wizard wizard-success">
+
+            <input type="hidden" id="txtIdPreference" name="txtIdPreference" value="@ViewBag.PREFERENCE_ID" />
+            <input type="hidden" id="txtIdPaquete" name="txtIdPaquete" value="@Model.id_paquete" />
+            <input type="hidden" id="txtInitPoint" name="txtInitPoint" value="@ViewBag.InitPoint"/>
+
+            <ul class="nav">
+                <li class="nav-item"><a class="nav-link" href="#Informacion">Información<br /><small>de la Compra</small></a></li>
+                <li class="nav-item"><a class="nav-link" href="#Facturacion">Datos<br /><small>de Facturación</small></a></li>
+            </ul>
+
+            <div class="tab-content">
+                <div id="Informacion" class="tab-pane" role="tabpanel">
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h3>Hola <strong>@usuario.nombre_razon</strong></h3>
+                        </div>
+                        <div class="col-md-6 text-md-right">
+                            <div class="text-muted">Fecha de Pago</div>
+                            <strong>@DateTime.Now.ToString("D")</strong>
+                        </div>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="text-muted">Cliente:</div>
+                            <strong>
+                                @usuario.nombre_razon
+                            </strong>
+                            <p>
+                                @usuario.calle @usuario.num_ext / @usuario.num_int <br> @usuario.colonia, @usuario.localidad <br> @usuario.estado @usuario.cp <br>
+                                <span>
+                                    @usuario.correo_electronico
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6 text-md-right">
+                            <div class="text-muted">Pago para:</div>
+                            <strong>
+                                Facturafast
+                            </strong>
+                            <p>
+                                Priv A Poniente de la 16 de Sep 4114 <br> Carmen Huexotitla, Puebla <br> Puebla 72534 <br>
+                                <span>
+                                    cfdi@facturafast.mx
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Descripción</th>
+                                <th>Cantidad</th>
+                                <th class="text-end">Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>@Model.nombre_paquete</td>
+                                <td>1</td>
+                                <td class="text-end">@Model.importe.ToString("c")</td>
+                            </tr>
+                            <tr>
+                                <th>&nbsp;</th>
+                                <th>Subtotal </th>
+                                <th class="text-end">@Model.importe.ToString("c")</th>
+                            </tr>
+                            <tr>
+                                <th>&nbsp;</th>
+                                <th>Impuestos </th>
+                                <th class="text-end">@Model.iva.ToString("c")</th>
+                            </tr>
+                            <tr>
+                                <th>&nbsp;</th>
+                                <th>Total </th>
+                                <th class="text-end">@Model.costo.ToString("c")</th>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+
+                <div id="Facturacion" class="tab-pane" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h3>Hola <strong>@usuario.nombre_razon</strong></h3>
+                        </div>
+                        <div class="col-md-6 text-md-right">
+                            <div class="text-muted">Fecha de Pago</div>
+                            <strong>@DateTime.Now.ToString("D")</strong>
+                        </div>
+                    </div>
+                    <hr class="my-4" />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbFormaPago" name="cmbFormaPago" aria-label="Forma de Pago">
+                                    <option value="4">04 Tarjeta de Crédito</option>
+                                    <option value="18">28 Tarjeta de Débito</option>
+                                </select>
+                                <label for="cmbFormaPago">Forma de Pago</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <select class="form-select form-select-lg" id="cmbUsoFactura" name="cmbUsoFactura" aria-label="Uso de la Factura">
+                                    <option value="13">G03 - Gastos en general</option>
+                                    <option value="22" selected="">P01 - Por definir</option>
+                                </select>
+                                <label for="cmbUsoFactura">Uso de la Factura</label>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="email" class="form-control form-control-lg" id="txtCorreo" name="txtCorreo" placeholder="Correo Electrónico" value="@usuario.correo_electronico" required>
+                                <label for="txtCorreo">Correo Electrónico</label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div class="modal fade" id="modalPagoMercadoPago" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Mercado Pago</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body m-3">     
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <h3>Sera redireccionado a la plataforma de cobros en linea de Mercado Pago.</h3>
+                    </div>
+                </div>
+                <br /><br />
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <img style="height:50px;" decoding="async" src="https://http2.mlstatic.com/frontend-assets/landing-op-internal-products/benefitsSection/checkouts/card.png?new=2" alt="Cualquier medio de pago"> <br /><br />
+                        <h3>Cualquier medio de pago</h3>
+                        <h4>Tarjeta de crédito y débito, billetera Mercado Pago, PayPal, efectivo y transferencia.</h4>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <img style="height:50px;" decoding="async" src="https://http2.mlstatic.com/frontend-assets/landing-op-internal-products/benefitsSection/checkouts/time.png?new=2" alt="Pagos simples desde el celular"> <br /><br />
+                        <h3>Pagos simples desde el celular</h3>
+                        <h4>Donde quiera que estén, tus clientes podrán comprar en tu tienda.</h4>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <img style="height:50px;" decoding="async" src="https://http2.mlstatic.com/frontend-assets/landing-op-internal-products/benefitsSection/checkouts/seguridad.png?new=2" alt="Datos protegidos"> <br /><br />
+                        <h3>Datos protegidos</h3>
+                        <h4>Todas las transacciones son encriptadas por Mercado Pago.</h4>
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <a class="btn btn-success" @*onclick="checkout.open()"*@ href="@ViewBag.InitPoint" ><i class="fas fa-credit-card"></i>&nbsp; Realizar Pago</a>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+
+    var checkout;
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        //$("#smartwizard-arrows-success").smartWizard({
+        //    theme: "arrows",
+        //    showStepURLhash: false,
+        //    lang: { // Language variables for button
+        //        next: 'Siguiente',
+        //        previous: 'Anterior'
+        //    }
+        //});
+
+
+
+
+        //// Validation
+        var $validationForm = $("#smartwizard-validation");
+        //$validationForm.validate({
+        //    errorPlacement: function errorPlacement(error, element) {
+        //        $(element).parents(".error-placeholder").append(
+        //            error.addClass("invalid-feedback small d-block")
+        //        )
+        //    },
+        //    highlight: function (element) {
+        //        $(element).addClass("is-invalid");
+        //    },
+        //    unhighlight: function (element) {
+        //        $(element).removeClass("is-invalid");
+        //    },
+        //    rules: {
+        //        "wizard-confirm": {
+        //            equalTo: "input[name=\"wizard-password\"]"
+        //        }
+        //    }
+        //});
+        $validationForm
+            .smartWizard({
+                theme: "arrows",
+                autoAdjustHeight: false,
+                backButtonSupport: false,
+                useURLhash: false,
+                showStepURLhash: false,
+                lang: { // Language variables for button
+                    next: 'Siguiente',
+                    previous: 'Anterior'
+                },
+                toolbarSettings: {
+                    toolbarExtraButtons: [$("<button class=\"btn btn-submit btn-primary invisible\" type=\"button\">Pagar</button>")]
+                }
+            })
+            .on("leaveStep", function (e, anchorObject, stepNumber, stepDirection) {
+                if (stepDirection === 1) {
+                    $validationForm.find(".btn-submit").removeClass("invisible");
+                }
+                if (stepDirection === 0) {
+                    $validationForm.find(".btn-submit").addClass("invisible");
+                }
+            });
+        $validationForm.find(".btn-submit").on("click", function () {
+            //if (!$validationForm.valid()) {
+            //    return;
+            //}
+            //alert("Great! The form is valid and ready to submit.");
+            //return false;
+            var data = $validationForm.serialize();
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AlmacenarCobro","Panel")',
+                data: data,
+                success: function (data) {
+                    if (data == "success") {
+                        bootstrap.Modal.getOrCreateInstance(document.getElementById("modalPagoMercadoPago")).show();
+                    }
+                }
+            });
+
+            return false;
+        });
+
+
+
+
+         @*// Agrega credenciales de SDK
+        const mp = new MercadoPago("@ViewBag.PUBLIC_KEY", {
+            locale: "es-MX",
+        });
+
+        // Inicializa el checkout
+        checkout = mp.checkout({
+            preference: {
+                id: "@ViewBag.PREFERENCE_ID",
+            },
+            theme: {
+                elementsColor: '#2C5129',
+                    headerColor: '#2C5129',
+            }
+        });*@
+    });
+</script>

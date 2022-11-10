@@ -161,8 +161,8 @@
                     <div class="row">
                         <div class='col-md-6'>
                             <div class="form-floating mb-3">
-                                <input type="text" class="form-control form-control-lg" disabled id="txtFolioFiscal" placeholder="Folio">
-                                <label for="txtUnidad">Folio Físcal</label>
+                                <input type="text" class="form-control form-control-lg" disabled id="txtFolioFiscal" placeholder="UUID">
+                                <label for="txtUnidad">UUID</label>
                             </div>
                         </div>
                         <div class='col-md-6'>
@@ -267,9 +267,11 @@
         filtrar();
         //-----------------
         $('#modalCancelar').on('show.bs.modal', function (event) {
+            $('.modal-footer').css('display', 'none');
+            abrirCargando();
             var myVal = $(event.relatedTarget).data('id');
             var tipo = $(event.relatedTarget).data('tipo');
-            if (tipo == "Estatus") {
+            if (tipo == "Estatus") {                
                 $.get("@Url.Action("getStatusXML", "CartaPorte")?id=" + myVal, async function (data) {
                     console.log(data);
                     var dd = data.split("|");
@@ -277,6 +279,7 @@
                     $('.dmensaje').css('display', 'block');
                     $('.delimina').css('display', 'none');
                     $('.dbtn').css('display', 'none');
+                    cerrarCargando();
                     if (dd[0] == "S")
                     {
                         $('.dmensaje').append("<div class='row'>" +
@@ -336,7 +339,7 @@
             $("#rfc_receptor").val(data[0].n_rfc);
             $("#razon_recpetor").val(data[0].rfc);
             var f_pdf = data[0].url_pdf;
-            var f_doc = data[0].url_xml;
+            var f_doc = data[0].url_xml;            
             $(".modal-footer").html('<button class="btn btn-primary" onclick=sendcorreo()><i class="fas fa-envelope"></i>&nbsp; Enviar Correo</button>' +
                 '<a target="_blank" class="btn btn-success" href="../Plantillas/' + f_pdf + '"><i class="fas fa-file"></i>&nbsp; Descargar PDF</button>' +
                 '<a class="btn btn-info" href="../Plantillas/' + f_doc + '"><i class="fas fa-file"></i>&nbsp; Descargar XML</button>');
@@ -353,7 +356,10 @@
             dataType: "json",
             url: '@Url.Action("filtrarFacturas","Facturacion")',
             data: JSON.stringify({ 'fecha_i': fi,'fecha_f': ff }),
-            success: function (data) {
+             success: function (data) {
+                 if (data.length == 0) {
+                     notificacionAlert("No se encontraron registros.", "warning");
+                 }
                 var response = data;
                 var t = TablePreFactura;
                 var t_obj = data.length;
@@ -371,23 +377,23 @@
                     t.row.add(
                         {
                             0: accion,
-                            1: data[x].nombre_rfc,
-                            2: data[x].rfc_cliente,
+                            1: data[x].rfc_cliente,
+                            2: data[x].nombre_rfc,
                             3:data[x].metodo_pago,
                             4:data[x].forma_pago,
                             5:data[x].clave_uso_cfdi,
-                            6:formatoMoneda(data[x].total),
-                            7:formatoMoneda(data[x].total),
+                            6: formatoMoneda(data[x].total),
+                            7:data[x].fecha_emision,
                             8:estatus
                         }
                     );
-                    t.columns.adjust().draw(false);
-                }
+                    t.columns.adjust().draw(false);                    
+                }                
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 console.log(data);
             }
-        });
+         });        
     }
 
     function sTipoMotivo() {
@@ -474,6 +480,7 @@
             $("#total_").val(data[0].total);
             $("#rfc_receptor_").val(data[0].rfc);
             $("#razon_recpetor_").val(data[0].n_rfc);
+            $(".modal-footer").css('display', 'flex');
             $(".modal-footer").html('<button class="btn btn-primary" onclick=sendcorreo()><i class="fas fa-envelope"></i>&nbsp; Enviar Correo</button>' +
                 '<a target="_blank" class="btn btn-success" href="../Plantillas/' + data[0].url_pdf + '"><i class="fas fa-file"></i>&nbsp; Descargar PDF</a>' +
                 '<a class="btn btn-info" href="../Plantillas/' + data[0].url_xml + '"><i class="fas fa-file"></i>&nbsp; Descargar XML</a>');

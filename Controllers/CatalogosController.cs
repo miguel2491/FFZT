@@ -42,6 +42,7 @@ namespace Facturafast.Controllers
             string _direccionFiscal = formCollection["txtDireccionFiscalCliente"];
             int _idUsoCFDI = Convert.ToInt32(formCollection["cmbUsoCFDICliente"]);
             int _idRegimenFiscal = Convert.ToInt32(formCollection["cmbRegimenFiscal"]);
+            int _codigoPostal= Convert.ToInt32(formCollection["txtCodigoPostal"]);
 
             _nombreRazon = _nombreRazon.Replace("\r\n", "").Replace("\n", "").Replace("\r", "");
 
@@ -71,6 +72,7 @@ namespace Facturafast.Controllers
                     id_uso_cdfi = _idUsoCFDI,
                     id_regimen_fiscal = _idRegimenFiscal,
                     rfc_usuario = usuario.rfc,
+                    codigo_postal = _codigoPostal,
                     id_estatus = 1
                 };
 
@@ -91,6 +93,7 @@ namespace Facturafast.Controllers
                 actualizar.direccion_fiscal = _direccionFiscal;
                 actualizar.correo = _correoElectronico;
                 actualizar.telefono = _telefono;
+                actualizar.codigo_postal = _codigoPostal;
 
                 TempData["Mensaje"] = "Los datos del cliente fueron actualizados correctamente.";
                 TempData["TMensaje"] = "success";

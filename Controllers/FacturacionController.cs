@@ -608,16 +608,17 @@ namespace Facturafast.Controllers
                               from mpago in m_pago.DefaultIfEmpty()
                               join uso_cfdi in db.tbc_Usos_CFDI on fac.clave_uso_cfdi equals uso_cfdi.id_uso_cfdi into u_cfdi
                               from ucfdi in u_cfdi.DefaultIfEmpty()
-                              where fac.rfc_usuario == usuario.rfc && fac.status != 0 && fac.tipo == "Factura"  && fac.fecha_emision >= f_inicial && fac.fecha_emision <= f_final
+                              where fac.rfc_usuario == usuario.rfc && fac.status != 0 && fac.tipo == "Factura" && fac.fecha_emision >= f_inicial && fac.fecha_emision <= f_final
                               orderby fac.id_pre_factura
                               select new
                               {
                                   id = fac.id_pre_factura,
                                   nombre_rfc = fac.nombre_rfc,
                                   rfc_cliente = fac.rfc_cliente,
-                                  metodo_pago = mpago.clave+"-"+mpago.metodo_pago,
-                                  forma_pago = fpago.clave +"-"+fpago.forma_pago,
-                                  clave_uso_cfdi = ucfdi.clave+"-"+ucfdi.uso_cfdi,
+                                  metodo_pago = mpago.clave + "-" + mpago.metodo_pago,
+                                  forma_pago = fpago.clave + "-" + fpago.forma_pago,
+                                  clave_uso_cfdi = ucfdi.clave + "-" + ucfdi.uso_cfdi,
+                                  fecha_emision = fac.fecha_emision.ToString(),
                                   total = fac.total,
                                   status = fac.status
                               };
@@ -711,7 +712,9 @@ namespace Facturafast.Controllers
 
                 nombrearchivo = "CFDI40Estandar.docx";
 
-                Word.Document ObjDoc = ObjWord.Documents.Open(DirPrg + "/Plantillas/" + nombrearchivo, ObjMiss);
+                //ObjDoc.Close();
+                Word.Document ObjDoc = /*ObjWord.Documents.Close(DirPrg + "/Plantillas/" + nombrearchivo, ObjMiss);*/
+                    ObjWord.Documents.Open(DirPrg + "/Plantillas/" + nombrearchivo, ObjMiss);
 
                 
 
@@ -797,7 +800,12 @@ namespace Facturafast.Controllers
                 Word.Range SelloSAT = ObjDoc.Bookmarks.get_Item(ref sello_sat).Range;
                 Word.Range CCertificacion = ObjDoc.Bookmarks.get_Item(ref complemento_certificacion).Range;
 
+                if (usuario.url_imagen != "img-default.png")
+                {
+                    object Logo_Emisor = "Logo_Emisor";
 
+                    ObjDoc.Bookmarks.get_Item(ref Logo_Emisor).Range.InlineShapes.AddPicture((DirPrg + "/img/logos/" + usuario.url_imagen), false, true);
+                }
                 
 
                 if (prefactura_.uuid != null)
@@ -930,19 +938,13 @@ namespace Facturafast.Controllers
                 //    namefile = nf;
                 //    //ObjDoc.SaveAs2(DirPrg + "/Plantillas/XML/DOCX/" + prefactura_.rfc_cliente + "/" + ax_fc_emi + "/" + namefile + ".docx");
                 //}
-                int x = 0;
-                while (x < 30)
+                while (true)
                 {
                     System.Threading.Thread.Sleep(1000);
-                    //if (System.IO.File.Exists(archivo))
-                    //{
-                    //    Thread.Sleep(2000);
-                    //    //System.IO.File.Delete(path + nombre + ".jpg");
-                    //    //System.IO.File.Delete(path + nombre + ".docx");
-                    //    break;
-                    //}
-
-                    x++;
+                    if (System.IO.File.Exists(DirPrg + "/Plantillas/XML/DOCX/" + prefactura_.rfc_usuario + "/" + ax_fc_emi + "/" + namefile + ".docx"))
+                    {
+                        break;
+                    }
                 }
                 ObjDoc.SaveAs2(DirPrg + "/Plantillas/XML/DOCX/" + prefactura_.rfc_usuario + "/" + ax_fc_emi + "/" + namefile + ".docx");
                 ObjDoc.Close();
@@ -950,7 +952,7 @@ namespace Facturafast.Controllers
 
                 //Crear PDF
                 var pdfProcess = new Process();
-                pdfProcess.StartInfo.FileName = "" + ruta.url_libreoffice;
+                pdfProcess.StartInfo.FileName = "" + /*ruta.url_libreoffice*/ @"C:\Users\Desarrollo Duala\Downloads\LibreOfficePortable\App\libreoffice\program\soffice.exe";
                 pdfProcess.StartInfo.Arguments = "--headless --convert-to pdf " + DirPrg + "Plantillas\\XML\\DOCX\\"+prefactura_.rfc_usuario+ "\\" + ax_fc_emi +"\\" + namefile + ".docx --outdir  " + DirPrg + "Plantillas\\XML\\PDF\\"+prefactura_.rfc_usuario+ "\\" + ax_fc_emi + "\\";
                 pdfProcess.Start();
                 fileExist_ = System.IO.File.Exists(DirPrg + "Plantillas\\" + prefactura_.url_pdf);
@@ -960,7 +962,15 @@ namespace Facturafast.Controllers
                     prefactura_.url_xml = "XML\\PDF\\" + prefactura_.rfc_usuario + "\\" + ax_fc_emi + "\\";
                 }
                 db.SaveChanges();
-                
+                while (true)
+                {
+                    System.Threading.Thread.Sleep(1000);
+                    if (System.IO.File.Exists(DirPrg + "\\Plantillas\\" + prefactura_.url_pdf))
+                    {
+                        break;
+                    }
+                }
+
             }
             //-----------------------------------------------------------------------------------------------------
             if (!fileExist_)

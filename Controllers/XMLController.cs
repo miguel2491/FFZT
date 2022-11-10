@@ -1715,6 +1715,8 @@ namespace Facturafast.Controllers
                                         prefac.ccertificacion = nuevaFactura.certificado_sat;
                                         prefac.version_timbrado = _versionTimbreFiscalDigital;
                                         prefac.uuid = nuevaFactura.uuid;
+                                        prefac.selloCFDI = nuevaFactura.sello_cfdi;
+                                        prefac.fca_timbrado = nuevaFactura.fecha_timbrado;
                                         //--------------
                                         db.SaveChanges();
 

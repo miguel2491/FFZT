@@ -343,36 +343,7 @@
         });
     }
 
-    function sendcorreo()
-    {
-        abrirCargando();
-        let correo = $("#correo_cliente_").val();
-        let id = $("#idprefac_modal_").val();
-        //-------------------------------------------------------------------------
-        $.ajax({
-            type: "POST",
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            url: '/Facturacion/EnviarCorreo',
-            data: JSON.stringify({ 'id_': id, 'correo_': correo, 'tipo':'factura'}),
-            success: function (data) {
-                var response = data;
-                console.log(response);
-                cerrarCargando();
-                if (response == "Enviado") {
-                    notificacionAlert("Correo enviado satisfactoriamente.", "success");
-                    setTimeout(function () { window.location = '@Url.Action("ListaFactura", "Facturacion")' }, 3000);
-                } else {
-                    notificacionAlert("Ocurrio un problema al enviar el correo, intentelo mas tarde.", "danger");
-                }
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
-            }
-        });
-        //-------------------------------------------------------------------------
-    }
-
+   
     function filtrar() {
         let fi = $("#txtFechaInicial").val();
         let ff = $("#txtFechaFinal").val();
@@ -495,6 +466,7 @@
         $.get("@Url.Action("getFacturas", "Facturacion")?id=" + id, async function (data) {
             console.log(data[0]);
             console.log(data[0].fpago);
+            $("#idprefac_modal_").val(data[0].id);
             $("#correo_cliente_").val(data[0].correo);
             $("#forma_pago_").val(data[0].fpago);
             $("#metodo_pago_").val(data[0].metodo_pago_);
@@ -506,6 +478,36 @@
                 '<a target="_blank" class="btn btn-success" href="../Plantillas/' + data[0].url_pdf + '"><i class="fas fa-file"></i>&nbsp; Descargar PDF</a>' +
                 '<a class="btn btn-info" href="../Plantillas/' + data[0].url_xml + '"><i class="fas fa-file"></i>&nbsp; Descargar XML</a>');
         });
+    }
+
+    function sendcorreo()
+    {
+        abrirCargando();
+        let correo = $("#correo_cliente_").val();
+        let id = $("#idprefac_modal_").val();
+        //-------------------------------------------------------------------------
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            url: '/Facturacion/EnviarCorreo',
+            data: JSON.stringify({ 'id_': id, 'correo_': correo, 'tipo':'Factura'}),
+            success: function (data) {
+                var response = data;
+                cerrarCargando();
+                if (response == "Enviado") {
+                    notificacionAlert("Correo enviado satisfactoriamente.", "success");
+                    setTimeout(function () { window.location = '@Url.Action("ListaComplemento", "Facturacion")' }, 3000);
+                } else {
+                    notificacionAlert("Ocurrio un problema al enviar el correo, intentelo mas tarde.", "danger");
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                cerrarCargando();
+            }
+        });
+        //-------------------------------------------------------------------------
     }
 
 </script>

@@ -1268,7 +1268,7 @@ namespace Facturafast.Controllers
                 string email = "cobranza@consultoriacastelan.com";
 
                 MailMessage msg = new MailMessage();
-                string DireccionaEnviar = "programador1@consultoriacastelan.com";// correo_;
+                string DireccionaEnviar = correo_; //"programador1@consultoriacastelan.com";
                 msg.To.Add(DireccionaEnviar);
                 msg.From = new MailAddress(email, "CASTELÁN AUDITORES S.C.", System.Text.Encoding.UTF8);
                 //msg.From = new MailAddress("comunicados@facturafast.mx", "FACTURAFAST ", System.Text.Encoding.UTF8);

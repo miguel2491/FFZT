@@ -53,7 +53,6 @@
                             <th>Razón Social</th>
                             <th>Total Pago</th>
                             <th>Fecha Pago</th>
-                            <th>Método Pago</th>
                             <th>Serie</th>
                             <th>Folio</th>
                             <th>Estatus</th>
@@ -100,7 +99,7 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer" id="mdl_fo">
 
             </div>
         </div>
@@ -170,10 +169,9 @@
                 { visible: true, orderable: true, searchable: true, targets: 3, name: "nombre_razon", data: "nombre_razon" },
                 { visible: true, orderable: false, searchable: false, targets: 4, name: "total_pago", data: "total_pago" },
                 { visible: true, orderable: true, searchable: true, targets: 5, name: "fecha_pago", data: "fecha_pago" },
-                { visible: true, orderable: true, searchable: true, targets: 6, name: "forma_pago", data: "forma_pago" },
-                { visible: true, orderable: false, searchable: false, targets: 7, name: "serie", data: "serie" },
-                { visible: true, orderable: true, searchable: true, targets: 8, name: "folio", data: "folio" },
-                { visible: true, orderable: false, searchable: false, targets: 9, name: "estatus", data: "estatus" }
+                { visible: true, orderable: false, searchable: false, targets: 6, name: "serie", data: "serie" },
+                { visible: true, orderable: true, searchable: true, targets: 7, name: "folio", data: "folio" },
+                { visible: true, orderable: false, searchable: false, targets: 8, name: "estatus", data: "estatus" }
             ],
             order: [[1, 'asc']]
         });
@@ -229,6 +227,7 @@
             {
                 $('.dmensaje').css('display', 'none');
                 $('.delimina').css('display', 'block');
+                $('.dbtn').css('display', 'block');
                 consultarfolio_(myVal);
             }
             $(this).find("#id_factura").val(myVal);
@@ -259,7 +258,7 @@
                         let send_c = '<a href="#" class="btn btn-info btn-sm icon-send" data-bs-toggle="modal" data-bs-target="#modalPrePago" onclick="envPrePago(' + data[x].id +')" title="Enviar"><i class="fas fa-share"></i></a>';
                         let borrar = '<a href="#" class="btn btn-danger btn-sm icon-delete" title="Eliminar"><i class="fas fa-trash"></i></a>';
 
-                        let g_xml = data[x].status == 2 ? '<button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalCancelar" data-id="' + data[x].id + '" data-tipo="Cancelacion" title="Cancelar XML"><i class="fas fa-window-close"></i></button>' : estatus == "3" ? '<button data-bs-toggle="modal" data-bs-target="#modalCancelar" data-tipo="Estatus" data-id="' + data[x].id + '" class="btn btn-success"><i class="fas fa-receipt"></i></button>' : '';
+                        let g_xml = data[x].status == 2 ? '<button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalCancelar" data-id="' + data[x].id + '" data-tipo="Cancelacion" title="Cancelar XML"><i class="fas fa-window-close"></i></button>' : estatus == "3" ? '<button data-bs-toggle="modal" data-bs-target="#modalCancelar" data-tipo="Estatus" data-id="' + data[x].id + '" class="btn btn-sm btn-success"><i class="fas fa-receipt"></i></button>' : '';
                         let acciones = estatus == 1 ? edit + " " + preview + " " + borrar : preview + " " + send_c + " " + g_xml;
                         t.row.add(
                             {
@@ -269,7 +268,6 @@
                                 "nombre_razon": data[x].nombre_razon,
                                 "total_pago": formatoMoneda(data[x].total_pago),
                                 "fecha_pago": data[x].fecha_pago,//fp,
-                                "forma_pago": data[x].metodo_pago,
                                 "serie": data[x].serie,
                                 "folio": data[x].folio,
                                 "estatus": sta
@@ -296,7 +294,7 @@
             $("#razon_recpetor").val(data.nombre_razon);
             $("#total_mod").val(formatoMoneda(data.total));
             $("#idprepago_modal").val(id);
-            $(".modal-footer").html('<button class="btn btn-primary" onclick=sendcorreo()><i class="fas fa-envelope"></i>&nbsp; Enviar Correo</button>' +
+            $("#mdl_fo").html('<button class="btn btn-primary" onclick=sendcorreo()><i class="fas fa-envelope"></i>&nbsp; Enviar Correo</button>' +
                 '<a target="_blank" class="btn btn-success" href="../Plantillas/' + data.url_pdf + '"><i class="fas fa-file"></i>&nbsp; Descargar PDF</button>' +
                 '<a class="btn btn-info" href="../Plantillas/' + data.url_xml + '"><i class="fas fa-file"></i>&nbsp; Descargar XML</button>');
         });

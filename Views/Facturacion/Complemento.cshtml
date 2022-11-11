@@ -11,6 +11,7 @@
 <input type="hidden" id="id_factura" />
 <input type="hidden" id="id_cliente" />
 <input type="hidden" id="id_pre_pago" />
+<input type="hidden" id="txttotal_o" />
 <div class="row">
     <div class="col-md-12">
         <div class="card">
@@ -59,7 +60,7 @@
                         </div>
                     </div>
                     <div class="col-md-3"></div>
-                    <div class="col-md-3">
+                    @*<div class="col-md-3">
                         <div class="form-floating mb-3">
                             <select class="form-select form-select-lg" id="cmbMetodoPago" aria-label="Método de Pago">
                                 <option value="1">PUE - Pago en una Sola Exhibición</option>
@@ -73,7 +74,7 @@
                             <select class="form-select form-select-lg" id="cmbUsoCFDI" aria-label="Uso de CFDI"></select>
                             <label for="cmbUsoCFDI">Uso del CFDI</label>
                         </div>
-                    </div>
+                    </div>*@
                 </div>
                 <div class="row">
                     <div class="col-md-2">
@@ -171,7 +172,7 @@
                 <div class="row">
                     <div class="col-md-3">
                         <div class="form-floating mb-3">
-                            <input type="text" class="form-control form-control-lg txtcifras" id="txtSaldoAnterior" placeholder="0.00" onkeypress="return valideKey(event);">
+                            <input type="text" class="form-control form-control-lg txtcifras" id="txtSaldoAnterior" placeholder="0.00" readonly onkeypress="return valideKey(event);">
                             <label for="txtSaldoAnt">Saldo Anterior</label>
                         </div>
                     </div>
@@ -270,14 +271,14 @@
     var id = '@ViewBag.id';
     document.addEventListener("DOMContentLoaded", function () {
 
-        $.get("@Url.Action("obtenerUsoCFDI", "Catalogos")", function (data) {
+        @*$.get("@Url.Action("obtenerUsoCFDI", "Catalogos")", function (data) {
             $("#cmbUsoCFDI").html(data);
             $("#cmbUsoCFDI").val($("#cmbUsoCFDI option:last").val());
-        });
+        });*@
 
-        $.get("@Url.Action("obtenerFormaPago", "Catalogos")", function (data) {
+        $.get("@Url.Action("obtenerFormaPagoCP", "Catalogos")", function (data) {
             $("#cmbFormaPago").html(data);
-            $("#cmbFormaPago").val($("#cmbFormaPago option:last").val());
+            
         });
 
         $('#txtuuid').mask('AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA');
@@ -368,7 +369,6 @@
             minLength: 1,
             source: function (request, response) {
                 var term = request.term;
-
                 if (term.length > 2) {
                     $("#txtRFC").removeClass("is-invalid");
                     $("#txtRFC").removeClass("is-valid");
@@ -410,40 +410,33 @@
                     $("#txtuuid").removeClass("is-invalid");
                     $("#txtuuid").removeClass("is-valid");
                     $("#txtuuid").addClass("is-invalid");
-                    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalUuid")).show();
+                    //bootstrap.Modal.getOrCreateInstance(document.getElementById("modalUuid")).show();
                     if (term in cacheUUID) {
                         response(cacheUUID[term]);
                         return;
                     }
                     $.getJSON("@Url.Action("obtenerUUIDFactura", "Facturacion")", request, function (data, status, xhr) {
-                        var t = Tableuuid;
-                        t.clear().draw(false);
-                        for (let a = 0; a < data.length; a++)
-                        {
-                            let idpago = data[a].id_forma_pago > 9 ? data[a].id_forma_pago : "0" + data[a].id_forma_pago;
-                            t.row.add({
-                                "acciones": '<a href="#" class="btn btn-success btn-sm icon-sel" title="Seleccionar"><i class="fas fa-check"></i></a>',
-                                "uuid": data[a].uuid,
-                                "forma_pago": idpago + "-"+data[a].forma_pago,
-                                "id_forma_pago": data[a].id_forma_pago,
-                                "total": data[a].total,
-                                "id_factura": data[a].id_factura
-                            });
-                        }
-                        t.columns.adjust().draw(false);
-                        $("#txtuuid").removeClass("is-invalid");
-                        $("#txtuuid").removeClass("is-valid");
-                        $("#txtuuid").addClass("is-valid");
-                        return false;
-                    });
+                        cacheUUID[term] = data;
+                        response(data);
+                    })
                 }
                 else {
                     $("#txtuuid").removeClass("is-invalid");
                     $("#txtuuid").removeClass("is-valid");
-                    $("#txtuuid").addClass("is-valid");
+                    $("#txtuuid").addClass("is-invalid");
                     response([]);
                 }
-            },
+            }, select: function (event, ui) {
+                $("#txtuuid").val(ui.item.uuid);
+                $("#cmbFormaPago").val(ui.item.name);
+                $("#txttotal_o").val(ui.item.value);
+                $("#txtSaldoAnterior").val(ui.item.value);
+                //getPrePagos(ui.item.uuid);
+                $("#txtuuid").removeClass("is-invalid");
+                $("#txtuuid").removeClass("is-valid");
+                $("#txtuuid").addClass("is-invalid");
+                return false;
+            }
         });
 
         //===Btn Seleccionar UUID===
@@ -456,7 +449,8 @@
             $("#txtiduuid").val(data.uuid);
             $("#id_factura").val(data.id_factura);
             //if ($("#txtRFC").val() != "") {
-                $.get("@Url.Action("getDetallePrePago", "Facturacion")?uuid=" + data.uuid, async function (data) {
+            $.get("@Url.Action("getDetallePrePago", "Facturacion")?uuid=" + data.uuid, async function (data) {
+                console.log(data);
                     if (data.length > 0)
                     {
                         let s_actual = 0;
@@ -483,7 +477,7 @@
 
         $("#btnAddDetalle").click(function () {
             if ($("#txtpagono").val() == "") {
-                notificacionAlert("Debe agregar algun numero de pago.", "danger");
+                notificacionAlert("Debe agregar algun número de pago.", "danger");
                 return false;
             }
             var t = TablePagos;
@@ -526,8 +520,8 @@
             data_json.push({
                 id_factura: $("#id_factura").val(),
                 id_cliente: $("#id_cliente").val(),
-                metodo_pago: $("#cmbMetodoPago option:selected").val(),
-                uso_cfdi: $("#cmbUsoCFDI option:selected").val(),
+                //metodo_pago: $("#cmbMetodoPago option:selected").val(),
+                //uso_cfdi: $("#cmbUsoCFDI option:selected").val(),
                 f_emision: $("#txtFechaEmision").val(),
                 serie: $("#txtSerie").val(),
                 folio: $("#txtFolio").val(),
@@ -560,7 +554,7 @@
             });
             cerrarCargando();
         });
-        
+
         if (id != "0") {
             abrirCargando();
             setTimeout(function () { conPrePagoEdit(id) }, 1500);
@@ -583,6 +577,7 @@
     function calcular()
     {
         let total = 0;
+        let pago_ = 0;
         let subtotal = parseFloat($("#txtTotal").val());
         abrirCargando();
         var array = TablePagos.rows()
@@ -596,12 +591,13 @@
                 let sa = sant - pago;
                 dato.s_actual = formatoMoneda(sa.toFixed(2));
                 total = total + sant;
+                pago_ = formatoMoneda(pago.toFixed(2));
             });
             TablePagos.clear().draw(false);
             TablePagos.rows.add(array);
             TablePagos.columns.adjust().draw(false);
             total = formatoMoneda(total.toFixed(2));
-            $("#txtTotal").val(total);
+            $("#txtTotal").val(pago_);//total
             cerrarCargando();
         } else {
             cerrarCargando();
@@ -638,6 +634,7 @@
             {
                 $("#txtiduuid").val(data[0].uuid);
                 $("#txtuuid").val(data[0].uuid);
+                
                 $("#id_factura").val(data[0].id_prefactura);
                 let s_actual = 0;
                 let s_original = 0;
@@ -663,8 +660,8 @@
             $("#id_cliente").val(data.id_cliente);
             $("#txtRFC").val(data.rfc);
             $(".txtNombreRazonCliente").val(data.nombre_razon);
-            $("#cmbMetodoPago").val(data.metodo_pago);
-            $("#cmbUsoCFDI").val(data.uso_cfdi);
+            //$("#cmbMetodoPago").val(data.metodo_pago);
+            //$("#cmbUsoCFDI").val(data.uso_cfdi);
             $("#txtFechaEmision").val(data.fecha_emision);
             $("#txtSerie").val(data.serie);
             $("#txtFolio").val(data.folio);
@@ -704,6 +701,18 @@
             //---------------------------------------------------------------------------------------------------------------------------
         });
         $("#btnGFactura").html("<i class='fa fa-edit'></i> Actualizar Complemento de Pago");
+    }
+
+    function getPrePagos(uuid)
+    {
+        $.get("@Url.Action("getDetallePrePago", "Facturacion")?uuid=" + uuid, async function (data) {
+            console.log(data);
+            if (data.length > 0) {
+                $("#txtSaldoAnterior").val(data.value);
+            } else {
+                $("#txtSaldoAnterior").val($("#txttotal_o").val());
+            }            
+        });
     }
 
 </script>

@@ -608,16 +608,16 @@ namespace Facturafast.Controllers
                               from mpago in m_pago.DefaultIfEmpty()
                               join uso_cfdi in db.tbc_Usos_CFDI on fac.clave_uso_cfdi equals uso_cfdi.id_uso_cfdi into u_cfdi
                               from ucfdi in u_cfdi.DefaultIfEmpty()
-                              where fac.rfc_usuario == usuario.rfc && fac.status != 0 && fac.tipo == "Factura" && fac.fecha_emision >= f_inicial && fac.fecha_emision <= f_final
+                              where fac.rfc_usuario == usuario.rfc && fac.status != 0 && fac.tipo == "Factura"  && fac.fecha_emision >= f_inicial && fac.fecha_emision <= f_final
                               orderby fac.id_pre_factura
                               select new
                               {
                                   id = fac.id_pre_factura,
                                   nombre_rfc = fac.nombre_rfc,
                                   rfc_cliente = fac.rfc_cliente,
-                                  metodo_pago = mpago.clave + "-" + mpago.metodo_pago,
-                                  forma_pago = fpago.clave + "-" + fpago.forma_pago,
-                                  clave_uso_cfdi = ucfdi.clave + "-" + ucfdi.uso_cfdi,
+                                  metodo_pago = mpago.clave+"-"+mpago.metodo_pago,
+                                  forma_pago = fpago.clave +"-"+fpago.forma_pago,
+                                  clave_uso_cfdi = ucfdi.clave+"-"+ucfdi.uso_cfdi,
                                   fecha_emision = fac.fecha_emision.ToString(),
                                   total = fac.total,
                                   status = fac.status
@@ -627,27 +627,40 @@ namespace Facturafast.Controllers
             }
             
         }
-        public ActionResult obtenerUUIDFactura(string term)
+        public String obtenerUUIDFactura(string term)
         {
-            tbc_Usuarios usuario = Session["tbc_Usuarios"] as tbc_Usuarios;
-            using (BD_FFEntities db = new BD_FFEntities())
-            {
-                var clientes = from fa in db.tbd_Facturas
-                               join fp in db.tbc_Formas_Pago on fa.id_forma_pago equals fp.id_forma_pago into fpago
-                               from t_fpagos in fpago.DefaultIfEmpty()
-                               where fa.uuid.Contains(term) && fa.rfc_emisor == usuario.rfc
-                               select new
-                               {
-                                   id_factura = fa.id_factura,
-                                   uuid = fa.uuid,
-                                   total = fa.total,
-                                   id_forma_pago = fa.id_forma_pago,
-                                   forma_pago = t_fpagos.forma_pago
-                               };
-                return Json(clientes.ToList(), JsonRequestBehavior.AllowGet);
-            }
-                //db.tbd_Facturas.Where(s => (s.uuid).Contains(term) && s.rfc_emisor== "SCM080611QE9").ToList();
             
+            db = new BD_FFEntities();
+            tbc_Usuarios usuario = Session["tbc_Usuarios"] as tbc_Usuarios;
+            var uuid = db.tbd_Facturas.Where(s => ("[" + s.uuid + "] " + s.rfc_receptor).Contains(term) && s.rfc_emisor == usuario.rfc && s.id_estatus != 8).ToList();
+            if (uuid.Count == 0)
+            {
+                return "[]";
+            }
+            String str = "[";
+            foreach (var item in uuid)
+            {
+                var permiso = db.tbd_Detalle_Prepago.Where(s => s.uuid == item.uuid).ToList();
+                decimal total = 0;
+                foreach (var itemp in permiso) 
+                {
+                    var c_pago = db.tbd_Pre_Pagos.Where(s => s.id == itemp.id_pre_pago).First();
+                    if (c_pago.status == 2) 
+                    {
+                        total += Convert.ToDecimal(itemp.pago);
+                    }
+                    
+                }
+                if (item.total > total)
+                {
+                    decimal total_ = item.total - total;
+                    str += "{\"label\": \"[" + item.rfc_receptor + "] " + item.uuid + "\", \"value\":" + total_ + ", \"name\":" + item.id_forma_pago + ", \"uuid\":\"" + item.uuid + "\"}, ";
+                }
+                else {
+                    return "[]";
+                }
+            }
+            return str.Substring(0, str.Length - 2) + "]";
         }
         //==========================================================Previsualización==========================================
         public JsonResult PreFacturar(Int32? id)
@@ -712,9 +725,7 @@ namespace Facturafast.Controllers
 
                 nombrearchivo = "CFDI40Estandar.docx";
 
-                //ObjDoc.Close();
-                Word.Document ObjDoc = /*ObjWord.Documents.Close(DirPrg + "/Plantillas/" + nombrearchivo, ObjMiss);*/
-                    ObjWord.Documents.Open(DirPrg + "/Plantillas/" + nombrearchivo, ObjMiss);
+                Word.Document ObjDoc = ObjWord.Documents.Open(DirPrg + "/Plantillas/" + nombrearchivo, ObjMiss);
 
                 
 
@@ -798,7 +809,8 @@ namespace Facturafast.Controllers
 
                 Word.Range SelloCFD = ObjDoc.Bookmarks.get_Item(ref sello_cfd).Range;
                 Word.Range SelloSAT = ObjDoc.Bookmarks.get_Item(ref sello_sat).Range;
-                Word.Range CCertificacion = ObjDoc.Bookmarks.get_Item(ref complemento_certificacion).Range;
+                Word.Range CCertificacion = ObjDoc.Bookmarks.get_Item(ref complemento_certificacion).Range; 
+
 
                 if (usuario.url_imagen != "img-default.png")
                 {
@@ -806,7 +818,6 @@ namespace Facturafast.Controllers
 
                     ObjDoc.Bookmarks.get_Item(ref Logo_Emisor).Range.InlineShapes.AddPicture((DirPrg + "/img/logos/" + usuario.url_imagen), false, true);
                 }
-                
 
                 if (prefactura_.uuid != null)
                 {
@@ -938,13 +949,16 @@ namespace Facturafast.Controllers
                 //    namefile = nf;
                 //    //ObjDoc.SaveAs2(DirPrg + "/Plantillas/XML/DOCX/" + prefactura_.rfc_cliente + "/" + ax_fc_emi + "/" + namefile + ".docx");
                 //}
-                while (true)
+                int ii = 0;
+                while (ii <= 1)
                 {
+
                     System.Threading.Thread.Sleep(1000);
-                    if (System.IO.File.Exists(DirPrg + "/Plantillas/XML/DOCX/" + prefactura_.rfc_usuario + "/" + ax_fc_emi + "/" + namefile + ".docx"))
-                    {
-                        break;
-                    }
+                    ii++;
+                    //if(System.IO.File.Exists(DirPrg + "/Plantillas/XML/DOCX/" + prefactura_.rfc_usuario + "/" + ax_fc_emi + "/" + namefile + ".docx"))
+                    //{
+                    //    break;
+                    //}                   
                 }
                 ObjDoc.SaveAs2(DirPrg + "/Plantillas/XML/DOCX/" + prefactura_.rfc_usuario + "/" + ax_fc_emi + "/" + namefile + ".docx");
                 ObjDoc.Close();
@@ -952,7 +966,7 @@ namespace Facturafast.Controllers
 
                 //Crear PDF
                 var pdfProcess = new Process();
-                pdfProcess.StartInfo.FileName = "" + /*ruta.url_libreoffice*/ @"C:\Users\Desarrollo Duala\Downloads\LibreOfficePortable\App\libreoffice\program\soffice.exe";
+                pdfProcess.StartInfo.FileName = "" + ruta.url_libreoffice;
                 pdfProcess.StartInfo.Arguments = "--headless --convert-to pdf " + DirPrg + "Plantillas\\XML\\DOCX\\"+prefactura_.rfc_usuario+ "\\" + ax_fc_emi +"\\" + namefile + ".docx --outdir  " + DirPrg + "Plantillas\\XML\\PDF\\"+prefactura_.rfc_usuario+ "\\" + ax_fc_emi + "\\";
                 pdfProcess.Start();
                 fileExist_ = System.IO.File.Exists(DirPrg + "Plantillas\\" + prefactura_.url_pdf);
@@ -962,10 +976,11 @@ namespace Facturafast.Controllers
                     prefactura_.url_xml = "XML\\PDF\\" + prefactura_.rfc_usuario + "\\" + ax_fc_emi + "\\";
                 }
                 db.SaveChanges();
+
                 while (true)
                 {
                     System.Threading.Thread.Sleep(1000);
-                    if (System.IO.File.Exists(DirPrg + "\\Plantillas\\" + prefactura_.url_pdf))
+                    if (System.IO.File.Exists(DirPrg+"\\Plantillas\\"+prefactura_.url_pdf))
                     {
                         break;
                     }
@@ -1413,6 +1428,7 @@ namespace Facturafast.Controllers
                                     {
                                         pago = d_pago.pago,
                                         id_forma_pago = fac.id_forma_pago,
+                                        total = fac.total,
                                         s_actual = d_pago.s_actual,
                                         s_anterior = d_pago.s_anterior
                                     };
@@ -1477,13 +1493,13 @@ namespace Facturafast.Controllers
                     id_pre_factura = item.id_factura,
                     id_cliente = item.id_cliente,
                     id_usuario = usuario.id_usuario,
-                    metodo_pago = item.metodo_pago,
-                    uso_cfdi = item.uso_cfdi,
+                    metodo_pago = 0,
+                    uso_cfdi = 0,
                     serie = item.serie,
                     folio = item.folio,
                     num_operacion = item.num_operacion,
                     tipo_moneda = item.tipo_moneda,
-                    tipo_cambio = item.tipo_cambio == null ? "0":item.tipo_cambio,
+                    tipo_cambio = item.tipo_cambio == null ? "1":item.tipo_cambio,
                     fecha_pago = item.fecha_pago,
                     fecha_emision = item.f_emision,
                     hora = item.hora,
@@ -1569,13 +1585,13 @@ namespace Facturafast.Controllers
                     db.Configuration.LazyLoadingEnabled = false;
                     var valor = db.tbd_Pre_Pagos.ToList<tbd_Pre_Pagos>().Where(u => u.id == id).FirstOrDefault();
                     valor.id_cliente = item.id_cliente;
-                    valor.metodo_pago = item.metodo_pago;
-                    valor.uso_cfdi = item.uso_cfdi;
+                    valor.metodo_pago = 0;// item.metodo_pago;
+                    valor.uso_cfdi = 0;// item.uso_cfdi;
                     valor.serie = item.serie;
                     valor.folio = item.folio;
                     valor.num_operacion = item.num_operacion;
                     valor.tipo_moneda = item.tipo_moneda;
-                    valor.tipo_cambio = item.tipo_cambio == null ? "0" : item.tipo_cambio;
+                    valor.tipo_cambio = item.tipo_cambio == null ? "1" : item.tipo_cambio;
                     valor.fecha_pago = item.fecha_pago;
                     valor.fecha_emision = item.f_emision;
                     valor.hora = item.hora;
@@ -1771,7 +1787,8 @@ namespace Facturafast.Controllers
             tbd_Pre_Pagos prepago_ = db.tbd_Pre_Pagos.Where(s => s.id == id).Single();
             var dprepago = db.tbd_Detalle_Prepago.ToList<tbd_Detalle_Prepago>().Where(u => u.id_pre_pago == id).ToList();
             tbc_Clientes cliente = db.tbc_Clientes.Where(u => u.id_cliente == prepago_.id_cliente).Single();
-            tbd_Facturas facturas_ = db.tbd_Facturas.Where(s => s.id_factura == prepago_.id_pre_factura).Single();
+            //tbd_Facturas facturas_ = db.tbd_Facturas.Where(s => s.uuid == prepago_.uuid).Single();
+            //int estatus_ = facturas_.id_estatus;
             bool fileExist_ = false;
             //-----------------------------------------------------------------------------------------------------------------------------
             var ruta = db.tbc_Variables_Calculo.Where(s => s.id_variable == 1).ToList().First();
@@ -1793,7 +1810,15 @@ namespace Facturafast.Controllers
                 string nf = nd[0];
                 namefile = nf;
             }
-            string path = "Plantillas/PREPAGO/XML/PDF/" + cliente.rfc + "/" + ax_fc_emi + "/" + namefile + ".pdf";
+            string path = "Plantillas/PREPAGO/XML/PDF/" + usuario.rfc + "/" + ax_fc_emi + "/" + namefile + ".pdf";
+            //if (estatus_ == 8)
+            //{
+            //    path = "Cancelado/Plantillas/PREPAGO/XML/PDF/" + cliente.rfc + "/" + ax_fc_emi + "/" + namefile + ".pdf";
+            //}
+            //else {
+            //    path = "Plantillas/PREPAGO/XML/PDF/" + cliente.rfc + "/" + ax_fc_emi + "/" + namefile + ".pdf";
+            //}
+            
             //ruta.url_pdf +"PRE_FAC_"+ prefactura_.id_pre_factura+ ".pdf";
             //-----------------------------------------------------------------------------------------------------------------------------
             bool fileExist = System.IO.File.Exists(path);
@@ -1808,28 +1833,32 @@ namespace Facturafast.Controllers
             }
             if (!fileExist)
             {
-                string auxpath = DirPrg + "Plantillas\\PREPAGO\\XML\\PDF\\" + cliente.rfc + "\\" + ax_fc_emi;
+                string auxpath = DirPrg + "Plantillas\\PREPAGO\\XML\\PDF\\" + usuario.rfc + "\\" + ax_fc_emi;
                 DirectoryInfo di = Directory.CreateDirectory(auxpath);
-                string auxpathdoc = DirPrg + "Plantillas\\PREPAGO\\XML\\DOCX\\" + cliente.rfc + "\\" + ax_fc_emi;
+                string auxpathdoc = DirPrg + "Plantillas\\PREPAGO\\XML\\DOCX\\" + usuario.rfc + "\\" + ax_fc_emi;
                 DirectoryInfo didoc = Directory.CreateDirectory(auxpathdoc);
                 string nombrearchivo = "";
                 object ObjMiss = System.Reflection.Missing.Value;
                 Word.Application ObjWord = new Word.Application();
 
-                nombrearchivo = "ComplementoPago.docx";
+                nombrearchivo = "ComplementoPagoEstandar.docx";
+                string rutaorigen = DirPrg + "/Plantillas/" + nombrearchivo;
+                string rutadestino = DirPrg + "/Plantillas/PREPAGO/XML/DOCX/" + cliente.rfc + "/" + ax_fc_emi + "/" + namefile + ".docx";
 
-                Word.Document ObjDoc = ObjWord.Documents.Open(DirPrg + "/Plantillas/" + nombrearchivo, ObjMiss);
+                System.IO.File.Copy(rutaorigen, rutadestino, true);
+
+                Word.Document ObjDoc = ObjWord.Documents.Open(rutadestino, ObjMiss);
 
                 //Definir Marcadores
                 object nombre_emisor = "Nombre_Emisor";
                 object serie_folio2 = "Serie_Folio2";
                 object rfc_emisor = "RFC_Emisor";
                 object lugar_expedicion = "Lugar_Expedicion";
-                object serie_folio = "Serie_Folio";
                 object fecha_ = "Fecha_";
+                object C_P_Emisor = "C_P";
 
                 object nombre_cliente = "Nombre_Cliente";
-                //object c_p_receptor = "C_P_Receptor";
+                object c_p_receptor = "C_P_Receptor";
                 object rfc_cliente = "RFC_Cliente";
                 object no_certificado = "No_Certificado";
                 object regimen_fiscal = "Regimen_Fiscal";
@@ -1851,21 +1880,24 @@ namespace Facturafast.Controllers
                 object version_timbre = "Version_Timbre";
                 object certificado_sat = "Certificado_SAT";
                 object uuid = "UUID_";
+                object complemento_certificacion = "Cadena_Original";
+                object No_Certificado = "No_Certificado";
+                object Version_Timbre = "Version_Timbre";
                 //Busqueda de marcadores en la plantilla
                 Word.Range nombreemisor = ObjDoc.Bookmarks.get_Item(ref nombre_emisor).Range;
                 Word.Range seriefolio2 = ObjDoc.Bookmarks.get_Item(ref serie_folio2).Range;
                 Word.Range rfcemisor = ObjDoc.Bookmarks.get_Item(ref rfc_emisor).Range;
                 Word.Range lugarexpedicion = ObjDoc.Bookmarks.get_Item(ref lugar_expedicion).Range;
-                Word.Range seriefolio = ObjDoc.Bookmarks.get_Item(ref serie_folio).Range;
                 Word.Range fecha = ObjDoc.Bookmarks.get_Item(ref fecha_).Range;
+                Word.Range CPEmisor = ObjDoc.Bookmarks.get_Item(ref C_P_Emisor).Range;
 
                 Word.Range nombrecliente = ObjDoc.Bookmarks.get_Item(ref nombre_cliente).Range;
                 Word.Range direccion_ = ObjDoc.Bookmarks.get_Item(ref direccion).Range;
                 Word.Range ciudad_ = ObjDoc.Bookmarks.get_Item(ref ciudad).Range;
-                //Word.Range cpreceptor = ObjDoc.Bookmarks.get_Item(ref c_p_receptor).Range;
+                Word.Range cpreceptor = ObjDoc.Bookmarks.get_Item(ref c_p_receptor).Range;
                 Word.Range rfccliente = ObjDoc.Bookmarks.get_Item(ref rfc_cliente).Range;
                 Word.Range regimenfiscal = ObjDoc.Bookmarks.get_Item(ref regimen_fiscal).Range;
-                Word.Range nocertificado = ObjDoc.Bookmarks.get_Item(ref no_certificado).Range;
+                //Word.Range nocertificado = ObjDoc.Bookmarks.get_Item(ref no_certificado).Range;
 
                 Word.Range fechahorappago = ObjDoc.Bookmarks.get_Item(ref fecha_hora_pago).Range;
                 Word.Range formapago = ObjDoc.Bookmarks.get_Item(ref forma_pago).Range;
@@ -1882,26 +1914,56 @@ namespace Facturafast.Controllers
                 Word.Range versiontimbre = ObjDoc.Bookmarks.get_Item(ref version_timbre).Range;
                 Word.Range certificadosat = ObjDoc.Bookmarks.get_Item(ref certificado_sat).Range;
                 Word.Range uuid_ = ObjDoc.Bookmarks.get_Item(ref uuid).Range;
+                Word.Range CCertificacion = ObjDoc.Bookmarks.get_Item(ref complemento_certificacion).Range;
+                Word.Range VersionTimbre = ObjDoc.Bookmarks.get_Item(ref Version_Timbre).Range;
+                //Word.Range NoCertificado = ObjDoc.Bookmarks.get_Item(ref No_Certificado).Range;
+
+                if (usuario.url_imagen != "img-default.png")
+                {
+                    object Logo_Emisor = "Logo_Emisor";
+
+                    ObjDoc.Bookmarks.get_Item(ref Logo_Emisor).Range.InlineShapes.AddPicture((DirPrg + "/img/logos/" + usuario.url_imagen), false, true);
+                }
+                
+
+                if (prepago_.uuid != null)
+                {
+                    //Crear Codigo QR
+                    string fileName = prepago_.uuid + "-" + cliente.rfc;
+                    QRCodeGenerator qrGenerator = new QRCodeGenerator();
+                    ASCIIEncoding ASSCII = new ASCIIEncoding();
+                    QRCodeData qrCodeData = qrGenerator.CreateQrCode(ASSCII.GetBytes("https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx?&id=" + prepago_.uuid + "&re=" + usuario.rfc + "&rr=" + cliente.rfc + "&tt=" + prepago_.total + "&fe=" + prepago_.selloCFDI.Substring(prepago_.selloCFDI.Length - 8, 8)), QRCodeGenerator.ECCLevel.H);
+                    QRCode qrCode = new QRCode(qrCodeData);
+                    Bitmap qrCodeImage = qrCode.GetGraphic(2);
+                    qrCodeImage.Save(DirPrg + "/Plantillas/PREPAGO/XML/PDF/" + usuario.rfc + "/" + ax_fc_emi + "/" + fileName + ".jpg", ImageFormat.Jpeg);
+                    //qrCodeImage.Save(@"D:\VS\Formatos\Documentos\Codigos QR\" + archivo + tipoComprobante + "" + fileName + ".jpg", ImageFormat.Jpeg);
+
+                    object Imagen_QR = "Codigo_QR";
+
+                    ObjDoc.Bookmarks.get_Item(ref Imagen_QR).Range.InlineShapes.AddPicture((DirPrg + "/Plantillas/PREPAGO/XML/PDF/" + usuario.rfc + "/" + ax_fc_emi + "/" + fileName + ".jpg"), false, true);
+                    //Fin Crear Codigo QR
+                }
 
                 //Agregar texto al marcador
                 nombreemisor.Text = usuario.nombre_razon;
                 seriefolio2.Text = prepago_.folio;//db.tbc_Clientes.Where(u => u.rfc == prefactura_.rfc_usuario).Select(u => u.nombre_razon).First();
                 rfcemisor.Text = usuario.rfc;
                 lugarexpedicion.Text = usuario.cp;
-                seriefolio.Text = prepago_.serie+"-"+prepago_.folio;
                 fecha.Text = prepago_.fecha_emision.ToString();
+                CPEmisor.Text = usuario.cp;
 
                 nombrecliente.Text = db.tbc_Clientes.Where(u => u.id_cliente == prepago_.id_cliente).Select(u => u.nombre_razon).First();
                 rfccliente.Text = cliente.rfc;
                 direccion_.Text = usuario.calle + " " +usuario.num_ext+" "+usuario.num_int+","+usuario.colonia+","+ usuario.localidad;
                 ciudad_.Text = usuario.municipio + "," + usuario.estado;
-                nocertificado.Text = "";//db.tbd_Firmas.Where(u => u.rfc == cliente.rfc).Select(u => u.certificado_fiel).First();
+                //nocertificado.Text = "";//db.tbd_Firmas.Where(u => u.rfc == cliente.rfc).Select(u => u.certificado_fiel).First();
                 regimenfiscal.Text = cliente.id_regimen_fiscal.ToString() + "-" + db.tbc_Regimenes.Where(u => u.id_regimen_fiscal == cliente.id_regimen_fiscal).Select(u => u.regimen).First();
+                cpreceptor.Text = cliente.codigo_postal.ToString();
 
-                var fpago = db.tbc_Metodos_Pago.ToList<tbc_Metodos_Pago>().Where(s => s.id_metodo_pago == Convert.ToInt32(prepago_.metodo_pago)).Single();
+                //var fpago = db.tbc_Metodos_Pago.ToList<tbc_Metodos_Pago>().Where(s => s.id_metodo_pago == Convert.ToInt32(prepago_.metodo_pago)).Single();
                 decimal totalEntero = Convert.ToDecimal(prepago_.total);
                 fechahorappago.Text = prepago_.fecha_pago.ToString();
-                formapago.Text = fpago.clave + "-" + fpago.metodo_pago;
+                //formapago.Text = fpago.clave + "-" + fpago.metodo_pago;
                 totalpago.Text = totalEntero.ToString("C");
                 cantidadletra.Text = totalEntero.NumeroALetras();
                 //Creacion y definicion de tabla
@@ -1968,24 +2030,43 @@ namespace Facturafast.Controllers
                 versiontimbre.Text = prepago_.version_cfdi;
                 certificadosat.Text = prepago_.ccertificacion;
                 uuid_.Text = prepago_.uuid;
+                CCertificacion.Text = prepago_.uuid != null ? "||" + prepago_.version_timbrado + "|" + prepago_.uuid + "|" + prepago_.fca_timbrado + "|" + prepago_.selloCFDI + "|" + prepago_.ccertificacion + "||" : "";
+                VersionTimbre.Text = prepago_.version_timbrado;
+                //NoCertificado.Text = prepago_.ccertificacion;
                 //Cerrar word
-                ObjDoc.SaveAs2(DirPrg + "/Plantillas/PREPAGO/XML/DOCX/" + cliente.rfc + "/" + ax_fc_emi + "/" + namefile + ".docx");
+
+                ObjDoc.SaveAs2(DirPrg + "/Plantillas/PREPAGO/XML/DOCX/" + usuario.rfc + "/" + ax_fc_emi + "/" + namefile + ".docx");
                 ObjDoc.Close();
                 ObjWord.Quit();
-
+                while (true)
+                {
+                    System.Threading.Thread.Sleep(1000);
+                    if (System.IO.File.Exists(DirPrg + "/Plantillas/PREPAGO/XML/DOCX/" + usuario.rfc + "/" + ax_fc_emi + "/" + namefile + ".docx"))
+                    {
+                        break;
+                    }
+                }
                 //Crear PDF
                 var pdfProcess = new Process();
                 pdfProcess.StartInfo.FileName = "" + ruta.url_libreoffice;
-                pdfProcess.StartInfo.Arguments = "--headless --convert-to pdf " + DirPrg + "Plantillas\\PREPAGO\\XML\\DOCX\\" + cliente.rfc + "\\" + ax_fc_emi + "\\" + namefile + ".docx --outdir  " + DirPrg + "Plantillas\\PREPAGO\\XML\\PDF\\" + cliente.rfc + "\\" + ax_fc_emi + "\\";
+                pdfProcess.StartInfo.Arguments = "--headless --convert-to pdf " + DirPrg + "Plantillas\\PREPAGO\\XML\\DOCX\\" + usuario.rfc + "\\" + ax_fc_emi + "\\" + namefile + ".docx --outdir  " + DirPrg + "Plantillas\\PREPAGO\\XML\\PDF\\" + usuario.rfc + "\\" + ax_fc_emi + "\\";
                 pdfProcess.Start();
                 fileExist_ = System.IO.File.Exists(DirPrg + "Plantillas\\" + prepago_.url_pdf);
                 //Actualizar 
                 if (prepago_.status == 1) 
                 {
-                    prepago_.url_pdf = "PREPAGO\\XML\\PDF\\" + cliente.rfc + "\\" + ax_fc_emi + "\\" + namefile + ".pdf";
-                    prepago_.url_xml = "PREPAGO\\XML\\PDF\\" + cliente.rfc + "\\" + ax_fc_emi + "\\";
+                    prepago_.url_pdf = "PREPAGO\\XML\\PDF\\" + usuario.rfc + "\\" + ax_fc_emi + "\\" + namefile + ".pdf";
+                    prepago_.url_xml = "PREPAGO\\XML\\PDF\\" + usuario.rfc + "\\" + ax_fc_emi + "\\";
                 }
                 db.SaveChanges();
+                while (true)
+                {
+                    System.Threading.Thread.Sleep(1000);
+                    if (System.IO.File.Exists(DirPrg + "/Plantillas/PREPAGO/XML/PDF/" + usuario.rfc + "/" + ax_fc_emi + "/" + namefile + ".pdf"))
+                    {
+                        break;
+                    }
+                }
             }
             //-----------------------------------------------------------------------------------------------------
             if (!fileExist_)

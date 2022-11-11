@@ -33,28 +33,6 @@
             <div class="modal-body m-3">
                 <input type="hidden" id="idprefac_modal" />
                 <input type="hidden" id="correo_cliente" />
-                <div class="row mb-3">
-                    <div class="col-md-12">
-                        <div class="form-floating mb-12">
-                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="uso_cfdi">
-                            <label for="uso_cfdi">Uso CFDI</label>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-8">
-                        <div class="form-floating mb-4">
-                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="metodo_pago">
-                            <label for="metodo_pago">Método Pago</label>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-floating mb-4">
-                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="total">
-                            <label for="total">Total</label>
-                        </div>
-                    </div>
-                </div>
                 <div class="row">
                     <div class="col-md-4">
                         <div class="form-floating mb-4">
@@ -69,6 +47,15 @@
                         </div>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control form-control-lg text-uppercase" readonly id="total">
+                            <label for="total">Total</label>
+                        </div>
+                    </div>
+                </div>
+                
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" onclick="timbrar()" id="btnTimbre"><i class="fas fa-bell"></i>&nbsp; Timbrar</button>
@@ -94,22 +81,31 @@
             data: JSON.stringify({ 'id': id }),
             success: function (data) {
                 var response = data;
+                console.log(response );
                 if (response == "NG") {
                     previsualizar();
                 }
                 else {
-                    f_pdf = response;
-                    //setTimeout(function () {
+                    var aux_path = response.split("/");
+                    console.log(aux_path[0]);
+                    if (aux_path[0] == "Cancelado") {
+                        $("#btnTimbrar").attr('disabled',true);
+
+                    } else {
+                        $("#btnTimbrar").attr('disabled', false);
+                        f_pdf = response;
+                        //setTimeout(function () {
                         if ('@ViewBag.Estatus' == "1") {
                             $(".btnEstatus").css("visibility", "visible");
                             genXML(id);
                         }
                         $(".rpdf").html('<iframe src="/' + response + '" style="height:100vh"></iframe>');
-                        cerrarCargando();
+                        
                         $(".btnPrePago").css("visibility", "visible");
                         f_doc = f_pdf.replace('PDF', 'DOCX');
                         f_doc = f_doc.replace('.pdf', '.docx');
-                        
+                    }
+                    cerrarCargando();
                     //}, 15000);
                 }
             },
@@ -128,9 +124,7 @@
         bootstrap.Modal.getOrCreateInstance(document.getElementById("modalTimbrado")).show();
         $.get("@Url.Action("getPrePagoID", "Facturacion")?id=" + id, async function (data) {
             $("#correo_cliente").val(data.correo);
-            $("#metodo_pago").val(data.s_metodo_pago);
-            $("#uso_cfdi").val(data.s_uso_cfdi);
-            $("#total").val(data.total);
+            $("#total").val(formatoMoneda(data.total));
             $("#razon_recpetor").val(data.nombre_razon);
             $("#rfc_receptor").val(data.rfc);
         });
@@ -221,7 +215,7 @@
             success: function (data) {
                 var response = data;
                 console.log(response);
-                
+
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 //notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");

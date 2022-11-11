@@ -34,7 +34,7 @@ namespace Facturafast.Controllers
             var factura = db.tbd_Pre_Factura.ToList<tbd_Pre_Factura>().Where(u => u.id_pre_factura == id_).Single();
             tbc_Usuarios usuario = Session["tbc_Usuarios"] as tbc_Usuarios;
             var firma = db.tbd_Firmas.ToList<tbd_Firmas>().Where(u => u.rfc == usuario.rfc).Single();
-            var receptor_c = db.tbc_Clientes.ToList<tbc_Clientes>().Where(u => u.rfc== factura.rfc_cliente && u.rfc_usuario == usuario.rfc).Single();
+            var receptor_c = db.tbc_Clientes.ToList<tbc_Clientes>().Where(u => u.rfc == factura.rfc_cliente && u.rfc_usuario == usuario.rfc).Single();
             //Ruta donde alojamos los Archivos
             var ruta_xml = factura.url_xml;
             string[] nom_doc = factura.url_pdf.Split('\\');
@@ -44,7 +44,7 @@ namespace Facturafast.Controllers
             //************************************
             string path = Server.MapPath("~");
             p = path;
-            string pathXML = path + @"\Plantillas\" + ruta_xml + "\\"+namefile+".xml";
+            string pathXML = path + @"\Plantillas\" + ruta_xml + "\\" + namefile + ".xml";
             string pathCer = path + @"\Plantillas\Firmas\" + usuario.rfc + "\\" + firma.url_cer_sello;
             string pathKey = path + @"\Plantillas\Firmas\" + usuario.rfc + "\\" + firma.url_key_sello;
             string clavePrivada = firma.password_sello;
@@ -111,12 +111,12 @@ namespace Facturafast.Controllers
                 Decimal imp_unitario = Convert.ToDecimal(valorConc[i].importe_unitario);
                 Decimal imp_total = Convert.ToDecimal(valorConc[i].importe_total);
                 Decimal descuento = valorConc[i].descuento == "" ? 0 : Convert.ToDecimal(valorConc[i].descuento);
-                oConcepto.Importe = Math.Round(imp_unitario,2);//10.00m;
+                oConcepto.Importe = Math.Round(imp_unitario, 2);//10.00m;
                 oConcepto.ClaveProdServ = valorConc[i].c_prod_serv;//"50202306";
                 oConcepto.Cantidad = Convert.ToDecimal(valorConc[i].cantidad);//1;
                 oConcepto.ClaveUnidad = valorConc[i].c_unidad_medida;//"H87";
                 oConcepto.Descripcion = valorConc[i].concepto;//"Refresco de Cola";
-                oConcepto.ValorUnitario = Math.Round(imp_unitario,2);//10.00m;
+                oConcepto.ValorUnitario = Math.Round(imp_unitario, 2);//10.00m;
                 oConcepto.Descuento = descuento;
                 oConcepto.ObjetoImp = "02";
                 oConcepto.Unidad = valorConc[i].unidad;//"Pieza";
@@ -124,15 +124,15 @@ namespace Facturafast.Controllers
                 if (valorConc[i].iva_tasa.Trim() != "0.00")
                 {
                     Decimal i_total = Convert.ToDecimal(valorConc[i].importe_total);
-                    comprobanteConceptoImpuestosTraslado.Base = Math.Round(imp_unitario,2);//10
+                    comprobanteConceptoImpuestosTraslado.Base = Math.Round(imp_unitario, 2);//10
                     comprobanteConceptoImpuestosTraslado.TasaOCuota = Convert.ToDecimal(valorConc[i].iva_tasa);//0.160000m;
                     comprobanteConceptoImpuestosTraslado.Impuesto = valorConc[i].iva_imp_traslado;//"002";
-                    comprobanteConceptoImpuestosTraslado.Importe = Math.Round(Convert.ToDecimal(valorConc[i].iva_tasa_impuesto),2);//1.60m;
+                    comprobanteConceptoImpuestosTraslado.Importe = Math.Round(Convert.ToDecimal(valorConc[i].iva_tasa_impuesto), 2);//1.60m;
                     comprobanteConceptoImpuestosTraslado.TipoFactor = valorConc[i].tipo_factor.Trim();//"Tasa";
                     comprobanteConceptoImpuestosTraslado.ImporteSpecified = true;
                     comprobanteConceptoImpuestosTraslado.TasaOCuotaSpecified = true;
-                    total_trasladado += Math.Round(Convert.ToDecimal(valorConc[i].iva_tasa_impuesto),2);
-                    base_iva += Math.Round(Convert.ToDecimal(valorConc[i].importe_total),2);
+                    total_trasladado += Math.Round(Convert.ToDecimal(valorConc[i].iva_tasa_impuesto), 2);
+                    base_iva += Math.Round(Convert.ToDecimal(valorConc[i].importe_total), 2);
                 }
                 //Retenido
                 if (valorConc[i].isr_ret_impuesto.Trim() != "0.00")
@@ -162,7 +162,7 @@ namespace Facturafast.Controllers
                 lstConceptos.Add(oConcepto);
                 oComprobante.Conceptos = lstConceptos.ToArray();
 
-                impuesto.TotalImpuestosTrasladados = Math.Round(Convert.ToDecimal(valorConc[i].iva_tasa_impuesto),2);//1.60m;
+                impuesto.TotalImpuestosTrasladados = Math.Round(Convert.ToDecimal(valorConc[i].iva_tasa_impuesto), 2);//1.60m;
 
                 impuesto.TotalImpuestosTrasladadosSpecified = true;
 
@@ -202,10 +202,10 @@ namespace Facturafast.Controllers
             SelloDigital oSelloDigital = new SelloDigital();
             oComprobante.Certificado = oSelloDigital.Certificado(pathCer);
             oComprobante.Sello = oSelloDigital.Sellar(cadenaOriginal, pathKey, clavePrivada);
-            
+
             //Creamos el xml
             CreateXML(oComprobante);
-            
+
             return Json("Success", JsonRequestBehavior.AllowGet);
         }
         private static void CreateXML(Comprobante oComprobante)
@@ -259,11 +259,11 @@ namespace Facturafast.Controllers
             string nf = nd[0];
             string namefile = nf;
             //------------------------------------
-            string UUIDRel = factura.uuid;
+            string UUIDRel = factura_d.uuid;
             p = path;
-            string pathXML = path + @"\Plantillas\"+ruta_xml+"\\"+namefile+".xml";
-            string pathCer = path + @"\Plantillas\Firmas\"+usuario.rfc+"\\"+firma.url_cer_sello;
-            string pathKey = path + @"\Plantillas\Firmas\"+usuario.rfc+"\\"+firma.url_key_sello;
+            string pathXML = path + @"\Plantillas\" + ruta_xml + "\\" + namefile + ".xml";
+            string pathCer = path + @"\Plantillas\Firmas\" + usuario.rfc + "\\" + firma.url_cer_sello;
+            string pathKey = path + @"\Plantillas\Firmas\" + usuario.rfc + "\\" + firma.url_key_sello;
             string clavePrivada = firma.password_sello;
             p_xml = pathXML;
             //Obtenemos el Número de Certificado
@@ -284,14 +284,14 @@ namespace Facturafast.Controllers
             oComprobante.Total = 0;//Math.Round(Convert.ToDecimal(factura.total),2);
             oComprobante.TipoDeComprobante = "P";
             //oComprobante.MetodoPago = "PPD";
-            oComprobante.LugarExpedicion = "20131"; //receptor_c.direccion_fiscal;
+            oComprobante.LugarExpedicion = receptor_c.direccion_fiscal;
             oComprobante.Descuento = 0;
             oComprobante.Exportacion = "01";
             ComprobanteEmisor oEmisor = new ComprobanteEmisor();
 
             oEmisor.Rfc = usuario.rfc;
             oEmisor.Nombre = usuario.nombre_razon;
-            oEmisor.RegimenFiscal = "601";//db.tbc_Regimenes.Where(u => u.id_regimen_fiscal == usuario.id_regimen_fiscal).Select(u => u.clave).First();
+            oEmisor.RegimenFiscal = db.tbc_Regimenes.Where(u => u.id_regimen_fiscal == usuario.id_regimen_fiscal).Select(u => u.clave).First();
 
             ComprobanteReceptor oReceptor = new ComprobanteReceptor();
             oReceptor.Nombre = receptor_c.nombre_razon;
@@ -325,7 +325,7 @@ namespace Facturafast.Controllers
 
             PagosTotales pagosTotales = new PagosTotales();
 
-            pagosTotales.MontoTotalPagos = Math.Round(Convert.ToDecimal(factura_d.pago),2);
+            pagosTotales.MontoTotalPagos = Math.Round(Convert.ToDecimal(factura_d.pago), 2);
 
             pagos.Totales = pagosTotales;
 
@@ -337,8 +337,8 @@ namespace Facturafast.Controllers
             pagosPago[0].FormaDePagoP = db.tbc_Formas_Pago.Where(u => u.id_forma_pago == factura_d.forma_pago).Select(u => u.clave).First();//"03";
 
             pagosPago[0].MonedaP = factura.tipo_moneda == 1 ? "MXN" : "USD";//"MXN";
-            pagosPago[0].TipoCambioP = 1;
-            pagosPago[0].Monto = Math.Round(Convert.ToDecimal(factura_d.pago),2);
+            pagosPago[0].TipoCambioP = Convert.ToDecimal(factura.tipo_cambio) == 0 ? 1: Convert.ToDecimal(factura.tipo_cambio);
+            pagosPago[0].Monto = Math.Round(Convert.ToDecimal(factura_d.pago), 2);
             pagosPago[0].NumOperacion = factura.num_operacion.ToString();
 
             pagosPago[0].TipoCambioPSpecified = true;
@@ -353,9 +353,9 @@ namespace Facturafast.Controllers
             pagosPagoDoctoRelacionados[0].MonedaDR = factura.tipo_moneda == 1 ? "MXN" : "USD";//"MXN";
             pagosPagoDoctoRelacionados[0].EquivalenciaDR = 1;
             pagosPagoDoctoRelacionados[0].NumParcialidad = "1";
-            pagosPagoDoctoRelacionados[0].ImpPagado = Math.Round(Convert.ToDecimal(factura_d.pago),2);
-            pagosPagoDoctoRelacionados[0].ImpSaldoAnt = Math.Round(Convert.ToDecimal(factura_d.s_anterior),2);
-            pagosPagoDoctoRelacionados[0].ImpSaldoInsoluto = Math.Round(Convert.ToDecimal(factura_d.s_actual),2);
+            pagosPagoDoctoRelacionados[0].ImpPagado = Math.Round(Convert.ToDecimal(factura_d.pago), 2);
+            pagosPagoDoctoRelacionados[0].ImpSaldoAnt = Math.Round(Convert.ToDecimal(factura_d.s_anterior), 2);
+            pagosPagoDoctoRelacionados[0].ImpSaldoInsoluto = Math.Round(Convert.ToDecimal(factura_d.s_actual), 2);
             pagosPagoDoctoRelacionados[0].ObjetoImpDR = "01";
 
             pagosPagoDoctoRelacionados[0].EquivalenciaDRSpecified = true;
@@ -443,7 +443,7 @@ namespace Facturafast.Controllers
             db = new BD_FFEntities();
             var carta = db.tbd_Pre_Carta_Porte.ToList<tbd_Pre_Carta_Porte>().Where(u => u.id == id).Single();
             var factura = db.tbd_Pre_Factura.ToList<tbd_Pre_Factura>().Where(u => u.id_pre_factura == carta.id_prefactura).Single();
-            
+
             tbc_Usuarios usuario = Session["tbc_Usuarios"] as tbc_Usuarios;
             var firma = db.tbd_Firmas.ToList<tbd_Firmas>().Where(u => u.rfc == usuario.rfc).Single();
             var receptor_c = db.tbc_Clientes.ToList<tbc_Clientes>().Where(u => u.rfc == factura.rfc_cliente).Single();
@@ -456,7 +456,7 @@ namespace Facturafast.Controllers
             //************************************
             string path = Server.MapPath("~");
             p = path;
-            string pathXML = path + @"\Plantillas\" + ruta_xml + "\\"+namefile+".xml";
+            string pathXML = path + @"\Plantillas\" + ruta_xml + "\\" + namefile + ".xml";
             string pathCer = path + @"\Plantillas\Firmas\" + usuario.rfc + "\\" + firma.url_cer_sello;
             string pathKey = path + @"\Plantillas\Firmas\" + usuario.rfc + "\\" + firma.url_key_sello;
             string clavePrivada = firma.password_sello;
@@ -537,7 +537,7 @@ namespace Facturafast.Controllers
                 //Traslado
                 if (valorConc[i].iva_tasa_impuesto.Trim() != "0.00")
                 {
-                    Decimal i_total = Convert.ToDecimal(valorConc[i].importe_total);    
+                    Decimal i_total = Convert.ToDecimal(valorConc[i].importe_total);
                     comprobanteConceptoImpuestosTraslado.Base = 1;//valorConc[i].total;
                     comprobanteConceptoImpuestosTraslado.Importe = 0.16m;//valorConc[i].iva_tasa;
                     comprobanteConceptoImpuestosTraslado.Impuesto = "002";
@@ -546,8 +546,8 @@ namespace Facturafast.Controllers
 
                     comprobanteConceptoImpuestosTraslado.ImporteSpecified = true;
                     comprobanteConceptoImpuestosTraslado.TasaOCuotaSpecified = true;
-                    
-                    
+
+
                     total_trasladado += Convert.ToDecimal(valorConc[i].iva_tasa_impuesto);
                     base_iva += Convert.ToDecimal(valorConc[i].importe_total);
                 }
@@ -555,12 +555,12 @@ namespace Facturafast.Controllers
                 conceptoImpuestos.Traslados[0] = comprobanteConceptoImpuestosTraslado;
                 oConcepto.Impuestos = new ComprobanteConceptoImpuestos();
                 oConcepto.Impuestos.Traslados = conceptoImpuestos.Traslados;
-                
+
                 //--------------------------------------------------------------------------------------------------Conceptos - impuestos - Retenciones
                 ComprobanteConceptoImpuestosRetencion[] comprobanteConceptoImpuestosRetencion = new ComprobanteConceptoImpuestosRetencion[2];
-                
+
                 //Retenido
-                if (valorConc[i].isr_ret_impuesto.Trim() != "0.00") 
+                if (valorConc[i].isr_ret_impuesto.Trim() != "0.00")
                 {
                     Decimal i_total = Convert.ToDecimal(valorConc[i].importe_total);
                     String i_total_ = i_total.ToString("########.00");
@@ -598,7 +598,7 @@ namespace Facturafast.Controllers
                 impuesto.TotalImpuestosTrasladados = 0.16m;//total_retenido;
                 impuesto.TotalImpuestosRetenidos = 0.20m;//total_retenido;
                 impuesto.TotalImpuestosRetenidosSpecified = true;
-                
+
 
                 impuesto.TotalImpuestosTrasladadosSpecified = true;
 
@@ -632,12 +632,12 @@ namespace Facturafast.Controllers
 
                 oComprobante.Impuestos = impuesto;
             }
-            
+
             //--------------------------------------------------------------------------------------------------Carta Porte
             CartaPorte cartaporte = new CartaPorte();
             cartaporte.Version = "2.0";
             cartaporte.TotalDistRecSpecified = true;
-            cartaporte.TotalDistRec = Math.Round(Convert.ToDecimal(carta.total_distancia_rec),2);
+            cartaporte.TotalDistRec = Math.Round(Convert.ToDecimal(carta.total_distancia_rec), 2);
             cartaporte.TranspInternac = carta.transporte_inter;
 
             //--------------------------------------------------------------------------------------------------Carta Porte - Ubicaciones
@@ -646,12 +646,12 @@ namespace Facturafast.Controllers
             CartaPorteUbicacionDomicilio[] cartaporteubicaciondomicilio = new CartaPorteUbicacionDomicilio[valorCP.Count];
             for (int i = 0; i < valorCP.Count; i++)
             {
-                string fca_hs = valorCP[i].fca_hora_salida != null ? valorCP[i].fca_hora_salida.Value.ToString("yyyy-MM-ddTHH:mm:ss"):"" ;
+                string fca_hs = valorCP[i].fca_hora_salida != null ? valorCP[i].fca_hora_salida.Value.ToString("yyyy-MM-ddTHH:mm:ss") : "";
                 cartaporteubicacion[i] = new CartaPorteUbicacion();
-                cartaporteubicacion[i].IDUbicacion = db.tbc_Ubicaciones.ToList<tbc_Ubicaciones>().Where(u => u.id_ubicacion == valorCP[i].id_ubicacion).Select(u=>u.id_origen_destino).FirstOrDefault();//"OR101010";
+                cartaporteubicacion[i].IDUbicacion = db.tbc_Ubicaciones.ToList<tbc_Ubicaciones>().Where(u => u.id_ubicacion == valorCP[i].id_ubicacion).Select(u => u.id_origen_destino).FirstOrDefault();//"OR101010";
                 cartaporteubicacion[i].TipoUbicacion = valorCP[i].tipo_ubicacion.Trim();//"Origen";
                 cartaporteubicacion[i].RFCRemitenteDestinatario = "EKU9003173C9";//db.tbc_Ubicaciones.ToList<tbc_Ubicaciones>().Where(u => u.id_ubicacion == valorCP[i].id).Select(u => u.rfc_usuario).FirstOrDefault();//"EKU9003173C9";
-                cartaporteubicacion[i].FechaHoraSalidaLlegada = fca_hs; 
+                cartaporteubicacion[i].FechaHoraSalidaLlegada = fca_hs;
                 if (valorCP[i].tipo_ubicacion.Trim() == "Destino")
                 {
                     cartaporteubicacion[i].DistanciaRecorrida = Convert.ToInt32(valorCP[i].distancia_recorrida);
@@ -697,11 +697,11 @@ namespace Facturafast.Controllers
                         cartaportemercanciasmercancia[j].ClaveUnidad = db.tbc_Unidades_Medida.ToList<tbc_Unidades_Medida>().Where(u => u.id_unidad_medida == valorM[i].id_unidad_medida).Select(u => u.clave).FirstOrDefault();//valorM[i].unidad;
                         cartaportemercanciasmercancia[j].PesoEnKg = Convert.ToDecimal(peso_kg);
                         cartaportemercanciasmercancia[j].MaterialPeligrosoSpecified = true;
-                        cartaportemercanciasmercancia[j].MaterialPeligroso = valorM[i].material_peligroso == "Si" ? "Sí": valorM[i].material_peligroso;
+                        cartaportemercanciasmercancia[j].MaterialPeligroso = valorM[i].material_peligroso == "Si" ? "Sí" : valorM[i].material_peligroso;
                         cartaportemercanciasmercancia[j].CveMaterialPeligrosoSpecified = true;
                         cartaportemercanciasmercancia[j].CveMaterialPeligroso = "1266";//SIN LA M db.tbc_Materiales_Peligrosos.ToList<tbc_Materiales_Peligrosos>().Where(u => u.id_material_peligroso == valorM[i].id_material_peligroso).Select(u => u.clave_material_peligroso).FirstOrDefault();
                         cartaportemercanciasmercancia[j].EmbalajeSpecified = true;
-                        cartaportemercanciasmercancia[j].Embalaje = db.tbc_Tipos_Embalaje.ToList<tbc_Tipos_Embalaje>().Where(u => u.id_tipo_embalaje== valorM[i].id_tipo_embalaje).Select(u => u.clave_designacion).FirstOrDefault(); ;//"4H2";
+                        cartaportemercanciasmercancia[j].Embalaje = db.tbc_Tipos_Embalaje.ToList<tbc_Tipos_Embalaje>().Where(u => u.id_tipo_embalaje == valorM[i].id_tipo_embalaje).Select(u => u.clave_designacion).FirstOrDefault(); ;//"4H2";
 
                         CartaPorteMercanciasMercanciaCantidadTransporta[] cartaPorteMercanciasMercanciaCantidadTransportas = new CartaPorteMercanciasMercanciaCantidadTransporta[1];
                         cartaPorteMercanciasMercanciaCantidadTransportas[0] = new CartaPorteMercanciasMercanciaCantidadTransporta();
@@ -712,16 +712,16 @@ namespace Facturafast.Controllers
                         cartaportemercancias.Mercancia = cartaportemercanciasmercancia;
                     }
                 }
-                
+
                 //--------------------------------------------------------------------------------------------------Carta Porte - Mercancias - Mercancia
-                
+
             }
             //cartaportemercanciasmercancia[0].Moneda = "MXN";                                    
             //cartaportemercanciasmercancia[0].ValorMercancia = 90000;            
             //cartaportemercanciasmercancia[0].Dimensiones = "5/25/5cm";
             //
             //--------------------------------------------------------------------------------------------------Carta Porte - Mercancias - Mercancia - CantidadTransporta
-            
+
             //--------------------------------------------------------------------------------------------------Carta Porte - Mercancias - Autotransporte
             var valorMA = db.tbd_Autotransporte.ToList<tbd_Autotransporte>().Where(u => u.id_autotransporte == carta.id_autotransporte).First();
             CartaPorteMercanciasAutotransporte cartaportemercanciasautotransporte = new CartaPorteMercanciasAutotransporte();
@@ -804,7 +804,7 @@ namespace Facturafast.Controllers
             CreateXMLCartaPorte(oComprobante);
             return Json("Creado", JsonRequestBehavior.AllowGet);
         }
-        private static void CreateXMLCartaPorte(Comprobante oComprobante) 
+        private static void CreateXMLCartaPorte(Comprobante oComprobante)
         {
             string pathXML = p_xml;
             //SERIALIZAMOS.-------------------------------------------------
@@ -894,7 +894,7 @@ namespace Facturafast.Controllers
             string PasswordFinkok = "F4ctur4f4st_C@st3l4n";
             string PasswordCer = firma.password_sello;
             string username = "cfdi@facturafast.mx";
-            
+
             string estatusuuid = "";
             //com.finkok.demo.CancelSOAP cancela = new com.finkok.demo.CancelSOAP();
             //com.finkok.demo.cancel can = new com.finkok.demo.cancel();
@@ -950,6 +950,8 @@ namespace Facturafast.Controllers
                                 var valorPreFac = db.tbd_Pre_Factura.ToList<tbd_Pre_Factura>().Where(u => u.id_pre_factura == id).FirstOrDefault();
                                 //valor.status = "3";
                                 valorPreFac.status = 3;
+                                var updFact = db.tbd_Facturas.ToList<tbd_Facturas>().Where(u => u.uuid == valorPreFac.uuid).FirstOrDefault();
+                                updFact.id_estatus = 8;
                             }
                             else
                             {
@@ -970,7 +972,6 @@ namespace Facturafast.Controllers
                                 estatus_uuid = cancelResponse.cancelResult.Folios[0].EstatusUUID
                             };
                             db.tbd_Cancelacion_Factura.Add(cancelaFac);
-
                             db.SaveChanges();
                         }
                     }
@@ -1067,7 +1068,9 @@ namespace Facturafast.Controllers
                 string[] nd = nom_doc[5].Split('.');
                 string nf = nd[0];
                 namefile = nf;
-            } else if(tipo == "CartaPorte"){
+            }
+            else if (tipo == "CartaPorte")
+            {
                 var cartaPorte = db.tbd_Pre_Carta_Porte.ToList<tbd_Pre_Carta_Porte>().Where(u => u.id == id_).Single();
                 var factura = db.tbd_Pre_Factura.ToList<tbd_Pre_Factura>().Where(u => u.id_pre_factura == cartaPorte.id_prefactura).Single();
                 ruta_pdf = factura.url_pdf;
@@ -1077,7 +1080,8 @@ namespace Facturafast.Controllers
                 string nf = nd[0];
                 namefile = nf;
             }
-            else {
+            else
+            {
                 var factura = db.tbd_Pre_Factura.ToList<tbd_Pre_Factura>().Where(u => u.id_pre_factura == id_).Single();
                 ruta_xml = factura.url_xml;
                 ruta_pdf = factura.url_pdf;
@@ -1101,7 +1105,7 @@ namespace Facturafast.Controllers
 
             //Parametros
             XmlDocument xmlDocument = new XmlDocument();
-            xmlDocument.Load(DirPrg + @"\Plantillas\"+ruta_xml+"\\"+n_doc);
+            xmlDocument.Load(DirPrg + @"\Plantillas\" + ruta_xml + "\\" + n_doc);
             string rutaO = DirPrg + @"\Plantillas\" + ruta_pdf;// + "\\" + n_doc;
             string rutaM = "";
             //Conviertes el archivo en Byte
@@ -1122,12 +1126,12 @@ namespace Facturafast.Controllers
             //Generamos Request
             String usuario;
             usuario = Environment.UserName;
-            String url = DirPrg + "\\Plantillas\\"+ruta_xml;
+            String url = DirPrg + "\\Plantillas\\" + ruta_xml;
             StreamWriter XML = new StreamWriter(url + "SOAP_Request.xml");
             //Direccion donde guardaremos el SOAP Envelope
-            XmlSerializer soap = new XmlSerializer(fx.GetType());
+            XmlSerializer soap = new XmlSerializer(stamp.GetType());
             //Obtenemos los datos del objeto oStamp que contiene los parámetros de envió y es de tipo stamp()
-            soap.Serialize(XML, fx);
+            soap.Serialize(XML, stamp);
             XML.Close();
 
             //Recibes la respuesta de Timbrado
@@ -1150,23 +1154,24 @@ namespace Facturafast.Controllers
                     selloResponse.stampResult.UUID.ToString() + "|" +
                     selloResponse.stampResult.xml.ToString();
                 uuidR = selloResponse.stampResult.UUID.ToString();
-                StreamWriter XMLL = new StreamWriter(url + "\\" + uuidR+".xml");
+                StreamWriter XMLL = new StreamWriter(url + "\\" + uuidR + ".xml");
                 XMLL.Write(selloResponse.stampResult.xml);
                 XMLL.Close();
                 //Cambiar nombre a PDF
-                rutaM = DirPrg + @"\Plantillas\" + ruta_xml + "\\" + uuidR +".pdf";
-                var rutaXMLO = DirPrg + @"\Plantillas\" + ruta_xml+"\\"+n_doc;
-                if (System.IO.File.Exists(rutaO)) {
+                rutaM = DirPrg + @"\Plantillas\" + ruta_xml + "\\" + uuidR + ".pdf";
+                var rutaXMLO = DirPrg + @"\Plantillas\" + ruta_xml + "\\" + n_doc;
+                if (System.IO.File.Exists(rutaO))
+                {
                     System.IO.File.Move(rutaO, rutaM);
-                    System.IO.File.Delete(rutaO);    
+                    System.IO.File.Delete(rutaO);
                 }
                 if (System.IO.File.Exists(rutaXMLO))
                 {
                     System.IO.File.Delete(rutaXMLO);
                 }
-                    ////Actualizar Estado XML
-                    using (BD_FFEntities db = new BD_FFEntities())
-                    {
+                ////Actualizar Estado XML
+                using (BD_FFEntities db = new BD_FFEntities())
+                {
                     if (tipo == "CartaPorte")
                     {
                         db.Configuration.LazyLoadingEnabled = false;
@@ -1193,8 +1198,8 @@ namespace Facturafast.Controllers
                         var valorPreFac = db.tbd_Pre_Factura.ToList<tbd_Pre_Factura>().Where(u => u.id_pre_factura == id_).FirstOrDefault();
                         valorPreFac.selloSAT = selloResponse.stampResult.SatSeal;
                         valorPreFac.ccertificacion = selloResponse.stampResult.NoCertificadoSAT;
-                        valorPreFac.url_xml = ruta_xml + uuidR+".xml";
-                        valorPreFac.url_pdf = ruta_xml + uuidR+".pdf";
+                        valorPreFac.url_xml = ruta_xml + uuidR + ".xml";
+                        valorPreFac.url_pdf = ruta_xml + uuidR + ".pdf";
                         valorPreFac.status = 2;
                         //Guardar CFDI
                         tbd_Cfdi_Uuid cfdi = new tbd_Cfdi_Uuid
@@ -1205,7 +1210,7 @@ namespace Facturafast.Controllers
                         };
                         db.tbd_Cfdi_Uuid.Add(cfdi);
                         db.SaveChanges();
-                    } 
+                    }
                     else
                     {
                         db.Configuration.LazyLoadingEnabled = false;
@@ -1213,20 +1218,33 @@ namespace Facturafast.Controllers
                         valorPrePago.selloSAT = selloResponse.stampResult.SatSeal;
                         valorPrePago.ccertificacion = selloResponse.stampResult.NoCertificadoSAT;
                         valorPrePago.uuid = uuidR;
-                        valorPrePago.url_xml = ruta_xml + uuidR+".xml";
-                        valorPrePago.url_pdf = ruta_xml + uuidR+".pdf";
+                        valorPrePago.url_xml = ruta_xml + uuidR + ".xml";
+                        valorPrePago.url_pdf = ruta_xml + uuidR + ".pdf";
                         valorPrePago.status = 2;
                         db.SaveChanges();
                     }
                 }
+                //Restar timbre
+
+                tbc_Timbres timbres = db.tbc_Timbres.Where(s => s.rfc_usuario == usuario_.rfc).Single();
+
+                timbres.timbres_usados++;
+                timbres.timbres_disponibles--;
+
+                db.SaveChanges();
+                
+
+
                 //---------Agregar a base Facturas-------------------
+
                 string root_xml = DirPrg + @"\Plantillas\" + ruta_xml + "\\" + uuidR + ".xml";
-                LeerArchivo(root_xml, usuario_.rfc, id_);
+
+                LeerArchivo(root_xml, usuario_.rfc, id_, tipo);
             }
             return Json(mensaje, JsonRequestBehavior.AllowGet);
         }
         //Almacenar Facturas
-        public void LeerArchivo(string root, String rfc, int id_prefac)
+        public void LeerArchivo(string root, String rfc, int id_prefac, string tipo)
         {
             BD_FFEntities db = new BD_FFEntities();
             tbc_Variables_Calculo variable = db.tbc_Variables_Calculo.Single();
@@ -1237,318 +1255,317 @@ namespace Facturafast.Controllers
                 xmlDoc.Load(reader);
                 //try
                 //{
-                    foreach (var Comprobante in xmlDoc.ChildNodes)
+                foreach (var Comprobante in xmlDoc.ChildNodes)
+                {
+                    if (Comprobante.GetType() == typeof(XmlElement))
                     {
-                        if (Comprobante.GetType() == typeof(XmlElement))
+                        var _comprobante = (Comprobante as XmlElement);
+                        if (_comprobante.LocalName == "Comprobante")
                         {
-                            var _comprobante = (Comprobante as XmlElement);
-                            if (_comprobante.LocalName == "Comprobante")
+
+                            List<tbd_Conceptos_Factura> conceptos = new List<tbd_Conceptos_Factura>();
+
+                            String _version = "";
+
+                            //!Comprobante
+                            DateTime _fechaEmision;
+                            Decimal _tipoCambio = 0;
+                            String _serie = "";
+                            String _folio = "";
+                            String _moneda = "";
+                            Decimal _total_original = 0;
+                            Decimal _subtotal = 0;
+                            String _metodoPago = "";
+                            String _formaPago = "";
+                            String _tipoComprobante = "";
+                            Decimal _descuento = 0;
+                            String _lugarExpedicion = "";
+                            String _exportacion = "";
+
+                            //Emisor
+                            String _rfcEmisor = "";
+                            String _nombreEmisor = "";
+                            String _regimenFiscalEmisor = "";
+
+
+                            //!Receptor
+                            String _rfcReceptor = "";
+                            String _nombreReceptor = "";
+                            String _usoCFDI = "";
+                            String _regimenFiscalReceptor = "";
+                            String _domicilioFiscalReceptor = "";
+
+                            //!TimbreFiscalDigital
+                            DateTime _fechaTimbrado = DateTime.Now;
+                            String _uuid = "";
+                            String _versionTimbreFiscalDigital = "";
+                            String _certificadoSAT = "";
+                            String _selloDigital = "";
+                            String _selloSAT = "";
+
+
+                            //!CartaPorte
+                            String _transpInter = "";
+                            String _totalDistancia = "";
+
+                            //!CartaPorte - Ubicaciones
+                            String _idUbicacionOrigen = "";
+                            String _rfcRemDesOrigen = "";
+                            String _nombreRemDesOrigen = "";
+                            String _distanciaRecorridaOrigen = "";
+                            DateTime _fechaHoraOrigen = DateTime.Now;
+                            String _calleOrigen = "";
+                            String _coloniaOrigen = "";
+                            String _localidadOrigen = "";
+                            String _municipioOrigen = "";
+                            String _estadoOrigen = "";
+                            String _paisOrigen = "";
+                            String _cpOrigen = "";
+                            String _direccionOrigen = "";
+
+                            String _idUbicacionDestino = "";
+                            String _rfcRemDesDestino = "";
+                            String _nombreRemDesDestino = "";
+                            String _distanciaRecorridaDestino = "";
+                            DateTime _fechaHoraDestino = DateTime.Now;
+                            String _calleDestino = "";
+                            String _coloniaDestino = "";
+                            String _localidadDestino = "";
+                            String _municipioDestino = "";
+                            String _estadoDestino = "";
+                            String _paisDestino = "";
+                            String _cpDestino = "";
+                            String _direccionDestino = "";
+
+                            //!CartaPorte - Mercancias
+                            String _pesoBrutoTotal = "";
+                            String _unidadPeso = "";
+                            String _numTotalMercancias = "";
+
+                            //!CartaPorte - Mercancia
+                            String _bienesTrans = "";
+                            String _descripcionMerca = "";
+                            String _cantidadMerca = "";
+                            String _claveUnidadMerca = "";
+                            String _unidadMerca = "";
+                            String _pesoKG = "";
+
+                            //!CartaPorte - AutoTransporte
+                            String _permSCT = "";
+                            String _numPermisoSCT = "";
+
+                            //!CartaPorte - IdentificacionVehicular
+                            String _configVehivular = "";
+                            String _placaVM = "";
+                            String _anioModelo = "";
+
+                            //!CartaPorte - Seguros
+                            String _aseguraRespCivil = "";
+                            String _polizaRespCivil = "";
+
+                            //!CartaPorte - Remolques
+                            String _subTipoRem = "";
+                            String _placaRemolque = "";
+
+
+                            //!CartaPorte - FiguraTransporte
+                            String _tipoFigura = "";
+                            String _rfcFigura = "";
+                            String _numLicenciaFigura = "";
+                            String _nombreFigura = "";
+
+
+                            //! Version del CFDI
+                            if (_comprobante.HasAttribute("Version"))
                             {
-
-                                List<tbd_Conceptos_Factura> conceptos = new List<tbd_Conceptos_Factura>();
-
-                                String _version = "";
-
-                                //!Comprobante
-                                DateTime _fechaEmision;
-                                Decimal _tipoCambio = 0;
-                                String _serie = "";
-                                String _folio = "";
-                                String _moneda = "";
-                                Decimal _total_original = 0;
-                                Decimal _subtotal = 0;
-                                String _metodoPago = "";
-                                String _formaPago = "";
-                                String _tipoComprobante = "";
-                                Decimal _descuento = 0;
-                                String _lugarExpedicion = "";
-                                String _exportacion = "";
-
-                                //Emisor
-                                String _rfcEmisor = "";
-                                String _nombreEmisor = "";
-                                String _regimenFiscalEmisor = "";
-
-
-                                //!Receptor
-                                String _rfcReceptor = "";
-                                String _nombreReceptor = "";
-                                String _usoCFDI = "";
-                                String _regimenFiscalReceptor = "";
-                                String _domicilioFiscalReceptor = "";
-
-                                //!TimbreFiscalDigital
-                                DateTime _fechaTimbrado = DateTime.Now;
-                                String _uuid = "";
-                                String _versionTimbreFiscalDigital = "";
-                                String _certificadoSAT = "";
-                                String _selloDigital = "";
-                                String _selloSAT = "";
-
-
-                                //!CartaPorte
-                                String _transpInter = "";
-                                String _totalDistancia = "";
-
-                                //!CartaPorte - Ubicaciones
-                                String _idUbicacionOrigen = "";
-                                String _rfcRemDesOrigen = "";
-                                String _nombreRemDesOrigen = "";
-                                String _distanciaRecorridaOrigen = "";
-                                DateTime _fechaHoraOrigen = DateTime.Now;
-                                String _calleOrigen = "";
-                                String _coloniaOrigen = "";
-                                String _localidadOrigen = "";
-                                String _municipioOrigen = "";
-                                String _estadoOrigen = "";
-                                String _paisOrigen = "";
-                                String _cpOrigen = "";
-                                String _direccionOrigen = "";
-
-                                String _idUbicacionDestino = "";
-                                String _rfcRemDesDestino = "";
-                                String _nombreRemDesDestino = "";
-                                String _distanciaRecorridaDestino = "";
-                                DateTime _fechaHoraDestino = DateTime.Now;
-                                String _calleDestino = "";
-                                String _coloniaDestino = "";
-                                String _localidadDestino = "";
-                                String _municipioDestino = "";
-                                String _estadoDestino = "";
-                                String _paisDestino = "";
-                                String _cpDestino = "";
-                                String _direccionDestino = "";
-
-                                //!CartaPorte - Mercancias
-                                String _pesoBrutoTotal = "";
-                                String _unidadPeso = "";
-                                String _numTotalMercancias = "";
-
-                                //!CartaPorte - Mercancia
-                                String _bienesTrans = "";
-                                String _descripcionMerca = "";
-                                String _cantidadMerca = "";
-                                String _claveUnidadMerca = "";
-                                String _unidadMerca = "";
-                                String _pesoKG = "";
-
-                                //!CartaPorte - AutoTransporte
-                                String _permSCT = "";
-                                String _numPermisoSCT = "";
-
-                                //!CartaPorte - IdentificacionVehicular
-                                String _configVehivular = "";
-                                String _placaVM = "";
-                                String _anioModelo = "";
-
-                                //!CartaPorte - Seguros
-                                String _aseguraRespCivil = "";
-                                String _polizaRespCivil = "";
-
-                                //!CartaPorte - Remolques
-                                String _subTipoRem = "";
-                                String _placaRemolque = "";
-
-
-                                //!CartaPorte - FiguraTransporte
-                                String _tipoFigura = "";
-                                String _rfcFigura = "";
-                                String _numLicenciaFigura = "";
-                                String _nombreFigura = "";
-
-
-                                //! Version del CFDI
-                                if (_comprobante.HasAttribute("Version"))
-                                {
-                                    _version = _comprobante.GetAttribute("Version").ToString();
-                                }
-                                //! Datos generales
-                                _fechaEmision = _comprobante.HasAttribute("Fecha") ? DateTime.Parse(_comprobante.GetAttribute("Fecha").ToString()) : DateTime.Now;
-                                _tipoCambio = _comprobante.HasAttribute("TipoCambio") ? Convert.ToDecimal(_comprobante.GetAttribute("TipoCambio").ToString()) : 1;
-                                _serie = _comprobante.HasAttribute("Serie") ? _comprobante.GetAttribute("Serie").ToString() : "";
-                                _folio = _comprobante.HasAttribute("Folio") ? _comprobante.GetAttribute("Folio").ToString() : "";
-                                _lugarExpedicion = _comprobante.HasAttribute("LugarExpedicion") ? _comprobante.GetAttribute("LugarExpedicion").ToString() : "";
-                                _exportacion = _comprobante.HasAttribute("Exportacion") ? _comprobante.GetAttribute("Exportacion").ToString() : "";
-                                _moneda = _comprobante.HasAttribute("Moneda") ? _comprobante.GetAttribute("Moneda").ToString() : "";
-                                _total_original = _comprobante.HasAttribute("Total") ? Convert.ToDecimal(_comprobante.GetAttribute("Total").ToString()) : 0;
-                                _subtotal = _comprobante.HasAttribute("SubTotal") ? Convert.ToDecimal(_comprobante.GetAttribute("SubTotal").ToString()) : 0;
-                                _tipoComprobante = _comprobante.HasAttribute("TipoDeComprobante") ? _comprobante.GetAttribute("TipoDeComprobante").ToString() : "";
-                                _formaPago = _comprobante.HasAttribute("FormaPago") ? _comprobante.GetAttribute("FormaPago").ToString() : "";
-                                _metodoPago = _comprobante.HasAttribute("MetodoPago") ? _comprobante.GetAttribute("MetodoPago").ToString() : "";
-                                _descuento = _comprobante.HasAttribute("Descuento") ? Convert.ToDecimal(_comprobante.GetAttribute("Descuento").ToString()) : 0;
-                                //version_timbrado = _comprobante.HasAttribute("Version") ? _comprobante.GetAttribute("Version").ToString() : "";
+                                _version = _comprobante.GetAttribute("Version").ToString();
+                            }
+                            //! Datos generales
+                            _fechaEmision = _comprobante.HasAttribute("Fecha") ? DateTime.Parse(_comprobante.GetAttribute("Fecha").ToString()) : DateTime.Now;
+                            _tipoCambio = _comprobante.HasAttribute("TipoCambio") ? Convert.ToDecimal(_comprobante.GetAttribute("TipoCambio").ToString()) : 1;
+                            _serie = _comprobante.HasAttribute("Serie") ? _comprobante.GetAttribute("Serie").ToString() : "";
+                            _folio = _comprobante.HasAttribute("Folio") ? _comprobante.GetAttribute("Folio").ToString() : "";
+                            _lugarExpedicion = _comprobante.HasAttribute("LugarExpedicion") ? _comprobante.GetAttribute("LugarExpedicion").ToString() : "";
+                            _exportacion = _comprobante.HasAttribute("Exportacion") ? _comprobante.GetAttribute("Exportacion").ToString() : "";
+                            _moneda = _comprobante.HasAttribute("Moneda") ? _comprobante.GetAttribute("Moneda").ToString() : "";
+                            _total_original = _comprobante.HasAttribute("Total") ? Convert.ToDecimal(_comprobante.GetAttribute("Total").ToString()) : 0;
+                            _subtotal = _comprobante.HasAttribute("SubTotal") ? Convert.ToDecimal(_comprobante.GetAttribute("SubTotal").ToString()) : 0;
+                            _tipoComprobante = _comprobante.HasAttribute("TipoDeComprobante") ? _comprobante.GetAttribute("TipoDeComprobante").ToString() : "";
+                            _formaPago = _comprobante.HasAttribute("FormaPago") ? _comprobante.GetAttribute("FormaPago").ToString() : "";
+                            _metodoPago = _comprobante.HasAttribute("MetodoPago") ? _comprobante.GetAttribute("MetodoPago").ToString() : "";
+                            _descuento = _comprobante.HasAttribute("Descuento") ? Convert.ToDecimal(_comprobante.GetAttribute("Descuento").ToString()) : 0;
+                            //version_timbrado = _comprobante.HasAttribute("Version") ? _comprobante.GetAttribute("Version").ToString() : "";
                             //!Nodo Principales
                             foreach (var Nodos in _comprobante.ChildNodes)
+                            {
+                                if (Nodos.GetType() == typeof(XmlElement))
                                 {
-                                    if (Nodos.GetType() == typeof(XmlElement))
+                                    var _nodo = (Nodos as XmlElement);
+                                    if (_nodo.LocalName == "Complemento")
                                     {
-                                        var _nodo = (Nodos as XmlElement);
-                                        if (_nodo.LocalName == "Complemento")
+                                        //!Complementos
+                                        foreach (var Complemento in _nodo.ChildNodes)
                                         {
-                                            //!Complementos
-                                            foreach (var Complemento in _nodo.ChildNodes)
+                                            if (Complemento.GetType() == typeof(XmlElement))
                                             {
-                                                if (Complemento.GetType() == typeof(XmlElement))
+                                                var _complemento = (Complemento as XmlElement);
+                                                if (_complemento.LocalName == "TimbreFiscalDigital")
                                                 {
-                                                    var _complemento = (Complemento as XmlElement);
-                                                    if (_complemento.LocalName == "TimbreFiscalDigital")
-                                                    {
-                                                        //!Timbre Fiscal Digital
-                                                        _uuid = _complemento.HasAttribute("UUID") ? _complemento.GetAttribute("UUID").ToString() : "";
-                                                        _fechaTimbrado = _complemento.HasAttribute("FechaTimbrado") ? DateTime.Parse(_complemento.GetAttribute("FechaTimbrado").ToString()) : DateTime.Now;
-                                                        _versionTimbreFiscalDigital = _complemento.HasAttribute("Version") ? _complemento.GetAttribute("Version").ToString() : "";
-                                                        _certificadoSAT = _complemento.HasAttribute("NoCertificadoSAT") ? _complemento.GetAttribute("NoCertificadoSAT").ToString() : "";
-                                                        _selloDigital = _complemento.HasAttribute("SelloCFD") ? _complemento.GetAttribute("SelloCFD").ToString() : "";
-                                                        _selloSAT = _complemento.HasAttribute("SelloSAT") ? _complemento.GetAttribute("SelloSAT").ToString() : "";
+                                                    //!Timbre Fiscal Digital
+                                                    _uuid = _complemento.HasAttribute("UUID") ? _complemento.GetAttribute("UUID").ToString() : "";
+                                                    _fechaTimbrado = _complemento.HasAttribute("FechaTimbrado") ? DateTime.Parse(_complemento.GetAttribute("FechaTimbrado").ToString()) : DateTime.Now;
+                                                    _versionTimbreFiscalDigital = _complemento.HasAttribute("Version") ? _complemento.GetAttribute("Version").ToString() : "";
+                                                    _certificadoSAT = _complemento.HasAttribute("NoCertificadoSAT") ? _complemento.GetAttribute("NoCertificadoSAT").ToString() : "";
+                                                    _selloDigital = _complemento.HasAttribute("SelloCFD") ? _complemento.GetAttribute("SelloCFD").ToString() : "";
+                                                    _selloSAT = _complemento.HasAttribute("SelloSAT") ? _complemento.GetAttribute("SelloSAT").ToString() : "";
 
                                                 }
 
-                                                    if (_complemento.LocalName == "CartaPorte")
+                                                if (_complemento.LocalName == "CartaPorte")
+                                                {
+                                                    _transpInter = _complemento.HasAttribute("TranspInternac") ? _complemento.GetAttribute("TranspInternac").ToString() : "";
+
+                                                    _totalDistancia = _complemento.HasAttribute("TotalDistRec") ? _complemento.GetAttribute("TotalDistRec").ToString() : "";
+
+                                                    foreach (var CartaPorte in _complemento.ChildNodes)
                                                     {
-                                                        _transpInter = _complemento.HasAttribute("TranspInternac") ? _complemento.GetAttribute("TranspInternac").ToString() : "";
-
-                                                        _totalDistancia = _complemento.HasAttribute("TotalDistRec") ? _complemento.GetAttribute("TotalDistRec").ToString() : "";
-
-                                                        foreach (var CartaPorte in _complemento.ChildNodes)
+                                                        if (CartaPorte.GetType() == typeof(XmlElement))
                                                         {
-                                                            if (CartaPorte.GetType() == typeof(XmlElement))
+                                                            var _cartaPorte = (CartaPorte as XmlElement);
+
+
+
+                                                            if (_cartaPorte.LocalName == "Ubicaciones")
                                                             {
-                                                                var _cartaPorte = (CartaPorte as XmlElement);
-
-
-
-                                                                if (_cartaPorte.LocalName == "Ubicaciones")
+                                                                foreach (var Ubicaciones in _cartaPorte.ChildNodes)
                                                                 {
-                                                                    foreach (var Ubicaciones in _cartaPorte.ChildNodes)
+                                                                    if (Ubicaciones.GetType() == typeof(XmlElement))
                                                                     {
-                                                                        if (Ubicaciones.GetType() == typeof(XmlElement))
+                                                                        var _ubicacion = (Ubicaciones as XmlElement);
+                                                                        String tipo_Ubicacion = _ubicacion.HasAttribute("TipoUbicacion") ? _ubicacion.GetAttribute("TipoUbicacion").ToString() : "";
+                                                                        if (tipo_Ubicacion == "Origen")
                                                                         {
-                                                                            var _ubicacion = (Ubicaciones as XmlElement);
-                                                                            String tipo_Ubicacion = _ubicacion.HasAttribute("TipoUbicacion") ? _ubicacion.GetAttribute("TipoUbicacion").ToString() : "";
-                                                                            if (tipo_Ubicacion == "Origen")
+                                                                            _idUbicacionOrigen = _ubicacion.HasAttribute("IDUbicacion") ? _ubicacion.GetAttribute("IDUbicacion").ToString() : "";
+                                                                            _rfcRemDesOrigen = _ubicacion.HasAttribute("RFCRemitenteDestinatario") ? _ubicacion.GetAttribute("RFCRemitenteDestinatario").ToString() : "";
+                                                                            _nombreRemDesOrigen = _ubicacion.HasAttribute("NombreRemitenteDestinatario") ? _ubicacion.GetAttribute("NombreRemitenteDestinatario").ToString() : "";
+                                                                            _fechaHoraOrigen = _ubicacion.HasAttribute("FechaHoraSalidaLlegada") ? DateTime.Parse(_ubicacion.GetAttribute("FechaHoraSalidaLlegada").ToString()) : DateTime.Now;
+                                                                            _distanciaRecorridaOrigen = _ubicacion.HasAttribute("DistanciaRecorrida") ? _ubicacion.GetAttribute("DistanciaRecorrida").ToString() : "";
+
+
+
+                                                                            var _domicilio = _ubicacion.FirstChild;
+                                                                            if (_domicilio.GetType() == typeof(XmlElement))
                                                                             {
-                                                                                _idUbicacionOrigen = _ubicacion.HasAttribute("IDUbicacion") ? _ubicacion.GetAttribute("IDUbicacion").ToString() : "";
-                                                                                _rfcRemDesOrigen = _ubicacion.HasAttribute("RFCRemitenteDestinatario") ? _ubicacion.GetAttribute("RFCRemitenteDestinatario").ToString() : "";
-                                                                                _nombreRemDesOrigen = _ubicacion.HasAttribute("NombreRemitenteDestinatario") ? _ubicacion.GetAttribute("NombreRemitenteDestinatario").ToString() : "";
-                                                                                _fechaHoraOrigen = _ubicacion.HasAttribute("FechaHoraSalidaLlegada") ? DateTime.Parse(_ubicacion.GetAttribute("FechaHoraSalidaLlegada").ToString()) : DateTime.Now;
-                                                                                _distanciaRecorridaOrigen = _ubicacion.HasAttribute("DistanciaRecorrida") ? _ubicacion.GetAttribute("DistanciaRecorrida").ToString() : "";
+                                                                                var _domi = (_domicilio as XmlElement);
 
+                                                                                _calleOrigen = _domi.HasAttribute("Calle") ? _domi.GetAttribute("Calle").ToString() : "";
+                                                                                _coloniaOrigen = _domi.HasAttribute("Colonia") ? _domi.GetAttribute("Colonia").ToString() : "";
+                                                                                _localidadOrigen = _domi.HasAttribute("Localidad") ? _domi.GetAttribute("Localidad").ToString() : "";
+                                                                                _municipioOrigen = _domi.HasAttribute("Municipio") ? _domi.GetAttribute("Municipio").ToString() : "";
+                                                                                _estadoOrigen = _domi.HasAttribute("Estado") ? _domi.GetAttribute("Estado").ToString() : "";
+                                                                                _paisOrigen = _domi.HasAttribute("Pais") ? _domi.GetAttribute("Pais").ToString() : "";
+                                                                                _cpOrigen = _domi.HasAttribute("CodigoPostal") ? _domi.GetAttribute("CodigoPostal").ToString() : "";
 
-
-                                                                                var _domicilio = _ubicacion.FirstChild;
-                                                                                if (_domicilio.GetType() == typeof(XmlElement))
-                                                                                {
-                                                                                    var _domi = (_domicilio as XmlElement);
-
-                                                                                    _calleOrigen = _domi.HasAttribute("Calle") ? _domi.GetAttribute("Calle").ToString() : "";
-                                                                                    _coloniaOrigen = _domi.HasAttribute("Colonia") ? _domi.GetAttribute("Colonia").ToString() : "";
-                                                                                    _localidadOrigen = _domi.HasAttribute("Localidad") ? _domi.GetAttribute("Localidad").ToString() : "";
-                                                                                    _municipioOrigen = _domi.HasAttribute("Municipio") ? _domi.GetAttribute("Municipio").ToString() : "";
-                                                                                    _estadoOrigen = _domi.HasAttribute("Estado") ? _domi.GetAttribute("Estado").ToString() : "";
-                                                                                    _paisOrigen = _domi.HasAttribute("Pais") ? _domi.GetAttribute("Pais").ToString() : "";
-                                                                                    _cpOrigen = _domi.HasAttribute("CodigoPostal") ? _domi.GetAttribute("CodigoPostal").ToString() : "";
-
-                                                                                    _direccionOrigen = _calleOrigen + ", " + _coloniaOrigen + ", " + _localidadOrigen + ", " + _municipioOrigen + ", " + _estadoOrigen + ", " + _paisOrigen + ", " + _cpOrigen;
-                                                                                }
-
-
+                                                                                _direccionOrigen = _calleOrigen + ", " + _coloniaOrigen + ", " + _localidadOrigen + ", " + _municipioOrigen + ", " + _estadoOrigen + ", " + _paisOrigen + ", " + _cpOrigen;
                                                                             }
-                                                                            else if (tipo_Ubicacion == "Destino")
-                                                                            {
-                                                                                _idUbicacionDestino = _ubicacion.HasAttribute("IDUbicacion") ? _ubicacion.GetAttribute("IDUbicacion").ToString() : "";
-                                                                                _rfcRemDesDestino = _ubicacion.HasAttribute("RFCRemitenteDestinatario") ? _ubicacion.GetAttribute("RFCRemitenteDestinatario").ToString() : "";
-                                                                                _nombreRemDesDestino = _ubicacion.HasAttribute("NombreRemitenteDestinatario") ? _ubicacion.GetAttribute("NombreRemitenteDestinatario").ToString() : "";
-                                                                                _fechaHoraDestino = _ubicacion.HasAttribute("FechaHoraSalidaLlegada") ? DateTime.Parse(_ubicacion.GetAttribute("FechaHoraSalidaLlegada").ToString()) : DateTime.Now;
-                                                                                _distanciaRecorridaDestino = _ubicacion.HasAttribute("DistanciaRecorrida") ? _ubicacion.GetAttribute("DistanciaRecorrida").ToString() : "";
 
-
-
-                                                                                var _domicilio = _ubicacion.FirstChild;
-                                                                                if (_domicilio.GetType() == typeof(XmlElement))
-                                                                                {
-                                                                                    var _domi = (_domicilio as XmlElement);
-
-                                                                                    _calleDestino = _domi.HasAttribute("Calle") ? _domi.GetAttribute("Calle").ToString() : "";
-                                                                                    _coloniaDestino = _domi.HasAttribute("Colonia") ? _domi.GetAttribute("Colonia").ToString() : "";
-                                                                                    _localidadDestino = _domi.HasAttribute("Localidad") ? _domi.GetAttribute("Localidad").ToString() : "";
-                                                                                    _municipioDestino = _domi.HasAttribute("Municipio") ? _domi.GetAttribute("Municipio").ToString() : "";
-                                                                                    _estadoDestino = _domi.HasAttribute("Estado") ? _domi.GetAttribute("Estado").ToString() : "";
-                                                                                    _paisDestino = _domi.HasAttribute("Pais") ? _domi.GetAttribute("Pais").ToString() : "";
-                                                                                    _cpDestino = _domi.HasAttribute("CodigoPostal") ? _domi.GetAttribute("CodigoPostal").ToString() : "";
-
-                                                                                    _direccionDestino = _calleDestino + ", " + _coloniaDestino + ", " + _localidadDestino + ", " + _municipioDestino + ", " + _estadoDestino + ", " + _paisDestino + ", " + _cpDestino;
-                                                                                }
-                                                                            }
 
                                                                         }
-                                                                    }
-
-                                                                }
-                                                                else if (_cartaPorte.LocalName == "Mercancias")
-                                                                {
-                                                                    _pesoBrutoTotal = _cartaPorte.HasAttribute("PesoBrutoTotal") ? _cartaPorte.GetAttribute("PesoBrutoTotal").ToString() : "";
-                                                                    _unidadPeso = _cartaPorte.HasAttribute("UnidadPeso") ? _cartaPorte.GetAttribute("UnidadPeso").ToString() : "";
-                                                                    _numTotalMercancias = _cartaPorte.HasAttribute("NumTotalMercancias") ? _cartaPorte.GetAttribute("NumTotalMercancias").ToString() : "";
-
-
-
-                                                                    foreach (var Mercancias in _cartaPorte.ChildNodes)
-                                                                    {
-                                                                        if (Mercancias.GetType() == typeof(XmlElement))
+                                                                        else if (tipo_Ubicacion == "Destino")
                                                                         {
-                                                                            var _mercancias = (Mercancias as XmlElement);
-                                                                            if (_mercancias.LocalName == "Mercancia")
+                                                                            _idUbicacionDestino = _ubicacion.HasAttribute("IDUbicacion") ? _ubicacion.GetAttribute("IDUbicacion").ToString() : "";
+                                                                            _rfcRemDesDestino = _ubicacion.HasAttribute("RFCRemitenteDestinatario") ? _ubicacion.GetAttribute("RFCRemitenteDestinatario").ToString() : "";
+                                                                            _nombreRemDesDestino = _ubicacion.HasAttribute("NombreRemitenteDestinatario") ? _ubicacion.GetAttribute("NombreRemitenteDestinatario").ToString() : "";
+                                                                            _fechaHoraDestino = _ubicacion.HasAttribute("FechaHoraSalidaLlegada") ? DateTime.Parse(_ubicacion.GetAttribute("FechaHoraSalidaLlegada").ToString()) : DateTime.Now;
+                                                                            _distanciaRecorridaDestino = _ubicacion.HasAttribute("DistanciaRecorrida") ? _ubicacion.GetAttribute("DistanciaRecorrida").ToString() : "";
+
+
+
+                                                                            var _domicilio = _ubicacion.FirstChild;
+                                                                            if (_domicilio.GetType() == typeof(XmlElement))
                                                                             {
-                                                                                _bienesTrans = _mercancias.HasAttribute("BienesTransp") ? _mercancias.GetAttribute("BienesTransp").ToString() : "";
-                                                                                _descripcionMerca = _mercancias.HasAttribute("Descripcion") ? _mercancias.GetAttribute("Descripcion").ToString() : "";
-                                                                                _cantidadMerca = _mercancias.HasAttribute("Cantidad") ? _mercancias.GetAttribute("Cantidad").ToString() : "";
-                                                                                _claveUnidadMerca = _mercancias.HasAttribute("ClaveUnidad") ? _mercancias.GetAttribute("ClaveUnidad").ToString() : "";
-                                                                                _unidadMerca = _mercancias.HasAttribute("Unidad") ? _mercancias.GetAttribute("Unidad").ToString() : "";
-                                                                                _pesoKG = _mercancias.HasAttribute("PesoEnKg") ? _mercancias.GetAttribute("PesoEnKg").ToString() : "";
+                                                                                var _domi = (_domicilio as XmlElement);
 
+                                                                                _calleDestino = _domi.HasAttribute("Calle") ? _domi.GetAttribute("Calle").ToString() : "";
+                                                                                _coloniaDestino = _domi.HasAttribute("Colonia") ? _domi.GetAttribute("Colonia").ToString() : "";
+                                                                                _localidadDestino = _domi.HasAttribute("Localidad") ? _domi.GetAttribute("Localidad").ToString() : "";
+                                                                                _municipioDestino = _domi.HasAttribute("Municipio") ? _domi.GetAttribute("Municipio").ToString() : "";
+                                                                                _estadoDestino = _domi.HasAttribute("Estado") ? _domi.GetAttribute("Estado").ToString() : "";
+                                                                                _paisDestino = _domi.HasAttribute("Pais") ? _domi.GetAttribute("Pais").ToString() : "";
+                                                                                _cpDestino = _domi.HasAttribute("CodigoPostal") ? _domi.GetAttribute("CodigoPostal").ToString() : "";
 
-
+                                                                                _direccionDestino = _calleDestino + ", " + _coloniaDestino + ", " + _localidadDestino + ", " + _municipioDestino + ", " + _estadoDestino + ", " + _paisDestino + ", " + _cpDestino;
                                                                             }
-                                                                            else if (_mercancias.LocalName == "Autotransporte")
+                                                                        }
+
+                                                                    }
+                                                                }
+
+                                                            }
+                                                            else if (_cartaPorte.LocalName == "Mercancias")
+                                                            {
+                                                                _pesoBrutoTotal = _cartaPorte.HasAttribute("PesoBrutoTotal") ? _cartaPorte.GetAttribute("PesoBrutoTotal").ToString() : "";
+                                                                _unidadPeso = _cartaPorte.HasAttribute("UnidadPeso") ? _cartaPorte.GetAttribute("UnidadPeso").ToString() : "";
+                                                                _numTotalMercancias = _cartaPorte.HasAttribute("NumTotalMercancias") ? _cartaPorte.GetAttribute("NumTotalMercancias").ToString() : "";
+
+
+
+                                                                foreach (var Mercancias in _cartaPorte.ChildNodes)
+                                                                {
+                                                                    if (Mercancias.GetType() == typeof(XmlElement))
+                                                                    {
+                                                                        var _mercancias = (Mercancias as XmlElement);
+                                                                        if (_mercancias.LocalName == "Mercancia")
+                                                                        {
+                                                                            _bienesTrans = _mercancias.HasAttribute("BienesTransp") ? _mercancias.GetAttribute("BienesTransp").ToString() : "";
+                                                                            _descripcionMerca = _mercancias.HasAttribute("Descripcion") ? _mercancias.GetAttribute("Descripcion").ToString() : "";
+                                                                            _cantidadMerca = _mercancias.HasAttribute("Cantidad") ? _mercancias.GetAttribute("Cantidad").ToString() : "";
+                                                                            _claveUnidadMerca = _mercancias.HasAttribute("ClaveUnidad") ? _mercancias.GetAttribute("ClaveUnidad").ToString() : "";
+                                                                            _unidadMerca = _mercancias.HasAttribute("Unidad") ? _mercancias.GetAttribute("Unidad").ToString() : "";
+                                                                            _pesoKG = _mercancias.HasAttribute("PesoEnKg") ? _mercancias.GetAttribute("PesoEnKg").ToString() : "";
+
+
+
+                                                                        }
+                                                                        else if (_mercancias.LocalName == "Autotransporte")
+                                                                        {
+                                                                            _permSCT = _mercancias.HasAttribute("PermSCT") ? _mercancias.GetAttribute("PermSCT").ToString() : "";
+                                                                            _numPermisoSCT = _mercancias.HasAttribute("NumPermisoSCT") ? _mercancias.GetAttribute("NumPermisoSCT").ToString() : "";
+
+
+                                                                            foreach (var AutoTransportes in _mercancias.ChildNodes)
                                                                             {
-                                                                                _permSCT = _mercancias.HasAttribute("PermSCT") ? _mercancias.GetAttribute("PermSCT").ToString() : "";
-                                                                                _numPermisoSCT = _mercancias.HasAttribute("NumPermisoSCT") ? _mercancias.GetAttribute("NumPermisoSCT").ToString() : "";
-
-
-                                                                                foreach (var AutoTransportes in _mercancias.ChildNodes)
+                                                                                if (AutoTransportes.GetType() == typeof(XmlElement))
                                                                                 {
-                                                                                    if (AutoTransportes.GetType() == typeof(XmlElement))
+                                                                                    var _autoTransporte = (AutoTransportes as XmlElement);
+                                                                                    if (_autoTransporte.LocalName == "IdentificacionVehicular")
                                                                                     {
-                                                                                        var _autoTransporte = (AutoTransportes as XmlElement);
-                                                                                        if (_autoTransporte.LocalName == "IdentificacionVehicular")
+                                                                                        _configVehivular = _autoTransporte.HasAttribute("ConfigVehicular") ? _autoTransporte.GetAttribute("ConfigVehicular").ToString() : "";
+                                                                                        _placaVM = _autoTransporte.HasAttribute("PlacaVM") ? _autoTransporte.GetAttribute("PlacaVM").ToString() : "";
+                                                                                        _anioModelo = _autoTransporte.HasAttribute("AnioModeloVM") ? _autoTransporte.GetAttribute("AnioModeloVM").ToString() : "";
+
+
+                                                                                    }
+                                                                                    else if (_autoTransporte.LocalName == "Seguros")
+                                                                                    {
+                                                                                        _aseguraRespCivil = _autoTransporte.HasAttribute("AseguraRespCivil") ? _autoTransporte.GetAttribute("AseguraRespCivil").ToString() : "";
+                                                                                        _polizaRespCivil = _autoTransporte.HasAttribute("PolizaRespCivil") ? _autoTransporte.GetAttribute("PolizaRespCivil").ToString() : "";
+
+
+                                                                                    }
+                                                                                    else if (_autoTransporte.LocalName == "Remolques")
+                                                                                    {
+                                                                                        foreach (var Remolques in _autoTransporte.ChildNodes)
                                                                                         {
-                                                                                            _configVehivular = _autoTransporte.HasAttribute("ConfigVehicular") ? _autoTransporte.GetAttribute("ConfigVehicular").ToString() : "";
-                                                                                            _placaVM = _autoTransporte.HasAttribute("PlacaVM") ? _autoTransporte.GetAttribute("PlacaVM").ToString() : "";
-                                                                                            _anioModelo = _autoTransporte.HasAttribute("AnioModeloVM") ? _autoTransporte.GetAttribute("AnioModeloVM").ToString() : "";
-
-
-                                                                                        }
-                                                                                        else if (_autoTransporte.LocalName == "Seguros")
-                                                                                        {
-                                                                                            _aseguraRespCivil = _autoTransporte.HasAttribute("AseguraRespCivil") ? _autoTransporte.GetAttribute("AseguraRespCivil").ToString() : "";
-                                                                                            _polizaRespCivil = _autoTransporte.HasAttribute("PolizaRespCivil") ? _autoTransporte.GetAttribute("PolizaRespCivil").ToString() : "";
-
-
-                                                                                        }
-                                                                                        else if (_autoTransporte.LocalName == "Remolques")
-                                                                                        {
-                                                                                            foreach (var Remolques in _autoTransporte.ChildNodes)
+                                                                                            if (Remolques.GetType() == typeof(XmlElement))
                                                                                             {
-                                                                                                if (Remolques.GetType() == typeof(XmlElement))
+                                                                                                var _remolque = (Remolques as XmlElement);
+                                                                                                if (_remolque.LocalName == "Remolque")
                                                                                                 {
-                                                                                                    var _remolque = (Remolques as XmlElement);
-                                                                                                    if (_remolque.LocalName == "Remolque")
-                                                                                                    {
-                                                                                                        _subTipoRem = _remolque.HasAttribute("SubTipoRem") ? _remolque.GetAttribute("SubTipoRem").ToString() : "";
-                                                                                                        _placaRemolque = _remolque.HasAttribute("Placa") ? _remolque.GetAttribute("Placa").ToString() : "";
+                                                                                                    _subTipoRem = _remolque.HasAttribute("SubTipoRem") ? _remolque.GetAttribute("SubTipoRem").ToString() : "";
+                                                                                                    _placaRemolque = _remolque.HasAttribute("Placa") ? _remolque.GetAttribute("Placa").ToString() : "";
 
 
-                                                                                                    }
                                                                                                 }
                                                                                             }
                                                                                         }
@@ -1558,22 +1575,22 @@ namespace Facturafast.Controllers
                                                                         }
                                                                     }
                                                                 }
-                                                                else if (_cartaPorte.LocalName == "FiguraTransporte")
+                                                            }
+                                                            else if (_cartaPorte.LocalName == "FiguraTransporte")
+                                                            {
+                                                                foreach (var FiguraTrans in _cartaPorte.ChildNodes)
                                                                 {
-                                                                    foreach (var FiguraTrans in _cartaPorte.ChildNodes)
+                                                                    if (FiguraTrans.GetType() == typeof(XmlElement))
                                                                     {
-                                                                        if (FiguraTrans.GetType() == typeof(XmlElement))
+                                                                        var _tiposFigura = (FiguraTrans as XmlElement);
+                                                                        if (_tiposFigura.LocalName == "TiposFigura")
                                                                         {
-                                                                            var _tiposFigura = (FiguraTrans as XmlElement);
-                                                                            if (_tiposFigura.LocalName == "TiposFigura")
-                                                                            {
-                                                                                _tipoFigura = _tiposFigura.HasAttribute("TipoFigura") ? _tiposFigura.GetAttribute("TipoFigura").ToString() : "";
-                                                                                _rfcFigura = _tiposFigura.HasAttribute("RFCFigura") ? _tiposFigura.GetAttribute("RFCFigura").ToString() : "";
-                                                                                _numLicenciaFigura = _tiposFigura.HasAttribute("NumLicencia") ? _tiposFigura.GetAttribute("NumLicencia").ToString() : "";
-                                                                                _nombreFigura = _tiposFigura.HasAttribute("NombreFigura") ? _tiposFigura.GetAttribute("NombreFigura").ToString() : "";
+                                                                            _tipoFigura = _tiposFigura.HasAttribute("TipoFigura") ? _tiposFigura.GetAttribute("TipoFigura").ToString() : "";
+                                                                            _rfcFigura = _tiposFigura.HasAttribute("RFCFigura") ? _tiposFigura.GetAttribute("RFCFigura").ToString() : "";
+                                                                            _numLicenciaFigura = _tiposFigura.HasAttribute("NumLicencia") ? _tiposFigura.GetAttribute("NumLicencia").ToString() : "";
+                                                                            _nombreFigura = _tiposFigura.HasAttribute("NombreFigura") ? _tiposFigura.GetAttribute("NombreFigura").ToString() : "";
 
 
-                                                                            }
                                                                         }
                                                                     }
                                                                 }
@@ -1583,104 +1600,107 @@ namespace Facturafast.Controllers
                                                 }
                                             }
                                         }
-                                        if (_nodo.LocalName == "Emisor")
-                                        {
-                                            //!Emisor
-                                            _rfcEmisor = _nodo.HasAttribute("Rfc") ? _nodo.GetAttribute("Rfc").ToString() : "";
-                                            _nombreEmisor = _nodo.HasAttribute("Nombre") ? _nodo.GetAttribute("Nombre").ToString() : "";
-                                            _regimenFiscalEmisor = _nodo.HasAttribute("RegimenFiscal") ? _nodo.GetAttribute("RegimenFiscal").ToString() : "";
-                                        }
-                                        else if (_nodo.LocalName == "Receptor")
-                                        {
-                                            //!Receptor
-                                            _rfcReceptor = _nodo.HasAttribute("Rfc") ? _nodo.GetAttribute("Rfc").ToString() : "";
-                                            _nombreReceptor = _nodo.HasAttribute("Nombre") ? _nodo.GetAttribute("Nombre").ToString() : "";
-                                            _usoCFDI = _nodo.HasAttribute("UsoCFDI") ? _nodo.GetAttribute("UsoCFDI").ToString() : "";
-                                            _regimenFiscalReceptor = _nodo.HasAttribute("RegimenFiscalReceptor") ? _nodo.GetAttribute("RegimenFiscalReceptor").ToString() : "";
-                                            _domicilioFiscalReceptor = _nodo.HasAttribute("DomicilioFiscalReceptor") ? _nodo.GetAttribute("DomicilioFiscalReceptor").ToString() : "";
-                                        }
+                                    }
+                                    if (_nodo.LocalName == "Emisor")
+                                    {
+                                        //!Emisor
+                                        _rfcEmisor = _nodo.HasAttribute("Rfc") ? _nodo.GetAttribute("Rfc").ToString() : "";
+                                        _nombreEmisor = _nodo.HasAttribute("Nombre") ? _nodo.GetAttribute("Nombre").ToString() : "";
+                                        _regimenFiscalEmisor = _nodo.HasAttribute("RegimenFiscal") ? _nodo.GetAttribute("RegimenFiscal").ToString() : "";
+                                    }
+                                    else if (_nodo.LocalName == "Receptor")
+                                    {
+                                        //!Receptor
+                                        _rfcReceptor = _nodo.HasAttribute("Rfc") ? _nodo.GetAttribute("Rfc").ToString() : "";
+                                        _nombreReceptor = _nodo.HasAttribute("Nombre") ? _nodo.GetAttribute("Nombre").ToString() : "";
+                                        _usoCFDI = _nodo.HasAttribute("UsoCFDI") ? _nodo.GetAttribute("UsoCFDI").ToString() : "";
+                                        _regimenFiscalReceptor = _nodo.HasAttribute("RegimenFiscalReceptor") ? _nodo.GetAttribute("RegimenFiscalReceptor").ToString() : "";
+                                        _domicilioFiscalReceptor = _nodo.HasAttribute("DomicilioFiscalReceptor") ? _nodo.GetAttribute("DomicilioFiscalReceptor").ToString() : "";
+                                    }
 
-                                        else if (_nodo.LocalName == "Conceptos")
+                                    else if (_nodo.LocalName == "Conceptos")
+                                    {
+                                        foreach (var Conceptos in _nodo.ChildNodes)
                                         {
-                                            foreach (var Conceptos in _nodo.ChildNodes)
+                                            if (Conceptos.GetType() == typeof(XmlElement))
                                             {
-                                                if (Conceptos.GetType() == typeof(XmlElement))
+                                                var _concepto = (Conceptos as XmlElement);
+                                                if (_concepto.LocalName == "Concepto")
                                                 {
-                                                    var _concepto = (Conceptos as XmlElement);
-                                                    if (_concepto.LocalName == "Concepto")
-                                                    {
-                                                        tbd_Conceptos_Factura _conceptoFactura = new tbd_Conceptos_Factura();
-                                                        _conceptoFactura.c_pord_serv = _concepto.HasAttribute("ClaveProdServ") ? _concepto.GetAttribute("ClaveProdServ").ToString() : "";
-                                                        _conceptoFactura.cantidad = _concepto.HasAttribute("Cantidad") ? Convert.ToDecimal(_concepto.GetAttribute("Cantidad").ToString()) : 0;
-                                                        _conceptoFactura.c_unidad = _concepto.HasAttribute("ClaveUnidad") ? _concepto.GetAttribute("ClaveUnidad").ToString() : "";
-                                                        _conceptoFactura.unidad = _concepto.HasAttribute("Unidad") ? _concepto.GetAttribute("Unidad").ToString() : "";
-                                                        _conceptoFactura.descripcion = _concepto.HasAttribute("Descripcion") ? _concepto.GetAttribute("Descripcion").ToString() : "";
-                                                        _conceptoFactura.valor_unitario = _concepto.HasAttribute("ValorUnitario") ? Convert.ToDecimal(_concepto.GetAttribute("ValorUnitario").ToString()) : 0;
-                                                        _conceptoFactura.importe = _concepto.HasAttribute("Importe") ? Convert.ToDecimal(_concepto.GetAttribute("Importe").ToString()) : 0;
-                                                        _conceptoFactura.descuento = _concepto.HasAttribute("Descuento") ? Convert.ToDecimal(_concepto.GetAttribute("Descuento").ToString()) : 0;
+                                                    tbd_Conceptos_Factura _conceptoFactura = new tbd_Conceptos_Factura();
+                                                    _conceptoFactura.c_pord_serv = _concepto.HasAttribute("ClaveProdServ") ? _concepto.GetAttribute("ClaveProdServ").ToString() : "";
+                                                    _conceptoFactura.cantidad = _concepto.HasAttribute("Cantidad") ? Convert.ToDecimal(_concepto.GetAttribute("Cantidad").ToString()) : 0;
+                                                    _conceptoFactura.c_unidad = _concepto.HasAttribute("ClaveUnidad") ? _concepto.GetAttribute("ClaveUnidad").ToString() : "";
+                                                    _conceptoFactura.unidad = _concepto.HasAttribute("Unidad") ? _concepto.GetAttribute("Unidad").ToString() : "";
+                                                    _conceptoFactura.descripcion = _concepto.HasAttribute("Descripcion") ? _concepto.GetAttribute("Descripcion").ToString() : "";
+                                                    _conceptoFactura.valor_unitario = _concepto.HasAttribute("ValorUnitario") ? Convert.ToDecimal(_concepto.GetAttribute("ValorUnitario").ToString()) : 0;
+                                                    _conceptoFactura.importe = _concepto.HasAttribute("Importe") ? Convert.ToDecimal(_concepto.GetAttribute("Importe").ToString()) : 0;
+                                                    _conceptoFactura.descuento = _concepto.HasAttribute("Descuento") ? Convert.ToDecimal(_concepto.GetAttribute("Descuento").ToString()) : 0;
 
-                                                        conceptos.Add(_conceptoFactura);
-                                                    }
+                                                    conceptos.Add(_conceptoFactura);
                                                 }
                                             }
                                         }
                                     }
                                 }
-                                //Condicion                                
-                                tbd_Facturas factura = db.tbd_Facturas.Where(s => s.uuid == _uuid).SingleOrDefault();
-                                if (factura == null)
+                            }
+                            //Condicion                                
+                            tbd_Facturas factura = db.tbd_Facturas.Where(s => s.uuid == _uuid).SingleOrDefault();
+                            if (factura == null)
+                            {
+                                tbd_Facturas nuevaFactura = new tbd_Facturas();
+                                nuevaFactura.version_cfdi = _version;
+                                nuevaFactura.fecha_emision = _fechaEmision;
+                                nuevaFactura.tipo_cambio = _tipoCambio;
+                                nuevaFactura.serie = _serie;
+                                nuevaFactura.folio = _folio;
+                                nuevaFactura.lugar_expedicion = _lugarExpedicion;
+                                nuevaFactura.exportacion = _exportacion;
+                                nuevaFactura.moneda = _moneda;
+                                nuevaFactura.total_original = _total_original;
+
+                                tbc_Tipos_Comprobante tbc_Tipos_Comprobante = db.tbc_Tipos_Comprobante.Where(s => s.tipo_comprobante == _tipoComprobante).SingleOrDefault();
+                                nuevaFactura.id_tipo_comprobante = tbc_Tipos_Comprobante != null ? tbc_Tipos_Comprobante.id_tipo_comprobante : 1;
+
+                                tbc_Formas_Pago tbc_Formas_Pago = db.tbc_Formas_Pago.Where(s => s.clave == _formaPago).SingleOrDefault();
+                                nuevaFactura.id_forma_pago = tbc_Formas_Pago != null ? tbc_Formas_Pago.id_forma_pago : 1;
+
+                                tbc_Metodos_Pago tbc_Metodos_Pago = db.tbc_Metodos_Pago.Where(s => s.clave == _metodoPago).SingleOrDefault();
+                                nuevaFactura.id_metodo_pago = tbc_Metodos_Pago != null ? tbc_Metodos_Pago.id_metodo_pago : 1;
+
+                                nuevaFactura.uuid = _uuid;
+                                nuevaFactura.fecha_timbrado = _fechaTimbrado;
+                                nuevaFactura.certificado_sat = _certificadoSAT;
+                                nuevaFactura.sello_cfdi = _selloDigital;
+                                nuevaFactura.sello_sat = _selloSAT;
+
+                                nuevaFactura.rfc_emisor = _rfcEmisor;
+                                nuevaFactura.nombre_emisor = _nombreEmisor;
+
+                                tbc_Regimenes tbc_Regimenes = db.tbc_Regimenes.Where(s => s.clave == _regimenFiscalEmisor).SingleOrDefault();
+                                nuevaFactura.id_regimen_fiscal_emisor = tbc_Regimenes != null ? tbc_Regimenes.id_regimen_fiscal : 0;
+
+                                nuevaFactura.rfc_receptor = _rfcReceptor;
+                                nuevaFactura.nombre_receptor = _nombreReceptor;
+
+                                tbc_Usos_CFDI tbc_Usos_CFDI = db.tbc_Usos_CFDI.Where(s => s.clave == _usoCFDI).Single();
+                                nuevaFactura.id_uso_cfdi = tbc_Usos_CFDI != null ? tbc_Usos_CFDI.id_uso_cfdi : 13;
+
+                                tbc_Regimenes tbc_Regimenes_Receptor = db.tbc_Regimenes.Where(s => s.clave == _regimenFiscalReceptor).SingleOrDefault();
+                                nuevaFactura.id_regimen_fiscal_receptor = tbc_Regimenes_Receptor != null ? tbc_Regimenes_Receptor.id_regimen_fiscal : 0;
+
+                                nuevaFactura.domicio_fiscal_receptor = _domicilioFiscalReceptor;
+
+                                nuevaFactura.subtotal = _subtotal * _tipoCambio;
+                                nuevaFactura.total = _total_original * _tipoCambio;
+                                nuevaFactura.descuento = _descuento * _tipoCambio;
+
+                                String DirectoryFecha = _fechaTimbrado.ToString("yyyyMMdd") + "\\";
+                                //------------------------------ Buscar url -----------------------------
+                                var url_xml_ = 0;
+                                var r_xml = "";
+                                if (tipo != "Pago")
                                 {
-                                    tbd_Facturas nuevaFactura = new tbd_Facturas();
-                                    nuevaFactura.version_cfdi = _version;
-                                    nuevaFactura.fecha_emision = _fechaEmision;
-                                    nuevaFactura.tipo_cambio = _tipoCambio;
-                                    nuevaFactura.serie = _serie;
-                                    nuevaFactura.folio = _folio;
-                                    nuevaFactura.lugar_expedicion = _lugarExpedicion;
-                                    nuevaFactura.exportacion = _exportacion;
-                                    nuevaFactura.moneda = _moneda;
-                                    nuevaFactura.total_original = _total_original;
-
-                                    tbc_Tipos_Comprobante tbc_Tipos_Comprobante = db.tbc_Tipos_Comprobante.Where(s => s.tipo_comprobante == _tipoComprobante).SingleOrDefault();
-                                    nuevaFactura.id_tipo_comprobante = tbc_Tipos_Comprobante != null ? tbc_Tipos_Comprobante.id_tipo_comprobante : 1;
-
-                                    tbc_Formas_Pago tbc_Formas_Pago = db.tbc_Formas_Pago.Where(s => s.clave == _formaPago).SingleOrDefault();
-                                    nuevaFactura.id_forma_pago = tbc_Formas_Pago != null ? tbc_Formas_Pago.id_forma_pago : 1;
-
-                                    tbc_Metodos_Pago tbc_Metodos_Pago = db.tbc_Metodos_Pago.Where(s => s.clave == _metodoPago).SingleOrDefault();
-                                    nuevaFactura.id_metodo_pago = tbc_Metodos_Pago != null ? tbc_Metodos_Pago.id_metodo_pago : 1;
-
-                                    nuevaFactura.uuid = _uuid;
-                                    nuevaFactura.fecha_timbrado = _fechaTimbrado;
-                                    nuevaFactura.certificado_sat = _certificadoSAT;
-                                    nuevaFactura.sello_cfdi = _selloDigital;
-                                    nuevaFactura.sello_sat = _selloSAT;
-
-                                    nuevaFactura.rfc_emisor = _rfcEmisor;
-                                    nuevaFactura.nombre_emisor = _nombreEmisor;
-
-                                    tbc_Regimenes tbc_Regimenes = db.tbc_Regimenes.Where(s => s.clave == _regimenFiscalEmisor).SingleOrDefault();
-                                    nuevaFactura.id_regimen_fiscal_emisor = tbc_Regimenes != null ? tbc_Regimenes.id_regimen_fiscal : 0;
-
-                                    nuevaFactura.rfc_receptor = _rfcReceptor;
-                                    nuevaFactura.nombre_receptor = _nombreReceptor;
-
-                                    tbc_Usos_CFDI tbc_Usos_CFDI = db.tbc_Usos_CFDI.Where(s => s.clave == _usoCFDI).Single();
-                                    nuevaFactura.id_uso_cfdi = tbc_Usos_CFDI != null ? tbc_Usos_CFDI.id_uso_cfdi : 13;
-
-                                    tbc_Regimenes tbc_Regimenes_Receptor = db.tbc_Regimenes.Where(s => s.clave == _regimenFiscalReceptor).SingleOrDefault();
-                                    nuevaFactura.id_regimen_fiscal_receptor = tbc_Regimenes_Receptor != null ? tbc_Regimenes_Receptor.id_regimen_fiscal : 0;
-
-                                    nuevaFactura.domicio_fiscal_receptor = _domicilioFiscalReceptor;
-
-                                    nuevaFactura.subtotal = _subtotal * _tipoCambio;
-                                    nuevaFactura.total = _total_original * _tipoCambio;
-                                    nuevaFactura.descuento = _descuento * _tipoCambio;
-
-                                    String DirectoryFecha = _fechaTimbrado.ToString("yyyyMMdd") + "\\";
-                                    //------------------------------ Buscar url -----------------------------
-                                    var url_xml_ = 0;
-                                    var r_xml = "";
                                     url_xml_ = db.tbd_Cfdi_Uuid.Where(s => s.uuid == _uuid).Select(u => u.id_pre_factura).SingleOrDefault();
                                     if (url_xml_ == 0)
                                     {
@@ -1691,32 +1711,50 @@ namespace Facturafast.Controllers
                                     {
                                         r_xml = db.tbd_Pre_Pagos.Where(s => s.id_pre_factura == url_xml_).Select(u => u.url_xml).SingleOrDefault();
                                     }
-                                    //----------------------------------------------------------------------------------------------------------------------------- 
-                                    String Url_Almacen = Server.MapPath("~") + "\\" + r_xml;//variable.url_facturas + DirectoryFecha;
-                                    if (!Directory.Exists(Url_Almacen))
-                                        Directory.CreateDirectory(Url_Almacen); //! Directorio Por Fecha (yyyyMMdd) dependiendo de la fecha de timbrado
+                                }
+                                else {
+                                    r_xml = db.tbd_Pre_Pagos.Where(s => s.uuid == _uuid).Select(u => u.url_xml).SingleOrDefault();
+                                }
+                                
+                                //----------------------------------------------------------------------------------------------------------------------------- 
+                                String Url_Almacen = Server.MapPath("~") + "\\" + r_xml;//variable.url_facturas + DirectoryFecha;
+                                if (!Directory.Exists(Url_Almacen))
+                                    Directory.CreateDirectory(Url_Almacen); //! Directorio Por Fecha (yyyyMMdd) dependiendo de la fecha de timbrado
 
-                                    String Url_XML = Url_Almacen;//+ _uuid + ".xml";
+                                String Url_XML = Url_Almacen;//+ _uuid + ".xml";
 
-                                    nuevaFactura.url_xml = (DirectoryFecha + _uuid + ".xml").ToUpper();
-                                    nuevaFactura.fecha_creacion = DateTime.Now;
-                                    nuevaFactura.id_estatus = 5; //Vigente
-                                    nuevaFactura.fecha_validacion = DateTime.Now;
+                                nuevaFactura.url_xml = (DirectoryFecha + _uuid + ".xml").ToUpper();
+                                nuevaFactura.fecha_creacion = DateTime.Now;
+                                nuevaFactura.id_estatus = 5; //Vigente
+                                nuevaFactura.fecha_validacion = DateTime.Now;
 
-                                    if (nuevaFactura.rfc_emisor == rfc || nuevaFactura.rfc_receptor == rfc)
+                                if (nuevaFactura.rfc_emisor == rfc || nuevaFactura.rfc_receptor == rfc)
+                                {
+                                    try
                                     {
-                                        try
-                                        {
-                                            db.tbd_Facturas.Add(nuevaFactura);
+                                        db.tbd_Facturas.Add(nuevaFactura);
                                         //Add A PreFactura
                                         db.Configuration.LazyLoadingEnabled = false;
-                                        var prefac = db.tbd_Pre_Factura.ToList<tbd_Pre_Factura>().Where(u => u.id_pre_factura == id_prefac).FirstOrDefault();
-                                        prefac.selloSAT = nuevaFactura.sello_sat;
-                                        prefac.ccertificacion = nuevaFactura.certificado_sat;
-                                        prefac.version_timbrado = _versionTimbreFiscalDigital;
-                                        prefac.uuid = nuevaFactura.uuid;
-                                        prefac.selloCFDI = nuevaFactura.sello_cfdi;
-                                        prefac.fca_timbrado = nuevaFactura.fecha_timbrado;
+                                        if (tipo != "Pago")
+                                        {
+                                            var prefac = db.tbd_Pre_Factura.ToList<tbd_Pre_Factura>().Where(u => u.id_pre_factura == id_prefac).FirstOrDefault();
+                                            prefac.selloSAT = nuevaFactura.sello_sat;
+                                            prefac.ccertificacion = nuevaFactura.certificado_sat;
+                                            prefac.version_timbrado = _versionTimbreFiscalDigital;
+                                            prefac.uuid = nuevaFactura.uuid;
+                                            prefac.selloCFDI = nuevaFactura.sello_cfdi;
+                                            prefac.fca_timbrado = nuevaFactura.fecha_timbrado;
+                                        }
+                                        else {
+                                            var prefac = db.tbd_Pre_Pagos.ToList<tbd_Pre_Pagos>().Where(u => u.id == id_prefac).FirstOrDefault();
+                                            prefac.selloSAT = nuevaFactura.sello_sat;
+                                            prefac.ccertificacion = nuevaFactura.certificado_sat;
+                                            prefac.version_timbrado = _versionTimbreFiscalDigital;
+                                            prefac.uuid = nuevaFactura.uuid;
+                                            prefac.selloCFDI = nuevaFactura.sello_cfdi;
+                                            prefac.fca_timbrado = nuevaFactura.fecha_timbrado;
+                                        }
+                                        
                                         //--------------
                                         db.SaveChanges();
 
@@ -1725,74 +1763,74 @@ namespace Facturafast.Controllers
                                             item.id_factura = nuevaFactura.id_factura;
                                         }
 
-                                            db.tbd_Conceptos_Factura.AddRange(conceptos);
-                                            db.SaveChanges();
+                                        db.tbd_Conceptos_Factura.AddRange(conceptos);
+                                        db.SaveChanges();
 
-                                            //if (!File.Exists(Url_XML))
-                                            //{
-                                            //    file.SaveAs(Url_XML);
-                                            //}
+                                        //if (!File.Exists(Url_XML))
+                                        //{
+                                        //    file.SaveAs(Url_XML);
+                                        //}
 
-                                            //!Carta porte
-                                            if (_tipoComprobante == "T")
-                                            {
-                                                tbd_Carta_Porte carta = new tbd_Carta_Porte();
-                                                carta.trans_inter = _transpInter;
-                                                carta.total_dist_rec = Convert.ToDecimal(_totalDistancia);
-                                                carta.id_origen = _idUbicacionOrigen;
-                                                carta.rfc_origen = _rfcRemDesOrigen;
-                                                carta.nombre_razon_origen = _nombreRemDesOrigen;
-                                                carta.fecha_salida = _fechaHoraOrigen;
-                                                carta.direccion_origen = _direccionOrigen;
-                                                carta.id_destino = _idUbicacionDestino;
-                                                carta.rfc_destino = _rfcRemDesDestino;
-                                                carta.nombre_razon_destino = _nombreRemDesDestino;
-                                                carta.distancia_recorrida = Convert.ToDecimal(_distanciaRecorridaDestino);
-                                                carta.fecha_llegada = _fechaHoraDestino;
-                                                carta.direccion_destino = _direccionDestino;
-                                                carta.peso_bruto = Convert.ToDecimal(_pesoBrutoTotal);
-                                                carta.unidad_peso = _unidadPeso;
-                                                carta.num_mercancias = _numTotalMercancias;
-                                                carta.bienes_trans = _bienesTrans;
-                                                carta.descripcion = _descripcionMerca;
-                                                carta.cantidad = Convert.ToDecimal(_cantidadMerca);
-                                                carta.clave_unidad = _claveUnidadMerca;
-                                                carta.unidad = _unidadMerca;
-                                                carta.peso_kg = Convert.ToDecimal(_pesoKG);
-                                                carta.permiso_sct = _permSCT;
-                                                carta.num_permiso_sct = _numPermisoSCT;
-                                                carta.config_vehicular = _configVehivular;
-                                                carta.placa = _placaVM;
-                                                carta.modelo = _anioModelo;
-                                                carta.asegura_resp_civil = _aseguraRespCivil;
-                                                carta.poliza_resp_civil = _polizaRespCivil;
-                                                carta.sub_tipo_remolque = _subTipoRem;
-                                                carta.placa_remolque = _placaRemolque;
-                                                carta.tipo_figura = _tipoFigura;
-                                                carta.rfc_figura = _rfcFigura;
-                                                carta.num_licencia = _numLicenciaFigura;
-                                                carta.nomnre_figura = _nombreFigura;
-                                                carta.id_factura = nuevaFactura.id_factura;
-                                                carta.url_pdf = "";
-                                                db.tbd_Carta_Porte.Add(carta);
-                                                db.SaveChanges();
-                                            }
-
-                                        }
-                                        catch (Exception ex)
+                                        //!Carta porte
+                                        if (_tipoComprobante == "T")
                                         {
-                                            tbd_Log_Errores error = new tbd_Log_Errores();
-                                            error.fecha = DateTime.Now;
-                                            error.funcion = "LecturaXML";
-                                            error.mensaje = ex.Message; //+ "[" + file.FileName + "]";
-                                            db.tbd_Log_Errores.Add(error);
+                                            tbd_Carta_Porte carta = new tbd_Carta_Porte();
+                                            carta.trans_inter = _transpInter;
+                                            carta.total_dist_rec = Convert.ToDecimal(_totalDistancia);
+                                            carta.id_origen = _idUbicacionOrigen;
+                                            carta.rfc_origen = _rfcRemDesOrigen;
+                                            carta.nombre_razon_origen = _nombreRemDesOrigen;
+                                            carta.fecha_salida = _fechaHoraOrigen;
+                                            carta.direccion_origen = _direccionOrigen;
+                                            carta.id_destino = _idUbicacionDestino;
+                                            carta.rfc_destino = _rfcRemDesDestino;
+                                            carta.nombre_razon_destino = _nombreRemDesDestino;
+                                            carta.distancia_recorrida = Convert.ToDecimal(_distanciaRecorridaDestino);
+                                            carta.fecha_llegada = _fechaHoraDestino;
+                                            carta.direccion_destino = _direccionDestino;
+                                            carta.peso_bruto = Convert.ToDecimal(_pesoBrutoTotal);
+                                            carta.unidad_peso = _unidadPeso;
+                                            carta.num_mercancias = _numTotalMercancias;
+                                            carta.bienes_trans = _bienesTrans;
+                                            carta.descripcion = _descripcionMerca;
+                                            carta.cantidad = Convert.ToDecimal(_cantidadMerca);
+                                            carta.clave_unidad = _claveUnidadMerca;
+                                            carta.unidad = _unidadMerca;
+                                            carta.peso_kg = Convert.ToDecimal(_pesoKG);
+                                            carta.permiso_sct = _permSCT;
+                                            carta.num_permiso_sct = _numPermisoSCT;
+                                            carta.config_vehicular = _configVehivular;
+                                            carta.placa = _placaVM;
+                                            carta.modelo = _anioModelo;
+                                            carta.asegura_resp_civil = _aseguraRespCivil;
+                                            carta.poliza_resp_civil = _polizaRespCivil;
+                                            carta.sub_tipo_remolque = _subTipoRem;
+                                            carta.placa_remolque = _placaRemolque;
+                                            carta.tipo_figura = _tipoFigura;
+                                            carta.rfc_figura = _rfcFigura;
+                                            carta.num_licencia = _numLicenciaFigura;
+                                            carta.nomnre_figura = _nombreFigura;
+                                            carta.id_factura = nuevaFactura.id_factura;
+                                            carta.url_pdf = "";
+                                            db.tbd_Carta_Porte.Add(carta);
                                             db.SaveChanges();
                                         }
+
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        tbd_Log_Errores error = new tbd_Log_Errores();
+                                        error.fecha = DateTime.Now;
+                                        error.funcion = "LecturaXML";
+                                        error.mensaje = ex.Message; //+ "[" + file.FileName + "]";
+                                        db.tbd_Log_Errores.Add(error);
+                                        db.SaveChanges();
                                     }
                                 }
                             }
                         }
                     }
+                }
                 //}
                 //catch (Exception ex)
                 //{

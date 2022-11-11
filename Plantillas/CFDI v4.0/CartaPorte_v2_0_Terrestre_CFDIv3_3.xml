@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/3"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:cartaporte20="http://www.sat.gob.mx/CartaPorte20"
+xsi:schemaLocation="http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv33.xsd
+                    http://www.sat.gob.mx/CartaPorte20 http://www.sat.gob.mx/sitio_internet/cfd/CartaPorte/CartaPorte20.xsd"
+Version="[VersionCFDI]"
+Serie="[Serie]"
+Folio="[Folio]"
+Fecha="[Fecha]" 
+Sello="e"
+CondicionesDePago="[CondicionesDePago]"
+SubTotal="[SubTotal]"
+Descuento="[Descuento]" 
+Moneda="[c_Moneda]"
+FormaPago="[c_FormaPago]"   
+TipoCambio="[TipoCambio]" Total="[Total]" 
+TipoDeComprobante="[c_TipoDeComprobante]" Exportacion="[c_Exportacion]" MetodoPago="[c_MetodoPago]" LugarExpedicion="[c_CodigoPostal]"
+>
+<cfdi:Emisor Rfc="[Emisor_Rfc]" Nombre="[Emisor_Nombre]" RegimenFiscal="[c_RegimenFiscal]"/>
+<cfdi:Receptor Rfc="[Receptor_Rfc]" Nombre="[Receptor_Nombre]" DomicilioFiscalReceptor="[CP_DomicilioFiscalReceptor]"  RegimenFiscalReceptor="[c_RegimenFiscalReceptor]" UsoCFDI="[c_UsoCFDI]"/>
+    <cfdi:Conceptos>
+        <cfdi:Concepto ClaveProdServ="[c_ClaveProdServ]" Cantidad="[ConceptoCantidad]" ClaveUnidad="[c_ClaveUnidad]" Unidad="[Unidad]" Descripcion="[ConceptoDescripcion]" ValorUnitario="[ConceptoValorUnitario]" Importe="[ConceptoImporte]" Descuento="[ConceptoDescuento]" ObjetoImp="[c_ObjetoImp]">
+            <cfdi:ConceptoImpuestos>
+                <cfdi:ConceptoTraslados>
+                    <cfdi:ConceptoTraslado Base="[ConceptoTrasladoBase]" Impuesto="[ConceptoTraslado_c_Impuesto]" TipoFactor="[ConceptoTraslado_c_TipoFactor]" TasaOCuota="[ConceptoTrasladoTasaOCuota]" Importe="[ConceptoTrasladoImporte]"/>
+                </cfdi:ConceptoTraslados>
+                <cfdi:ConceptoRetenciones>
+                    <cfdi:ConceptoRetencion Base="[ConceptoRetencionBase]" Impuesto="[ConceptoRetencion_c_Impuesto]" TipoFactor="[ConceptoRetencion_c_TipoFactor]" TasaOCuota="[ConceptoRetencionTasaOCuota]" Importe="[ConceptoRetencionImporte]"/>
+                </cfdi:ConceptoRetenciones>
+            </cfdi:ConceptoImpuestos>
+        </cfdi:Concepto>
+    </cfdi:Conceptos>
+   <cfdi:Impuestos TotalImpuestosRetenidos="[TotalImpuestosRetenidos]" TotalImpuestosTrasladados="[TotalImpuestosTrasladados]">
+        <cfdi:Retenciones>
+            <cfdi:Retencion Impuesto="[Retencion_c_Impuesto]" Importe="[RetencionImporte]"/>
+        </cfdi:Retenciones>
+        <cfdi:Traslados>
+            <cfdi:Traslado Base="[Traslado_Base]" Impuesto="[Traslado_c_Impuesto]" TipoFactor="[Traslado_c_TipoFactor]" TasaOCuota="[TrasladoTasaOCuota]" Importe="[TrasladoImporte]"/>
+        </cfdi:Traslados>
+    </cfdi:Impuestos>
+    <cfdi:Complemento>
+        <!-- Carta Porte v2.0 .- Complemento para incorporar al CFDI, la información relacionada al transporte de bienes o mercancías desde el origen, puntos intermedios y destino. -->
+        <cartaporte20:CartaPorte Version="[CP_Version]" TranspInternac="[CP_TranspInternac]" TotalDistRec="[CP_TotalDistRec]">
+            <cartaporte20:Ubicaciones>
+                <cartaporte20:Ubicacion TipoUbicacion="[U_TipoUbicacion]" IDUbicacion="[U_IDUbicacion]" RFCRemitenteDestinatario="[U_RFCRemitenteDestinatario]" FechaHoraSalidaLlegada="[U_FechaHoraSalidaLlegada]" >
+                    <cartaporte20:Domicilio Calle="[U_Dom_Calle]" NumeroExterior="[U_Dom_NumeroExterior]" Colonia="[U_Dom_Colonia]" Localidad="[U_Dom_Localidad]" Referencia="[U_Dom_Referencia]" Municipio="[U_Dom_Municipio]" Estado="[U_Dom_Estado]" Pais="[U_Dom_c_Pais]" CodigoPostal="[U_Dom_CodigoPostal]"/>
+                </cartaporte20:Ubicacion>
+            </cartaporte20:Ubicaciones>
+            <cartaporte20:Mercancias PesoBrutoTotal="[M_PesoBrutoTotal]" UnidadPeso="[M_c_ClaveUnidadPeso]" PesoNetoTotal="[M_PesoNetoTotal]" NumTotalMercancias="[M_NumTotalMercancias]">
+                <cartaporte20:Mercancia BienesTransp="[Mer_c_ClaveProdServCP]" Descripcion="[Mer_Descripcion]" Cantidad="[Mer_Cantidad]" ClaveUnidad="[Mer_c_ClaveUnidad]" Dimensiones="[Mer_Dimensiones]" MaterialPeligroso="[Mer_MaterialPeligroso]" CveMaterialPeligroso="[Mer_c_MaterialPeligroso]" Embalaje="[Mer_c_TipoEmbalaje]" PesoEnKg="[Mer_PesoEnKg]">
+                    <cartaporte20:CantidadTransporta Cantidad="[Mer_CT_Cantidad]" IDOrigen="[Mer_CT_IDOrigen]" IDDestino="[Mer_CT_IDDestino]"/>
+                </cartaporte20:Mercancia>
+                <cartaporte20:Autotransporte PermSCT="[ATF_c_TipoPermiso]" NumPermisoSCT="[ATF_NumPermisoSCT]">
+                    <cartaporte20:IdentificacionVehicular ConfigVehicular="[ATF_IV_c_ConfigAutotransporte]" PlacaVM="[ATF_IV_PlacaVM]" AnioModeloVM="[ATF_IV_AnioModeloVM]"/>
+                    <cartaporte20:Seguros AseguraRespCivil="[ATF_Seg_AseguraRespCivil]" PolizaRespCivil="[ATF_Seg_PolizaRespCivil]" AseguraMedAmbiente="[ATF_Seg_AseguraMedAmbiente]" PolizaMedAmbiente="[ATF_Seg_PolizaMedAmbiente]" AseguraCarga="[ATF_Seg_AseguraCarga]" />
+                    <cartaporte20:Remolques>
+                        <cartaporte20:Remolque SubTipoRem="[ATF_Rem_c_SubTipoRem]" Placa="[ATF_Rem_Placa]"/>
+                    </cartaporte20:Remolques>
+                </cartaporte20:Autotransporte>
+            </cartaporte20:Mercancias>
+            <cartaporte20:FiguraTransporte>
+                <cartaporte20:TiposFigura TipoFigura="[FTT_TipoFigura]" RFCFigura="[FTT_RFCFigura]" NumLicencia="[FTT_NumLicencia]">
+                </cartaporte20:TiposFigura>
+            </cartaporte20:FiguraTransporte>
+        </cartaporte20:CartaPorte>
+    </cfdi:Complemento>
+</cfdi:Comprobante>

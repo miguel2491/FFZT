@@ -140,7 +140,7 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer" id="mdl_f">
 
             </div>
         </div>
@@ -161,8 +161,8 @@
                     <div class="row">
                         <div class='col-md-6'>
                             <div class="form-floating mb-3">
-                                <input type="text" class="form-control form-control-lg" disabled id="txtFolioFiscal" placeholder="UUID">
-                                <label for="txtUnidad">UUID</label>
+                                <input type="text" class="form-control form-control-lg" disabled id="txtFolioFiscal" placeholder="Folio Fiscal">
+                                <label for="txtUnidad">Folio Fiscal</label>
                             </div>
                         </div>
                         <div class='col-md-6'>
@@ -179,7 +179,7 @@
                         <div class='col-md-6' id='folioDiv'>
                             <div class="form-floating mb-3">
                                 <input type='text' class='form-control form-control-lg' id='folio_'>
-                                <label for="folio_">Folio</label>
+                                <label for="folio_">UUID Relacionado</label>
                             </div>
                         </div>
                     </div>
@@ -247,7 +247,7 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer" id="mdl_fo">
                 
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnCerrar"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
             </div>
@@ -267,11 +267,10 @@
         filtrar();
         //-----------------
         $('#modalCancelar').on('show.bs.modal', function (event) {
-            $('.modal-footer').css('display', 'none');
-            abrirCargando();
+            //abrirCargando();
             var myVal = $(event.relatedTarget).data('id');
             var tipo = $(event.relatedTarget).data('tipo');
-            if (tipo == "Estatus") {                
+            if (tipo == "Estatus") {
                 $.get("@Url.Action("getStatusXML", "CartaPorte")?id=" + myVal, async function (data) {
                     console.log(data);
                     var dd = data.split("|");
@@ -279,7 +278,7 @@
                     $('.dmensaje').css('display', 'block');
                     $('.delimina').css('display', 'none');
                     $('.dbtn').css('display', 'none');
-                    cerrarCargando();
+                    //cerrarCargando();
                     if (dd[0] == "S")
                     {
                         $('.dmensaje').append("<div class='row'>" +
@@ -292,13 +291,16 @@
             }
             else
             {
+                $('.dbtn').css('display', 'block');
                 $('.dmensaje').css('display', 'none');
                 $('.delimina').css('display', 'block');
                 consultarfolio(myVal);
+                //cerrarCargando();
             }
             $(this).find("#id_factura").val(myVal);
         });
         getFirma();
+        
     });
 
     function deletePreFactura(id)
@@ -317,7 +319,7 @@
             data: JSON.stringify({ 'id_': id }),
             success: function (data) {
                 var response = data;
-                $('#modalPreFactura').modal('hide');
+                //$('#modalPreFactura').modal('hide');
                 console.log(response);
             },
             error: function (jqXHR, textStatus, errorThrown) {
@@ -330,6 +332,7 @@
     {
          bootstrap.Modal.getOrCreateInstance(document.getElementById("modalTimbrado")).show();
         $.get("@Url.Action("getFacturas", "Facturacion")?id=" + id, async function (data) {
+            $(".modal-footer").css('display','flex');
             $("#idprefac_modal").val(id);
             $("#correo_cliente").val(data[0].correo);
             $("#forma_pago").val(data[0].forma_pago);
@@ -339,8 +342,8 @@
             $("#rfc_receptor").val(data[0].n_rfc);
             $("#razon_recpetor").val(data[0].rfc);
             var f_pdf = data[0].url_pdf;
-            var f_doc = data[0].url_xml;            
-            $(".modal-footer").html('<button class="btn btn-primary" onclick=sendcorreo()><i class="fas fa-envelope"></i>&nbsp; Enviar Correo</button>' +
+            var f_doc = data[0].url_xml;
+            $("#mdl_f").html('<button class="btn btn-primary" onclick=sendcorreo()><i class="fas fa-envelope"></i>&nbsp; Enviar Correo</button>' +
                 '<a target="_blank" class="btn btn-success" href="../Plantillas/' + f_pdf + '"><i class="fas fa-file"></i>&nbsp; Descargar PDF</button>' +
                 '<a class="btn btn-info" href="../Plantillas/' + f_doc + '"><i class="fas fa-file"></i>&nbsp; Descargar XML</button>');
         });
@@ -368,7 +371,7 @@
                 {
                     var estatus = data[x].status == 1 ? '<span class="badge btn-primary"><i class="fa fa-times"></i>  Sin Timbradar</span>' : data[x].status == 2 ? '<span class="badge btn-warning"><i class="fa fa-check-circle"></i>  Timbrada</span>' : data[x].status == 3 ? '<span class="badge btn-danger"><i class="fa fa-times"></i>  Cancelada</span>':'';
                     var op_editar = '<a href="../Facturacion/Factura?id=' + data[x].id + '" class="btn btn-warning btn-sm icon-edit" title="Editar"><i class="fas fa-edit"></i></a>';
-                    var op_ver = '<a href="../Facturacion/TimbrarFac?id='+data[x].id+'" class="btn btn-info btn-sm icon-preview" title="Preview"><i class="fas fa-eye"></i></a>';
+                    var op_ver = '<a href="../Facturacion/TimbrarFac?id='+data[x].id+'" class="btn btn-info btn-sm" title="Preview"><i class="fas fa-eye"></i></a>';
                     var op_del = '<a href="#" class="btn btn-danger btn-sm icon-delete" title="Eliminar"><i class="fas fa-trash"></i></a>';
                     let send_c = '<a href="#" class="btn btn-info btn-sm icon-send" data-bs-toggle="modal" data-bs-target="#modalPreFac" onclick="envPreFac(' + data[x].id + ')" title="Enviar"><i class="fas fa-share"></i></a>';
                     let g_xml = data[x].status == 2 ? '<a href="#" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalCancelar" data-id="' + data[x].id + '" data-tipo="Cancelacion" title="Cancelar XML"><i class="fas fa-window-close"></i></a>' : data[x].status == 3 ? '<a href="#" data-bs-toggle="modal" data-bs-target="#modalCancelar" data-tipo="Estatus" data-id="' + data[x].id + '" class="btn btn-success btn-sm"><i class="fas fa-receipt"></i></a>' : '';
@@ -383,17 +386,17 @@
                             4:data[x].forma_pago,
                             5:data[x].clave_uso_cfdi,
                             6: formatoMoneda(data[x].total),
-                            7:data[x].fecha_emision,
+                            7: data[x].fecha_emision,
                             8:estatus
                         }
                     );
-                    t.columns.adjust().draw(false);                    
-                }                
+                    t.columns.adjust().draw(false);
+                }
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 console.log(data);
             }
-         });        
+        });
     }
 
     function sTipoMotivo() {
@@ -472,6 +475,7 @@
         $.get("@Url.Action("getFacturas", "Facturacion")?id=" + id, async function (data) {
             console.log(data[0]);
             console.log(data[0].fpago);
+            $(".modal-footer").css('display', 'flex');
             $("#idprefac_modal_").val(data[0].id);
             $("#correo_cliente_").val(data[0].correo);
             $("#forma_pago_").val(data[0].fpago);
@@ -480,8 +484,7 @@
             $("#total_").val(data[0].total);
             $("#rfc_receptor_").val(data[0].rfc);
             $("#razon_recpetor_").val(data[0].n_rfc);
-            $(".modal-footer").css('display', 'flex');
-            $(".modal-footer").html('<button class="btn btn-primary" onclick=sendcorreo()><i class="fas fa-envelope"></i>&nbsp; Enviar Correo</button>' +
+            $("#mdl_fo").html('<button class="btn btn-primary" onclick=sendcorreo()><i class="fas fa-envelope"></i>&nbsp; Enviar Correo</button>' +
                 '<a target="_blank" class="btn btn-success" href="../Plantillas/' + data[0].url_pdf + '"><i class="fas fa-file"></i>&nbsp; Descargar PDF</a>' +
                 '<a class="btn btn-info" href="../Plantillas/' + data[0].url_xml + '"><i class="fas fa-file"></i>&nbsp; Descargar XML</a>');
         });

@@ -30,8 +30,8 @@
                     </thead>
                     <tbody>
                         @foreach (var item in Model)
-                            {
-                                tbr_Vendedor_Cliente vendedor = db.tbr_Vendedor_Cliente.Where(s => s.id_cliente_usuario == item.id_usuario).Single();
+                        {
+                            tbr_Vendedor_Cliente vendedor = db.tbr_Vendedor_Cliente.Where(s => s.id_cliente_usuario == item.id_usuario).Single();
 
                             <tr>
                                 <td></td>
@@ -46,8 +46,8 @@
                                             </td>
                                         </tr>
                                     </table>
-                                    
-                                   
+
+
                                 </td>
                                 <td>@item.usuario</td>
                                 <td>@item.nombre_razon</td>
@@ -161,7 +161,7 @@
 
         $.get("@Url.Action("obtenerVendedores", "Administracion")", async function (data) {
             $("#cmbVendedor").html(data);
-        });        
+        });
     });
 
     function validateForm() {
@@ -169,7 +169,7 @@
         if (rfc != "") {
 
             if ($("#txtUsuario").hasClass("is-invalid")) {
-                notificacionAlert("El Usuario " + $("#txtUsuario").val() + " ya existe.", "danger");                
+                notificacionAlert("El Usuario " + $("#txtUsuario").val() + " ya existe.", "danger");
                 return false;
             }
 
@@ -179,7 +179,7 @@
                 return true;
             }
             else {
-                notificacionAlert("El Usuario no cumple con la validación requerida.", "danger");                
+                notificacionAlert("El Usuario no cumple con la validación requerida.", "danger");
                 $("#txtUsuario").addClass("is-invalid");
                 return false;
             }

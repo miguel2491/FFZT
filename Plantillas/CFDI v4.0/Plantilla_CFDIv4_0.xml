@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:iedu="http://www.sat.gob.mx/iedu"
+xmlns:implocal="http://www.sat.gob.mx/implocal"
+xmlns:divisas="http://www.sat.gob.mx/divisas"
+xmlns:donat="http://www.sat.gob.mx/donat"
+xmlns:pfic="http://www.sat.gob.mx/pfic"
+xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd
+                    http://www.sat.gob.mx/iedu http://www.sat.gob.mx/sitio_internet/cfd/iedu/iedu.xsd
+                    http://www.sat.gob.mx/implocal http://www.sat.gob.mx/sitio_internet/cfd/implocal/implocal.xsd
+                    http://www.sat.gob.mx/divisas http://www.sat.gob.mx/sitio_internet/cfd/divisas/divisas.xsd
+                    http://www.sat.gob.mx/donat http://www.sat.gob.mx/sitio_internet/cfd/donat/donat11.xsd
+                    http://www.sat.gob.mx/pfic http://www.sat.gob.mx/sitio_internet/cfd/pfic/pfic.xsd"
+    Version="[VersionCFDI]" PAC="[PAC]" URL="[URL]" Usuario="[Usuario]" Clave="[Clave]"
+    Serie="[Serie]" Folio="[Folio]" Fecha="[Fecha]" FormaPago="[c_FormaPago]"
+    CondicionesDePago="[CondicionesDePago]" SubTotal="[SubTotal]" Descuento="[Descuento]"
+    Moneda="[c_Moneda]" TipoCambio="[TipoCambio]" Total="[Total]" TipoDeComprobante="[c_TipoDeComprobante]"
+    Exportacion="[c_Exportacion]" MetodoPago="[c_MetodoPago]" LugarExpedicion="[c_CodigoPostal]" 
+    Confirmacion="[Confirmacion]">
+    <cfdi:InformacionGlobal Periodicidad="[c_Periodicidad]" Meses="[c_Meses]" Anio="[Año]"/>
+    <cfdi:CfdiRelacionados TipoRelacion="[c_TipoRelacion]">
+        <cfdi:CfdiRelacionado UUID="[UUID_Relacionado]"/>
+    </cfdi:CfdiRelacionados>
+    <cfdi:Emisor Rfc="[Emisor_Rfc]" Nombre="[Emisor_Nombre]" RegimenFiscal="[c_RegimenFiscalEmisor]" FacAtrAdquirente="[FacAtrAdquirente]"/>
+    <cfdi:Receptor Rfc="[Receptor_Rfc]" Nombre="[Receptor_Nombre]" DomicilioFiscalReceptor="[CP_DomicilioFiscalReceptor]" ResidenciaFiscal="[c_Pais]" NumRegIdTrib="[NumRegIdTrib]" RegimenFiscalReceptor="[c_RegimenFiscalReceptor]" UsoCFDI="[c_UsoCFDI]"/>
+    <cfdi:Conceptos>
+        <cfdi:Concepto ClaveProdServ="[c_ClaveProdServ]" NoIdentificacion="[NoIdentificacion]" Cantidad="[ConceptoCantidad]" ClaveUnidad="[c_ClaveUnidad]" Unidad="[Unidad]" Descripcion="[ConceptoDescripcion]" ValorUnitario="[ConceptoValorUnitario]" Importe="[ConceptoImporte]" Descuento="[ConceptoDescuento]" ObjetoImp="[c_ObjetoImp]">
+            <cfdi:ConceptoImpuestos>
+                <cfdi:ConceptoTraslados>
+                    <cfdi:ConceptoTraslado Base="[ConceptoTrasladoBase]" Impuesto="[ConceptoTraslado_c_Impuesto]" TipoFactor="[ConceptoTraslado_c_TipoFactor]" TasaOCuota="[ConceptoTrasladoTasaOCuota]" Importe="[ConceptoTrasladoImporte]"/>
+                </cfdi:ConceptoTraslados>
+                <cfdi:ConceptoRetenciones>
+                    <cfdi:ConceptoRetencion Base="[ConceptoRetencionBase]" Impuesto="[ConceptoRetencion_c_Impuesto]" TipoFactor="[ConceptoRetencion_c_TipoFactor]" TasaOCuota="[ConceptoRetencionTasaOCuota]" Importe="[ConceptoRetencionImporte]"/>
+                </cfdi:ConceptoRetenciones>
+            </cfdi:ConceptoImpuestos>
+            <cfdi:ACuentaTerceros RfcACuentaTerceros="[RfcACuentaTerceros]" NombreACuentaTerceros="[NombreACuentaTerceros]" RegimenFiscalACuentaTerceros="[c_RegimenFiscalACuentaTerceros]" DomicilioFiscalACuentaTerceros="[CP_DomicilioFiscalACuentaTerceros]"/>
+            <cfdi:InformacionAduanera NumeroPedimento="[NumeroPedimento]"/>
+            <cfdi:CuentaPredial Numero="[CuentaPredial]"/>
+            <cfdi:ComplementoConcepto>
+                <iedu:instEducativas version="[ieduversion]" nombreAlumno="[iedunombreAlumno]" CURP="[ieducurp]" nivelEducativo="[iedunivelEducativo]" autRVOE="[ieduautRVOE]" rfcPago="[iedurfcpago]"/>
+            </cfdi:ComplementoConcepto>
+        </cfdi:Concepto>
+    </cfdi:Conceptos>
+    <cfdi:Impuestos TotalImpuestosRetenidos="[TotalImpuestosRetenidos]" TotalImpuestosTrasladados="[TotalImpuestosTrasladados]">
+        <cfdi:Retenciones>
+            <cfdi:Retencion Impuesto="[Retencion_c_Impuesto]" Importe="[RetencionImporte]"/>
+        </cfdi:Retenciones>
+        <cfdi:Traslados>
+            <cfdi:Traslado Base="[Traslado_Base]" Impuesto="[Traslado_c_Impuesto]" TipoFactor="[Traslado_c_TipoFactor]" TasaOCuota="[TrasladoTasaOCuota]" Importe="[TrasladoImporte]"/>
+        </cfdi:Traslados>
+    </cfdi:Impuestos>
+    <cfdi:Complemento>
+        <!-- ImpuestosLocales.- Complemento al CFDI para Impuestos Locales. -->
+        <implocal:ImpuestosLocales version="1.0" TotaldeRetenciones="[ImpLocalTotReten]" TotaldeTraslados="[ImpLocalTotTras]">
+                <implocal:RetencionesLocales ImpLocRetenido="[NombreImpLocRetenido]" TasadeRetencion="[PorcentImpLocRetenido]" Importe="[ImporteImpLocRetenido]"/>
+                <implocal:TrasladosLocales ImpLocTrasladado="[NombreImpLocTrasladado]" TasadeTraslado="[PorcentImpLocTrasladado]" Importe="[ImporteImpLocTrasladado]"/>
+        </implocal:ImpuestosLocales>
+        <!-- Divisas.- Complemento al CFDI para identificar las operaciones de compra y venta de divisas. -->
+        <divisas:Divisas version="[versionDivisas]" tipoOperacion="[tipoOperacion]" />
+        <!-- Donatarias.- Complemento al CFDI para incluir informacion de las organizaciones civiles o fideicomisos autorizados para recibir donativos. -->
+        <donat:Donatarias version="[versionDonatarias]" noAutorizacion="[noAutorizacion]" fechaAutorizacion="[fechaAutorizacion]" leyenda="[leyenda]" />
+        <!-- PFintegranteCoordinado.- Complemento al CFDI para identificar vehiculos de personas fisicas integrantes de coordinados. -->
+        <pfic:PFintegranteCoordinado version="[versionPF]" ClaveVehicular="[ClaveVehicular]" Placa="[Placa]" RFCPF="[RFCPF]"/>      
+    </cfdi:Complemento>
+    <cfdi:Addenda nombreAddenda="[nombreAddenda]" RutadelaAddenda="[RutadelaAddenda]"> </cfdi:Addenda>
+</cfdi:Comprobante>

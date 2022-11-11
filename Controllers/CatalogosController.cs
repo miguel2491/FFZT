@@ -42,7 +42,7 @@ namespace Facturafast.Controllers
             string _direccionFiscal = formCollection["txtDireccionFiscalCliente"];
             int _idUsoCFDI = Convert.ToInt32(formCollection["cmbUsoCFDICliente"]);
             int _idRegimenFiscal = Convert.ToInt32(formCollection["cmbRegimenFiscal"]);
-            int _codigoPostal= Convert.ToInt32(formCollection["txtCodigoPostal"]);
+            int _codigoPostal = Convert.ToInt32(formCollection["txtCodigoPostal"]);
 
             _nombreRazon = _nombreRazon.Replace("\r\n", "").Replace("\n", "").Replace("\r", "");
 
@@ -1031,6 +1031,19 @@ namespace Facturafast.Controllers
             }
             return str;
         }
+
+        public String obtenerFormaPagoCP()
+        {
+            db = new BD_FFEntities();
+            var lista = db.tbc_Formas_Pago.Where(s=>s.clave != "99").ToList();
+            String str = "";
+            foreach (var item in lista)
+            {
+                str += "<option value='" + item.id_forma_pago + "'>" + item.clave + " - " + item.forma_pago + "</option>";
+            }
+            return str;
+        }
+
 
         public String obtenerMetodoPago()
         {

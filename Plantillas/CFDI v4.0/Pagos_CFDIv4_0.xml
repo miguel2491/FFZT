@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:pago20="http://www.sat.gob.mx/Pagos20"
+xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd
+                    http://www.sat.gob.mx/Pagos20 http://www.sat.gob.mx/sitio_internet/cfd/Pagos/Pagos20.xsd"
+    Version="[VersionCFDI]" PAC="[PAC]" URL="[Url]" Usuario="[Usuario]" Clave="[Clave]"
+    Serie="[Serie]" Folio="[Folio]" Fecha="[Fecha]" SubTotal="[SubTotal]"
+    Moneda="[c_Moneda]" Total="[Total]" TipoDeComprobante="[c_TipoDeComprobante]"
+    Exportacion="[c_Exportacion]" LugarExpedicion="[c_CodigoPostal]" 
+    Confirmacion="[Confirmacion]">
+    <cfdi:CfdiRelacionados TipoRelacion="[c_TipoRelacion]">
+        <cfdi:CfdiRelacionado UUID="[UUID_Relacionado]"/>
+    </cfdi:CfdiRelacionados>
+    <cfdi:Emisor Rfc="[Emisor_Rfc]" Nombre="[Emisor_Nombre]" RegimenFiscal="[c_RegimenFiscal]"/>
+    <cfdi:Receptor Rfc="[Receptor_Rfc]" Nombre="[Receptor_Nombre]" DomicilioFiscalReceptor="[CP_DomicilioFiscalReceptor]" RegimenFiscalReceptor="[c_RegimenFiscalReceptor]" UsoCFDI="[c_UsoCFDI]"/>
+    <cfdi:Conceptos>
+        <cfdi:Concepto ClaveProdServ="[c_ClaveProdServ]" Cantidad="[ConceptoCantidad]" ClaveUnidad="[c_ClaveUnidad]" Descripcion="[ConceptoDescripcion]" ValorUnitario="[ConceptoValorUnitario]" Importe="[ConceptoImporte]" Descuento="[ConceptoDescuento]" ObjetoImp="[c_ObjetoImp]"/>
+    </cfdi:Conceptos>
+    <cfdi:Complemento>
+        <!-- Pagos v2.0.- Complemento para registrar información sobre la recepción de pago -->
+        <pago20:Pagos Version="[VersionPagos]">
+            <pago20:Totales TotalRetencionesIVA="[TotalRetencionesIVA]" TotalRetencionesISR="[TotalRetencionesISR]" TotalRetencionesIEPS="[TotalRetencionesIEPS]" TotalTrasladosBaseIVA16="[TotalTrasladosBaseIVA16]" TotalTrasladosImpuestoIVA16="[TotalTrasladosImpuestoIVA16]" TotalTrasladosBaseIVA8="[TotalTrasladosBaseIVA8]" TotalTrasladosImpuestoIVA8="[TotalTrasladosImpuestoIVA8]" TotalTrasladosBaseIVA0="[TotalTrasladosBaseIVA0]" TotalTrasladosImpuestoIVA0="[TotalTrasladosImpuestoIVA0]" TotalTrasladosBaseIVAExento="[TotalTrasladosBaseIVAExento]" MontoTotalPagos="[MontoTotalPagos]"/>
+            <pago20:Pago FechaPago="[PagosFechaPago]" FormaDePagoP="[c_FormaDePagoP]" MonedaP="[c_MonedaP]" TipoCambioP="[TipoCambioP]" Monto="[PagosMonto]" NumOperacion="[NumOperacion]" RfcEmisorCtaOrd="[RfcEmisorCtaOrd]" NomBancoOrdExt="[NomBancoOrdExt]" CtaOrdenante="[CtaOrdenante]" RfcEmisorCtaBen="[RfcEmisorCtaBen]" CtaBeneficiario="[CtaBeneficiario]" TipoCadPago="[c_TipoCadenaPago]" CertPago="[CertPago]" CadPago="[CadPago]" SelloPago="[SelloPago]">
+                <pago20:DoctoRelacionado IdDocumento="[IdDocumento]" Serie="[SerieDR]" Folio="[FolioDR]" MonedaDR="[MonedaDR]" EquivalenciaDR="[EquivalenciaDR]" NumParcialidad="[NumParcialidad]" ImpSaldoAnt="[ImpSaldoAnt]" ImpPagado="[ImpPagado]" ImpSaldoInsoluto="[ImpSaldoInsoluto]" ObjetoImpDR="[ObjetoImpDR]">
+                    <pago20:ImpuestosDR>
+                        <pago20:RetencionesDR>
+                            <pago20:RetencionDR BaseDR="[RetencionesDR_BaseDR]" ImpuestoDR="[RetencionesDR_c_ImpuestoDR]" TipoFactorDR="[RetencionesDR_c_TipoFactorDR]" TasaOCuotaDR="[RetencionesDR_TasaOCuotaDR]" ImporteDR="[RetencionesDR_ImporteDR]"/>
+                        </pago20:RetencionesDR>
+                        <pago20:TrasladosDR>
+                            <pago20:TrasladoDR BaseDR="[TrasladoDR_BaseDR]" ImpuestoDR="[TrasladoDR_c_ImpuestoDR]" TipoFactorDR="[TrasladoDR_c_TipoFactorDR]" TasaOCuotaDR="[TrasladoDR_TasaOCuotaDR]" ImporteDR="[TrasladoDR_ImporteDR]"/>
+                        </pago20:TrasladosDR>
+                    </pago20:ImpuestosDR>
+                </pago20:DoctoRelacionado>
+                <pago20:ImpuestosP>
+                    <pago20:RetencionesP>
+                        <pago20:RetencionP ImpuestoP="[RetencionP_c_ImpuestoP]" ImporteP="[RetencionP_ImporteP]"/>
+                    </pago20:RetencionesP>
+                    <pago20:TrasladosP>
+                        <pago20:TrasladoP BaseP="[TrasladoP_BaseP]" ImpuestoP="[TrasladoP_c_ImpuestoP]" TipoFactorP="[TrasladoP_c_TipoFactorP]" TasaOCuotaP="[TrasladoP_TasaOCuotaP]" ImporteP="[TrasladoP_ImporteP]"/>
+                    </pago20:TrasladosP>
+                </pago20:ImpuestosP>
+            </pago20:Pago>
+        </pago20:Pagos>
+    </cfdi:Complemento>
+</cfdi:Comprobante>

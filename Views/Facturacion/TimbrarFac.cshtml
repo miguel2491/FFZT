@@ -108,7 +108,7 @@
                 else
                 {
                     f_pdf = response;
-                    setTimeout(function () {
+                    //setTimeout(function () {
                         $(".rpdf").html('<iframe src="/' + response + '" style="height:100vh"></iframe>');
                         cerrarCargando();
                         $("#btnPreTimbrar").css("display", "none");
@@ -120,7 +120,7 @@
                         f_doc = f_pdf.replace('PDF', 'DOCX');
                         f_doc = f_doc.replace('.pdf', '.docx');
 
-                    }, 15000);
+                    //}, 15000);
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {

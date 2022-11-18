@@ -78,7 +78,6 @@
                             <select class="form-select form-select-lg" id="cmbTipoFactura" aria-label="Tipo de Factura">
                                 <option value="1" data-cfdi-type="I">Factura</option>
                                 <option value="2" data-cfdi-type="E">Nota de Crédito</option>
-                                <option value="14" data-cfdi-type="P">Complemento de Pago</option>
                             </select>
                             <label for="cmbTipoFactura">Tipo de Factura</label>
                         </div>
@@ -1135,6 +1134,16 @@
             total_isr_ = total_isr_.replace("$", "");
             let descuento_ = $("#txtTotalDescuento").val();
             descuento_ = descuento_.replace("$", "");
+            console.log($("#cmbMoneda option:selected").val());
+            if ($("#cmbMoneda option:selected").val() != "MXN")
+            {
+                console.log($("#txtTipoCambio").val());
+                if ($("#txtTipoCambio").val() == 0 || $("#txtTipoCambio").val() == "") {
+                    notificacionAlert("Tipo de Cambio no puede ser vacio  o cero", "danger");
+                    cerrarCargando();
+                    return false;
+                }
+            }
             filter.push({
                 serie: $("#txtSerie").val(),
                 reg_fiscal_usuario: $("#txtClaveRegimen").val(),
@@ -1232,11 +1241,14 @@
     function sTipoCambio()
     {
         var id = $("#cmbMoneda").val();
-        /*if (id == "USD") {
-            $("#txtTipoCambio").css("pointer-events", "none");
+        if (id == "USD") {
+            $("#txtTipoCambio").focus();
+            document.getElementById("txtTipoCambio").required = true;
+
         } else {
-            $("#txtTipoCambio").css("pointer-events", "unset");
-        }*/
+            $("#txtTipoCambio").val(1);
+            document.getElementById("txtTipoCambio").required = false;
+        }
 
     }
 
@@ -1382,16 +1394,16 @@
                     TableConceptos.columns.adjust().draw(false);
                     cerrarCargando();
                     objaux.map(function (dato) {
-                        dato.total = response.Total.toFixed(2);
-                        dato.total_iva = response.Total_IVA.toFixed(2);
-                        dato.iva_tasa_impuesto = response.Total_IVA.toFixed(2);
-                        dato.total_iva_ret = response.Total_IVARet.toFixed(2);
-                        dato.iva_ret_impuesto = response.Total_IVARet.toFixed(2);
-                        dato.total_isr = response.Total_ISRRet.toFixed(2);
-                        dato.isr_ret_impuesto = response.Total_ISRRet.toFixed(2);
-                        dato.total_descuento = response.Total_Descuento.toFixed(2);
+                        dato.total = response.Total.toFixed(4);
+                        dato.total_iva = response.Total_IVA.toFixed(4);
+                        dato.iva_tasa_impuesto = response.Total_IVA.toFixed(4);
+                        dato.total_iva_ret = response.Total_IVARet.toFixed(4);
+                        dato.iva_ret_impuesto = response.Total_IVARet.toFixed(4);
+                        dato.total_isr = response.Total_ISRRet.toFixed(4);
+                        dato.isr_ret_impuesto = response.Total_ISRRet.toFixed(4);
+                        dato.total_descuento = response.Total_Descuento.toFixed(4);
                         let tiva = response.Total_IVARet + response.Total_ISRRet;
-                        dato.total_imp_retenido = tiva.toFixed(2);
+                        dato.total_imp_retenido = tiva.toFixed(4);
                     });
                 }
             });

@@ -1,0 +1,79 @@
+﻿@model IEnumerable<Facturafast.Models.tbd_Cobros>
+@using Facturafast.Models
+@{
+    BD_FFEntities db = new BD_FFEntities();
+    tbc_Usuarios usuario = Session["tbc_Usuarios"] as tbc_Usuarios;
+    tbc_Vendedores vendedor = db.tbc_Vendedores.Where(s => s.id_usuario == usuario.id_usuario).Single();
+}
+<h1 class="h3 mb-3">Paquetes comprados por cliente</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-actions float-end">
+
+                </div>
+            </div>
+            <div class="card-body">
+                <table id="datatables-paquetesclientes" class="table table-striped" style="width:100%;">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>Nombre/Razón Social</th>
+                            <th>RFC</th>
+                            <th>Concepto</th>
+                            <th>Cobrado</th>
+                            <th>Comisión</th>
+                            <th>Fecha de Compra</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            tbc_Paquetes paquete = db.tbc_Paquetes.Where(s => s.id_paquete == item.id_paquete).Single();
+                            tbc_Usuarios usuarioi = db.tbc_Usuarios.Where(s => s.id_usuario == item.id_usuario).Single();
+
+
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td>@usuarioi.nombre_razon</td>
+                                <td>@usuarioi.rfc</td>
+                                <td>@paquete.nombre_paquete</td>
+                                <td>@item.total.ToString("C")</td>
+                                <td>@item.comision.ToString("C")</td>
+                                <td>@item.fecha_cobro.ToString("yyyy-MM-dd HH:mm")</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>                            
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td>@vendedor.total_vendido.ToString("C")</td>
+                            <td>@vendedor.comision_total.ToString("C")</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        $("#datatables-paquetesclientes").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0, 1] }
+            ],
+            order: [[2, 'asc']]
+        });
+    });
+</script>

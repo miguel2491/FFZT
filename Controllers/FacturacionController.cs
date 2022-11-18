@@ -457,12 +457,10 @@ namespace Facturafast.Controllers
         {
             using (BD_FFEntities db = new BD_FFEntities())
             {
-                var auxcad = from uid in db.tbd_Cfdi_Uuid
+                var auxcad = from uid in db.tbd_Pre_Factura
                              where uid.id_pre_factura == id
                              select new
                              {
-                                 id_uuid_cfdi = uid.id_cfdi_pre_factura,
-                                 id_relacion = uid.id_relacion,
                                  uuid = uid.uuid
                              };
                 return Json(auxcad.ToList(), JsonRequestBehavior.AllowGet);
@@ -608,7 +606,7 @@ namespace Facturafast.Controllers
                               from mpago in m_pago.DefaultIfEmpty()
                               join uso_cfdi in db.tbc_Usos_CFDI on fac.clave_uso_cfdi equals uso_cfdi.id_uso_cfdi into u_cfdi
                               from ucfdi in u_cfdi.DefaultIfEmpty()
-                              where fac.rfc_usuario == usuario.rfc && fac.status != 0 && fac.tipo == "Factura"  && fac.fecha_emision >= f_inicial && fac.fecha_emision <= f_final
+                              where fac.rfc_usuario == usuario.rfc && fac.status != 0 && fac.fecha_emision >= f_inicial && fac.fecha_emision <= f_final
                               orderby fac.id_pre_factura
                               select new
                               {
@@ -654,7 +652,7 @@ namespace Facturafast.Controllers
                 if (item.total > total)
                 {
                     decimal total_ = item.total - total;
-                    str += "{\"label\": \"[" + item.rfc_receptor + "] " + item.uuid + "\", \"value\":" + total_ + ", \"name\":" + item.id_forma_pago + ", \"uuid\":\"" + item.uuid + "\"}, ";
+                    str += "{\"label\": \"[" + item.rfc_receptor + "] " + item.uuid + " $("+item.total+")"+"\", \"value\":" + total_ + ", \"name\":" + item.id_forma_pago + ", \"uuid\":\"" + item.uuid + "\"}, ";
                 }
                 else {
                     return "[]";
@@ -949,17 +947,17 @@ namespace Facturafast.Controllers
                 //    namefile = nf;
                 //    //ObjDoc.SaveAs2(DirPrg + "/Plantillas/XML/DOCX/" + prefactura_.rfc_cliente + "/" + ax_fc_emi + "/" + namefile + ".docx");
                 //}
-                int ii = 0;
-                while (ii <= 1)
-                {
+                //int ii = 0;
+                //while (ii <= 1)
+                //{
 
-                    System.Threading.Thread.Sleep(1000);
-                    ii++;
-                    //if(System.IO.File.Exists(DirPrg + "/Plantillas/XML/DOCX/" + prefactura_.rfc_usuario + "/" + ax_fc_emi + "/" + namefile + ".docx"))
-                    //{
-                    //    break;
-                    //}                   
-                }
+                //    System.Threading.Thread.Sleep(1000);
+                //    ii++;
+                //    //if(System.IO.File.Exists(DirPrg + "/Plantillas/XML/DOCX/" + prefactura_.rfc_usuario + "/" + ax_fc_emi + "/" + namefile + ".docx"))
+                //    //{
+                //    //    break;
+                //    //}                   
+                //}
                 ObjDoc.SaveAs2(DirPrg + "/Plantillas/XML/DOCX/" + prefactura_.rfc_usuario + "/" + ax_fc_emi + "/" + namefile + ".docx");
                 ObjDoc.Close();
                 ObjWord.Quit();
@@ -982,6 +980,7 @@ namespace Facturafast.Controllers
                     System.Threading.Thread.Sleep(1000);
                     if (System.IO.File.Exists(DirPrg+"\\Plantillas\\"+prefactura_.url_pdf))
                     {
+                        fileExist_ = true;
                         break;
                     }
                 }
@@ -1821,12 +1820,12 @@ namespace Facturafast.Controllers
             
             //ruta.url_pdf +"PRE_FAC_"+ prefactura_.id_pre_factura+ ".pdf";
             //-----------------------------------------------------------------------------------------------------------------------------
-            bool fileExist = System.IO.File.Exists(path);
-            FileInfo file = new FileInfo(path);
+            bool fileExist = System.IO.File.Exists(DirPrg + path);
+            FileInfo file = new FileInfo(DirPrg+path);
             try
             {
                 file.Delete();
-                fileExist = System.IO.File.Exists(path);
+                fileExist = System.IO.File.Exists(DirPrg+path);
             }
             catch (Exception e)
             {
@@ -1842,8 +1841,8 @@ namespace Facturafast.Controllers
                 Word.Application ObjWord = new Word.Application();
 
                 nombrearchivo = "ComplementoPagoEstandar.docx";
-                string rutaorigen = DirPrg + "/Plantillas/" + nombrearchivo;
-                string rutadestino = DirPrg + "/Plantillas/PREPAGO/XML/DOCX/" + cliente.rfc + "/" + ax_fc_emi + "/" + namefile + ".docx";
+                string rutaorigen = DirPrg + "Plantillas\\" + nombrearchivo;
+                string rutadestino = DirPrg + "Plantillas/PREPAGO/XML/DOCX/" + usuario.rfc + "/" + ax_fc_emi + "/" + namefile + ".docx";
 
                 System.IO.File.Copy(rutaorigen, rutadestino, true);
 
@@ -2035,13 +2034,13 @@ namespace Facturafast.Controllers
                 //NoCertificado.Text = prepago_.ccertificacion;
                 //Cerrar word
 
-                ObjDoc.SaveAs2(DirPrg + "/Plantillas/PREPAGO/XML/DOCX/" + usuario.rfc + "/" + ax_fc_emi + "/" + namefile + ".docx");
+                ObjDoc.SaveAs2(DirPrg + "Plantillas/PREPAGO/XML/DOCX/" + usuario.rfc + "/" + ax_fc_emi + "/" + namefile + ".docx");
                 ObjDoc.Close();
                 ObjWord.Quit();
                 while (true)
                 {
                     System.Threading.Thread.Sleep(1000);
-                    if (System.IO.File.Exists(DirPrg + "/Plantillas/PREPAGO/XML/DOCX/" + usuario.rfc + "/" + ax_fc_emi + "/" + namefile + ".docx"))
+                    if (System.IO.File.Exists(DirPrg + "Plantillas/PREPAGO/XML/DOCX/" + usuario.rfc + "/" + ax_fc_emi + "/" + namefile + ".docx"))
                     {
                         break;
                     }
@@ -2062,8 +2061,9 @@ namespace Facturafast.Controllers
                 while (true)
                 {
                     System.Threading.Thread.Sleep(1000);
-                    if (System.IO.File.Exists(DirPrg + "/Plantillas/PREPAGO/XML/PDF/" + usuario.rfc + "/" + ax_fc_emi + "/" + namefile + ".pdf"))
+                    if (System.IO.File.Exists(DirPrg + "Plantillas/PREPAGO/XML/PDF/" + usuario.rfc + "/" + ax_fc_emi + "/" + namefile + ".pdf"))
                     {
+                        fileExist_ = true;
                         break;
                     }
                 }
@@ -2117,6 +2117,7 @@ namespace Facturafast.Controllers
             {
                 var lista = from pf in db.tbd_Pre_Factura
                             where pf.id_usuario == usuario.id_usuario
+                            orderby pf.id_pre_factura descending
                             select new
                             {
                                 id = pf.id_pre_factura,

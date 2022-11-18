@@ -26,6 +26,7 @@
                             <th>Importe</th>
                             <th>IVA</th>
                             <th>Costo</th>
+                            <th>Comisión</th>
                             <th>Estatus</th>
                         </tr>
                     </thead>
@@ -34,13 +35,14 @@
                         {
                         <tr>
                             <td></td>
-                            <td><button class="btn btn-warning btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#modalPaquete" onclick="actualizarPaquete(@item.id_paquete, '@item.nombre_paquete', '@item.descripcion_paquete', @item.folios, @item.importe, @item.iva, @item.id_estatus);"><i class="fas fa-edit"></i></button></td>
+                            <td><button class="btn btn-warning btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#modalPaquete" onclick="actualizarPaquete(@item.id_paquete, '@item.nombre_paquete', '@item.descripcion_paquete', @item.folios, @item.importe, @item.iva, @item.id_estatus, @item.comision);"><i class="fas fa-edit"></i></button></td>
                             <td>@item.nombre_paquete</td>
                             <td>@item.descripcion_paquete</td>
                             <td>@item.folios</td>
                             <td>@item.importe.ToString("c")</td>
                             <td>@item.iva.ToString("c")</td>
                             <td>@item.costo.ToString("c")</td>
+                            <td>@item.comision.ToString("c")</td>
                             <td>@db.tbc_Estatus.Where(s => s.id_estatus == item.id_estatus).Single().estatus</td>
                         </tr>
                         }
@@ -95,14 +97,22 @@
                         </div>
                         <div class="col-md-4">
                             <div class="form-floating mb-3">
-                                <input type="number" class="form-control form-control-lg" id="txtImporte" name="txtImporte" placeholder="Importe" required>
+                                <input type="number" class="form-control form-control-lg" id="txtImporte" name="txtImporte" placeholder="Importe" required step="0.01">
                                 <label for="txtImporte">Importe</label>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-floating mb-3">
-                                <input type="number" class="form-control form-control-lg" id="txtIVA" name="txtIVA" placeholder="IVA" required>
+                                <input type="number" class="form-control form-control-lg" id="txtIVA" name="txtIVA" placeholder="IVA" required step="0.01">
                                 <label for="txtIVA">IVA</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control form-control-lg" id="txtComision" name="txtComision" placeholder="Comisión" required step="0.01">
+                                <label for="txtComision">Comisión</label>
                             </div>
                         </div>
                     </div>
@@ -146,13 +156,14 @@
         $("#cmbEstatus").val(1);
     }
 
-    function actualizarPaquete(a, b, c, d, e, f, g) {
+    function actualizarPaquete(a, b, c, d, e, f, g, h) {
         document.forms["GuardarPaquete.Administracion"]["txtIdPaquete"].value = a;
         document.forms["GuardarPaquete.Administracion"]["txtNombrePaquete"].value = b;
         document.forms["GuardarPaquete.Administracion"]["txtDescripcionPaquete"].value = c;
         document.forms["GuardarPaquete.Administracion"]["txtFolios"].value = d;
         document.forms["GuardarPaquete.Administracion"]["txtImporte"].value = e;
         document.forms["GuardarPaquete.Administracion"]["txtIVA"].value = f;
+        document.forms["GuardarPaquete.Administracion"]["txtComision"].value = h;
         $("#cmbEstatus").val(g);
     }
 

@@ -406,7 +406,8 @@
             minLength: 1,
             source: function (request, response) {
                 var term = request.term;
-                if (term.length > 2) {
+                var rfc_aux = $("#txtRFC").val();
+                if (term.length > 2 && rfc_aux != "") {
                     $("#txtuuid").removeClass("is-invalid");
                     $("#txtuuid").removeClass("is-valid");
                     $("#txtuuid").addClass("is-invalid");
@@ -433,8 +434,7 @@
                 $("#txtSaldoAnterior").val(ui.item.value);
                 //getPrePagos(ui.item.uuid);
                 $("#txtuuid").removeClass("is-invalid");
-                $("#txtuuid").removeClass("is-valid");
-                $("#txtuuid").addClass("is-invalid");
+                $("#txtuuid").addClass("is-valid");
                 return false;
             }
         });

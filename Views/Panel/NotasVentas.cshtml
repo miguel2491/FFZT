@@ -118,7 +118,8 @@
                                     <table>
                                         <tr>
                                             <td style="padding:0px 5px;">
-                                                <a href="#" class="btn btn-info btn-sm" title="Descargar Nota de Venta" onclick="@(item.url_pdf != "" ? "descargarPDF("+ item.id_nota_venta +");" : "generarPDF("+ item.id_nota_venta +",'"+ JSONPDf +"');")"><i class="fas fa-file"></i></a>
+                                                <a href="#" class="btn btn-danger btn-sm" title="Descargar Nota de Venta" onclick="descargarPDF(@item.id_nota_venta)"><i class="fas fa-file-pdf"></i></a>
+                                                @*<a href="#" class="btn btn-info btn-sm" title="Descargar Nota de Venta" onclick="@(item.url_pdf != "" ? "descargarPDF("+ item.id_nota_venta +");" : "generarPDF("+ item.id_nota_venta +",'"+ JSONPDf +"');")"><i class="fas fa-file"></i></a>*@
                                             </td>
                                             @if (item.id_estatus == 1)
                                             {
@@ -140,7 +141,8 @@
                                             @if (item.id_estatus != 6)
                                             {
                                                 <td style="padding:0px 5px;">
-                                                    <a href="#" class="btn btn-success btn-sm" title="Pagos" data-bs-toggle="modal" data-bs-target="#modalPagoNota" onclick="pagarNota(@item.id_nota_venta, @restante);"><i class="fas fa-money-bill-wave"></i></a>
+                                                    @*<a href="#" class="btn btn-success btn-sm" style="visibility:hidden" title="Pagos" data-bs-toggle="modal" data-bs-target="#modalPagoNota" onclick="pagarNota(@item.id_nota_venta, @restante);"><i class="fas fa-money-bill-wave"></i></a>*@
+                                                    <a href="#" class="btn btn-info btn-sm" title="Factura" onclick="OpenTimbrar(@item.id_nota_venta);"><i class="fas fa-file-arrow-up"></i></a>
                                                 </td>
                                             }
 
@@ -248,7 +250,7 @@
                         </div>
                         <div class="col-md-3">
                             <div class="form-floating mb-3">
-                                <input type="number" step="0.01" class="form-control form-control-lg" id="txtPrecioUnitario" name="txtPrecioUnitario" placeholder="Precio Unitario" required>
+                                <input type="text" class="form-control form-control-lg" id="txtPrecioUnitario" name="txtPrecioUnitario" placeholder="Precio Unitario" required>
                                 <label for="txtPrecioUnitario">Precio Unitario</label>
                             </div>
                         </div>
@@ -511,8 +513,6 @@
     </div>
 </form>
 
-
-
 <div class="modal fade" id="modalEnviarCorreo" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
         <div class="modal-content">
@@ -557,6 +557,46 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
                 <button type="button" class="btn btn-primary" onclick="enviarNotaSeleccion();"><i class="fas fa-envelope"></i>&nbsp; Enviar Nota de Venta</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalTimbrado" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Timbrado</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body m-3">
+                <input type="hidden" id="txtIdNotaVenta" />
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-floating mb-3">
+                            <select class="form-select form-select-lg" id="cmbUsoCFDI_" aria-label="Uso de la Factura"></select>
+                            <label for="cmbUsoCFDI">Uso de la Factura</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating mb-3">
+                            <select class="form-select form-select-lg" id="cmbFormaPago_" aria-label="Forma de Pago"></select>
+                            <label for="cmbFormaPago">Forma de Pago</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating mb-3">
+                            <select class="form-select form-select-lg" id="cmbMetodoPago_" aria-label="Método de Pago" onchange="sMetodoPago()">
+                            </select>
+                            <label for="cmbMetodoPago">Método de Pago</label>
+                        </div>
+                    </div>
+                    <input type="hidden" class="form-control form-control-lg" id="txtLugarExpedicion_" value="@usuario.cp">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="genTimbre();"><i class="fas fa-bell"></i>&nbsp; Timbrar</button>
             </div>
         </div>
     </div>
@@ -699,6 +739,15 @@
     var dataEdit;
     document.addEventListener("DOMContentLoaded", function () {
 
+        $("#txtPrecioUnitario").inputmask({
+            alias: "decimal",
+            integerDigits: 6,
+            digits: 4,
+            allowMinus: false,
+            digitsOptional: false,
+            placeholder: "0"
+        });
+
         tbContactosCliente = $("#datatables-contactos-clientes").DataTable({
             responsive: true,
             'columnDefs': [
@@ -727,16 +776,23 @@
 
         $.get("@Url.Action("obtenerFormaPago", "Catalogos")", function (data) {
             $("#cmbFormaPago").html(data);
+            $("#cmbFormaPago_").html(data);
         });
 
          $.get("@Url.Action("obtenerUsoCFDI", "Catalogos")", function (data) {
-            $("#cmbUsoCFDI").html(data);
+             $("#cmbUsoCFDI").html(data);
+             $("#cmbUsoCFDI_").html(data);
          });
 
         $.get("@Url.Action("obtenerCuentas", "Catalogos")", function (data) {
             $("#cmbCuentas").html(data);
         });
-
+        $.get("@Url.Action("obtenerMetodoPago", "Catalogos")", function (data) {
+            $("#cmbMetodoPago").html(data);
+            $("#cmbMetodoPago").val($("#cmbMetodoPago option:first").val());
+            $("#cmbMetodoPago_").html(data);
+            $("#cmbMetodoPago_").val($("#cmbMetodoPago_ option:first").val());
+        });
 
 
         $("#btn-EditarConcepto").hide();
@@ -1262,22 +1318,25 @@
     }
 
     function guardarNotaVenta() {
-
+        abrirCargando();
         var $Form = document.forms["GuardarNotaVenta.Panel"];
 
         if ($Form["txtIdCliente"].value != "") {
             if ($("#txtRFC").val() == "" || $("#txtRFC").hasClass("is-invalid")) {
                 notificacionAlert("Debe seleccionar un RFC válido.", "danger");
+                cerrarCargando();
             }
             else {
                 if ($("#txtSerie").val() == "") {
                     notificacionAlert("Debe capturar una Serie válida.", "danger");
+                    cerrarCargando();
                 }
                 else {
                     var array = TableConceptos.rows()
                         .data().toArray();
                     if (array.length == 0) {
                         notificacionAlert("Debe haber por lo menos un concepto para hacer la nota de venta.", "danger");
+                        cerrarCargando();
                     }
                     else {
                         abrirCargando();
@@ -1290,7 +1349,8 @@
                             success: function (data) {
                                 var response = data;
                                 if (response.Estatus == 1) {
-                                    window.location = '@Url.Action("NotasVentas","Panel")';
+                                    console.log(response);
+                                    generarPDF(response.Id);
                                 }
                                 else {
                                     notificacionAlert(response.Mensaje, "danger");
@@ -1314,14 +1374,37 @@
     }
 
     function descargarPDF(id) {
+        @*window.location = '@Url.Action("DescargarNotaVenta", "Panel")' + '?idNotaVenta=' + id;*@
         window.location = '@Url.Action("DescargarNotaVenta", "Panel")' + '?idNotaVenta=' + id;
     }
+
 
     function loadFile(url, callback) {
         PizZipUtils.getBinaryContent(url, callback);
     }
-    function generarPDF(id, render) {
-        var renderPDF = JSON.parse(render);
+    function generarPDF(id) {
+        //--------------------------------------------------------------------------------------
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            url: '/Panel/AlmacenarNota?idNotaVenta=' + id,
+            success: function (data) {
+                var response = data;
+                console.log(response);
+                if (response == "Ok") {
+                    window.location = '@Url.Action("NotasVentas","Panel")';
+                    cerrarCargando();
+                }
+
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                cerrarCargando();
+            }
+        });
+        //--------------------------------------------------------------------------------------
+        @*var renderPDF = JSON.parse(render);
         for (var i = 0; i < renderPDF.productos.length; i++) {
             renderPDF.productos[i].pu = formatoMoneda(renderPDF.productos[i].pu);
             renderPDF.productos[i].imp = formatoMoneda(renderPDF.productos[i].imp);
@@ -1359,7 +1442,124 @@
                     descargarPDF(id);
                 });
             }
-        );
+        );*@
+    }
+
+    function OpenTimbrar(id)
+    {
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        $("#txtIdNotaVenta").val(id);
+        //--------------------------------------------------------------------------------------
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            url: '/Panel/conNotaVenta?id=' + id,
+            success: function (data) {
+                var response = data;
+                console.log(response);
+                console.log(response.forma_pago);
+                if (response.forma_pago == null || response.metodo_pago == null || response.lugar_expedicion == null || response.uso_cfdi == null) {
+                    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalTimbrado")).show();
+                } else {
+                    notificacionAlert("Factura ya timbrada anteriormente", "danger")
+                    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalTimbrado")).hide();
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                cerrarCargando();
+            }
+        });
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    }
+
+    function genTimbre()
+    {
+        abrirCargando();
+        var arr = [];
+        var id = $("#txtIdNotaVenta").val();
+        arr.push({
+            "id_uso_cfdi": $("#cmbUsoCFDI_ option:selected").val(),
+            "id_forma_pago": $("#cmbFormaPago_ option:selected").val(),
+            "id_metodo_pago": $("#cmbMetodoPago_ option:selected").val(),
+            "lugar_expedicion": $("#txtLugarExpedicion_").val()
+        });
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            url: '/Panel/UpdTimbre?id_=' + id,
+            data: JSON.stringify({ 'id': id, 'nota':arr }),
+            success: function (data) {
+                var response = data;
+                console.log(response);
+                if (response == "OK") {
+                    genXML(id);
+                }
+
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                cerrarCargando();
+            }
+        });
+        //-------------------------------------------------------------------------------------
+    }
+
+    function genXML(id)
+    {
+        //--------------------------------------------------------------------------------------
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            url: '/XML/GenXMLNota?id_=' + id,
+            success: function (data) {
+                var response = data;
+                console.log(response);
+                if (response == "Success") {
+                    setTimbre(id);
+                }
+
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                cerrarCargando();
+            }
+        });
+        //--------------------------------------------------------------------------------------
+
+    }
+
+    function setTimbre(id)
+    {
+        //--------------------------------------------------------------------------------------
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            url: '/XML/TimbrarXML?id_=' + id,
+            data: JSON.stringify({ 'id_': id, 'n_doc': 'Factura.xml', 'tipo': 'FacturaNV' }),
+            success: function (data) {
+                var response = data;
+                console.log(response);
+                var res = response.split("|");
+                if (res[0] == "Timbrado") {
+                    notificacionAlert(res[0], "success");
+                } else {
+                    notificacionAlert(res[0], "danger");
+                }
+                cerrarCargando();
+                bootstrap.Modal.getOrCreateInstance(document.getElementById("modalTimbrado")).hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                cerrarCargando();
+            }
+        });
+        //--------------------------------------------------------------------------------------
     }
 
 </script>

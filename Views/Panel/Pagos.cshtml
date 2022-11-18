@@ -27,10 +27,10 @@
                     </thead>
                     <tbody>
                         @foreach (var item in Model)
-                        {
-                            tbc_Paquetes paquete = db.tbc_Paquetes.Where(s => s.id_paquete == item.id_paquete).Single();
-                            if (paquete.costo == item.total)
-                            {
+                                {
+                                    tbc_Paquetes paquete = db.tbc_Paquetes.Where(s => s.id_paquete == item.id_paquete).Single();
+                                    if (paquete.costo == item.total)
+                                    {
                                 <tr>
                                     <td></td>
                                     <td>
@@ -48,10 +48,17 @@
                                                 else
                                                 {
                                                     <td style="padding:0px 5px;">
-                                                        <a href="#" class="btn btn-danger btn-sm"><i class="fas fa-file-pdf"></i></a>
+                                                        <a href="#" onclick="descargarPDF(@item.id_cobro)" class="btn btn-danger btn-sm"><i class="fas fa-file-pdf"></i></a>
                                                     </td>
                                                     <td style="padding:0px 5px;">
                                                         <a href="#" class="btn btn-info btn-sm"><i class="fas fa-file-archive"></i></a>
+                                                    </td>
+                                                    <td style="padding:0px 5px;">
+                                                        @if (item.lugar_expedicion == null)
+                                                        {
+                                                            @*<a href="@Url.Action("genXMLPagos","XML", new { id_ = item.id_cobro })" class="btn btn-info btn-sm" title="GenXML"><i class="fas fa-credit-card"></i> </a>*@
+                                                           <button data-bs-toggle="modal" data-bs-target="#modalTimbre" class="btn btn-sm btn-warning" onclick="timbrarModalCobro(@item.id_cobro)"><i class="fas fa-bell"></i></button>
+                                                        }
                                                     </td>
                                                 }
                                             </tr>
@@ -105,6 +112,33 @@
     </div>
 </form>
 
+<div class="modal fade" id="modalTimbre" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Timbrado</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body m-3">
+                <input type="hidden" id="txtIdCobro" />
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control form-control-lg" id="txtLugarExpedicion_">
+                            <label for="txtLugarExpedicion_">Lugar Expedición</label>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-remove"></i>&nbsp; Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="genTimbre();"><i class="fas fa-bell"></i>&nbsp; Timbrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         $("#datatables-pagos").DataTable({
@@ -115,6 +149,7 @@
             order: [[3, 'asc']]
         });
     });
+
     function validateForm() {
         let pass = document.forms["EliminarCobro.Panel"]["id_cobro_eliminar"].value;
         if (pass != "") {
@@ -123,9 +158,74 @@
         }
         return false;
     }
+
     function eliminarCobro(a, b, c) {
         $("#id_cobro_eliminar").val(a);
         $("#txtConceptoCobro").val(b);
         $("#txtCostoCobro").val(c);
     }
+
+    function timbrarModalCobro(id)
+    {
+        $("#txtIdCobro").val(id);
+    }
+
+    function genTimbre() {
+        var id_cobro = $("#txtIdCobro").val();
+        abrirCargando();
+        //--------------------------------------------------------------------------------------
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            url: '/XML/genXMLPagosServicio',
+            data: JSON.stringify({ 'id_': id_cobro }),
+            success: function (data) {
+                var response = data;
+                console.log(response);
+                if (response == "Success") {
+                    setTimbre(id_cobro);
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                cerrarCargando();
+            }
+        });
+        //--------------------------------------------------------------------------------------
+    }
+
+    function setTimbre(id) {
+        //--------------------------------------------------------------------------------------
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            url: '/XML/TimbrarXML?id_=' + id,
+            data: JSON.stringify({ 'id_': id, 'n_doc': 'Factura.xml', 'tipo': 'FacturaC' }),
+            success: function (data) {
+                var response = data;
+                console.log(response);
+                var res = response.split("|");
+                if (res[0] == "Timbrado") {
+                    notificacionAlert(res[0], "success");
+                } else {
+                    notificacionAlert(res[0], "danger");
+                }
+                cerrarCargando();
+                bootstrap.Modal.getOrCreateInstance(document.getElementById("modalTimbrado")).hide();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
+                cerrarCargando();
+            }
+        });
+        //--------------------------------------------------------------------------------------
+    }
+
+    function descargarPDF(id_cobro) {
+        console.log(id_cobro);
+        window.location = '@Url.Action("DescargarFacturaFacturafast", "Panel")' + '?idcobro=' + id_cobro;
+    }
+
 </script>

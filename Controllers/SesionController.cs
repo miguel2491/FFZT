@@ -63,7 +63,14 @@ namespace Facturafast.Controllers
                 }
 
                 Session["tbc_Usuarios"] = usuario;
-                return RedirectToAction("Inicio", "Panel");
+                if (usuario.id_perfil == 4)
+                {
+                    return RedirectToAction("Inicio", "Vendedor");
+                }
+                else
+                {
+                    return RedirectToAction("Inicio", "Panel");
+                }
             }
 
             TempData["Mensaje"] = "No se encontro registro del usuario.";

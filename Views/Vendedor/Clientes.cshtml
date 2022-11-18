@@ -1,0 +1,56 @@
+﻿@model IEnumerable<Facturafast.Models.tbr_Vendedor_Cliente>
+@using Facturafast.Models 
+@{
+    BD_FFEntities db = new BD_FFEntities();
+}
+<h1 class="h3 mb-3">Clientes</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-actions float-end">
+
+                </div>                
+            </div>
+            <div class="card-body">
+                <table id="datatables-clientes" class="table table-striped" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>Nombre / Razón Social</th>
+                            <th>RFC</th>
+                            <th>Fecha Asignación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            
+                            tbc_Usuarios usuarios = db.tbc_Usuarios.Where(s => s.id_usuario == item.id_cliente_usuario).Single();
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td>@usuarios.nombre_razon</td>
+                                <td>@usuarios.rfc</td>
+                                <td>@item.fecha_creacion</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        $("#datatables-clientes").DataTable({
+            responsive: true,
+            'columnDefs': [
+                { 'sortable': false, 'searchable': false, 'visible': true, 'targets': [0,1] }
+            ],
+            order: [[2, 'asc']]
+        });
+    })
+</script>

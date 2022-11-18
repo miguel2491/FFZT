@@ -2,13 +2,14 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
+<input type="hidden" id="tmp_pdf" />
+<input type="hidden" id="tmp_xml" />
 <h1 class="h3 mb-3">PrePagos</h1>
 <div class="row">
     <div class="col-md-2 col-xs-2">
         <input type="hidden" value="@ViewBag.ID" id="idprepago" />
         <button class="btn btn-danger btnEstatus mb-3" id="btnTimbrar" style="visibility:hidden" onclick="timbrarModal()">Timbrar</button><br />
-        <a class="btn btn-warning btnPrePago mb-3" href="/Facturacion/Complemento?id=@ViewBag.ID" style="visibility: hidden"><i class="fas fa-edit"></i> Editar</a><br />
+        <a class="btn btn-warning btnPrePago mb-3" id="btnEditar" href="/Facturacion/Complemento?id=@ViewBag.ID" style="visibility: hidden"><i class="fas fa-edit"></i> Editar</a><br />
         <a class="btn btn-success btnPrePago" id="btnListar" href='/Facturacion/ListaComplemento' style="visibility: hidden"><i class="fas fa-file-alt"></i> Listar</a>
     </div>
     <div class="col-md-10 col-xs-10" id="d_prepagos" style="visibility:hidden">
@@ -55,7 +56,7 @@
                         </div>
                     </div>
                 </div>
-                
+
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" onclick="timbrar()" id="btnTimbre"><i class="fas fa-bell"></i>&nbsp; Timbrar</button>
@@ -66,12 +67,14 @@
 </div>
 
 <script>
-    setTimeout(function () { abrirCargando(); previsualizar(); }, 1000);
+    setTimeout(function () { abrirCargando(); previsualizar(0); }, 1000);
     const id = '@ViewBag.ID';
-
-    function previsualizar()
+    const estatus_ = '@ViewBag.Estatus'
+    function previsualizar(a)
     {
+        console.log("-->"+a);
         $("#d_prepagos").css("visibility", "visible");
+        $(".rpdf").empty();
         //-------------------------------------------------------------------------
         $.ajax({
             type: "POST",
@@ -81,27 +84,38 @@
             data: JSON.stringify({ 'id': id }),
             success: function (data) {
                 var response = data;
-                console.log(response );
                 if (response == "NG") {
-                    previsualizar();
+                    previsualizar(0);
                 }
                 else {
                     var aux_path = response.split("/");
-                    console.log(aux_path[0]);
                     if (aux_path[0] == "Cancelado") {
                         $("#btnTimbrar").attr('disabled',true);
 
                     } else {
                         $("#btnTimbrar").attr('disabled', false);
                         f_pdf = response;
-                        //setTimeout(function () {
-                        if ('@ViewBag.Estatus' == "1") {
-                            $(".btnEstatus").css("visibility", "visible");
-                            genXML(id);
-                        }
                         $(".rpdf").html('<iframe src="/' + response + '" style="height:100vh"></iframe>');
+                        $("#tmp_pdf").val(response);
+                        //setTimeout(function () {
+                        if ('@ViewBag.Estatus' == "1" && a == 0) {
+                            $(".btnPrePago").css("visibility", "visible");
+                            $(".btnEstatus").css("visibility", "visible");
+                            $("#btnListar").css("visibility", "visible");
+                            genXML(id);
+                        } else {
+                            $(".btnEstatus").css("visibility", "hidden");
+                            $(".btnPrePago").css("visibility", "hidden");
+                            $("#btnListar").css("visibility", "visible");
+                        }
+                        if (a == 1)
+                        {
+                            $(".btnEstatus").css("visibility", "hidden");
+                            $(".btnPrePago").css("visibility", "hidden");
+                            $("#btnListar").css("visibility", "visible");
+                            genBtn();
+                        }
                         
-                        $(".btnPrePago").css("visibility", "visible");
                         f_doc = f_pdf.replace('PDF', 'DOCX');
                         f_doc = f_doc.replace('.pdf', '.docx');
                     }
@@ -149,14 +163,11 @@
             success: function (data) {
                 var response = data;
                 response = response.split("|");
-                console.log(response);
                 if (response[0] == "Timbrado" || response[0] =="Timdrado") {
                     notificacionAlert("Timbrada Correctamente", "success");
-                    setTimeout(function () {
-                        $(".modal-footer").html('<button class="btn btn-primary" onclick=sendcorreo()><i class="fas fa-envelope"></i>&nbsp; Enviar Correo</button>' +
-                            '<a target="_blank" class="btn btn-success" href="../' + f_pdf + '"><i class="fas fa-file"></i>&nbsp; Descargar PDF</button>' +
-                            '<a class="btn btn-info" href="../' + f_doc + '"><i class="fas fa-file"></i>&nbsp; Descargar XML</button>');
-                    }, 5000);
+                    $("#btnEditar").css('visibility', 'hidden');
+                    $("#btnTimbrar").css('visibility', 'hidden');
+                    previsualizar(1);
                     cerrarCargando();
                 } else {
                     notificacionAlert("Ocurrio un error, " + response[2] + ",vuelva a intentar", "danger");
@@ -169,6 +180,10 @@
                 cerrarCargando();
             }
         });
+        //$("#btnEditar").css('visibility', 'hidden');
+        //            $("#btnTimbrar").css('visibility', 'hidden');
+        //            previsualizar(1);
+        //            cerrarCargando();
         //-------------------------------------------------------------------------
     }
 
@@ -223,5 +238,20 @@
             }
         });
         //-------------------------------------------------------------------------
+    }
+
+    function genBtn()
+    {
+        $("#btnTimbrar").css('visibility', 'hidden');
+        var rutaPDF = $("#tmp_pdf").val();
+        var rxml_tmp = rutaPDF.split("/");
+        var nombre_f = rxml_tmp[6].split(".");
+        var r_temp_xml = rxml_tmp[0] + "/" + rxml_tmp[1] + "/" + rxml_tmp[2] + "/" + rxml_tmp[3] + "/" + rxml_tmp[4] + "/" + rxml_tmp[5] + "/" + nombre_f[0] + ".xml";
+        $("#tmp_xml").val(r_temp_xml);
+        var rutaXML = r_temp_xml;
+        $(".modal-footer").empty();
+        $(".modal-footer").html('<button class="btn btn-primary" onclick=sendcorreo()><i class="fas fa-envelope"></i>&nbsp; Enviar Correo</button>' +
+            '<a target="_blank" class="btn btn-success" href="../' + rutaPDF + '"><i class="fas fa-file"></i>&nbsp; Descargar PDF</button>' +
+            '<a class="btn btn-info" href="../' + rutaXML + '"><i class="fas fa-file"></i>&nbsp; Descargar XML</button>');
     }
 </script>

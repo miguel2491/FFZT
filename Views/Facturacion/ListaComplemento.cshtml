@@ -147,7 +147,7 @@
             </div>
             <div class="modal-footer">
                 <div class="dbtn">
-                    <button class="btn btn-warning btn-sm" onclick="cancelaFactura()">Cancelar</button>
+                    <button class="btn btn-warning btn-sm" id="btnCancelar" onclick="cancelaFactura()">Cancelar</button>
                     <button class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 </div>
                 <br />
@@ -349,6 +349,8 @@
 
     function cancelaFactura()
     {
+        
+        $("#btnCancelar").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class= "sr-only">Loading...</span>');
         //-------------------------------------------------------------------------
         $.ajax({
             type: "POST",
@@ -358,13 +360,14 @@
             data: JSON.stringify({ 'id': $("#id_factura").val(), 'ffiscal': $("#txtFolioFiscal").val().trim(), 'motivo': $("#s_motivos").val(), 'folio_':$("#folio_").val(),'tipo':'Pago'}),
             success: function (data) {
                 var response = data.split("|");
-                console.log(response);
                 cerrarCargando();
+                $("#btnTimbre").css('visibility', 'hidden');
                 if (response[0] == "Cancelado") {
                     notificacionAlert("Se cancelo correctamente.", "success");
-                    setTimeout(function () { window.location = '@Url.Action("ListaComplemento", "Facturacion")' }, 3000);
+                    setTimeout(function () { window.location = '@Url.Action("ListaComplemento", "Facturacion")' }, 1000);
                 } else {
                     notificacionAlert("Ocurrio un problema al cancelar, intentelo mas tarde.", "danger");
+                    $("#btnCancelar").css('visibility','hidden');
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {

@@ -365,83 +365,6 @@
                     <div class="card-actions float-end">
 
                     </div>
-                    <h5 class="card-title mb-0">Últimos Documentos</h5>
-                </div>
-                <table id="datatables-dashboard-projects" class="table table-striped my-0">
-                    <thead>
-                        <tr>
-                            <th>Cliente</th>
-                            <th class="d-none d-xl-table-cell">Tipo</th>
-                            <th class="d-none d-xl-table-cell">Fecha Emisión</th>
-                            <th>Estatus</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Jonathan Gamboa</td>
-                            <td class="d-none d-xl-table-cell">Factura</td>
-                            <td class="d-none d-xl-table-cell">31/06/2021</td>
-                            <td><span class="badge bg-success">Timbrada</span></td>
-                        </tr>
-                        <tr>
-                            <td>Jonathan Gamboa</td>
-                            <td class="d-none d-xl-table-cell">Factura</td>
-                            <td class="d-none d-xl-table-cell">31/06/2021</td>
-                            <td><span class="badge bg-danger">Cancelada</span></td>
-                        </tr>
-                        <tr>
-                            <td>Jonathan Gamboa</td>
-                            <td class="d-none d-xl-table-cell">Factura</td>
-                            <td class="d-none d-xl-table-cell">31/06/2021</td>
-                            <td><span class="badge bg-success">Timbrada</span></td>
-                        </tr>
-                        <tr>
-                            <td>Jonathan Gamboa</td>
-                            <td class="d-none d-xl-table-cell">Factura</td>
-                            <td class="d-none d-xl-table-cell">31/06/2021</td>
-                            <td><span class="badge bg-warning">En proceso</span></td>
-                        </tr>
-                        <tr>
-                            <td>Sofia Palacios</td>
-                            <td class="d-none d-xl-table-cell">Factura</td>
-                            <td class="d-none d-xl-table-cell">31/06/2021</td>
-                            <td><span class="badge bg-success">Timbrada</span></td>
-                        </tr>
-                        <tr>
-                            <td>Sofia Palacios</td>
-                            <td class="d-none d-xl-table-cell">Nómina</td>
-                            <td class="d-none d-xl-table-cell">31/06/2021</td>
-                            <td><span class="badge bg-success">Timbrada</span></td>
-                        </tr>
-                        <tr>
-                            <td>Danaé Zarate</td>
-                            <td class="d-none d-xl-table-cell">Factura</td>
-                            <td class="d-none d-xl-table-cell">31/06/2021</td>
-                            <td><span class="badge bg-success">Timbrada</span></td>
-                        </tr>
-                        <tr>
-                            <td>Danaé Zarate</td>
-                            <td class="d-none d-xl-table-cell">Factura</td>
-                            <td class="d-none d-xl-table-cell">31/06/2021</td>
-                            <td><span class="badge bg-warning">En proceso</span></td>
-                        </tr>
-                        <tr>
-                            <td>Danaé Zarate</td>
-                            <td class="d-none d-xl-table-cell">Nómina</td>
-                            <td class="d-none d-xl-table-cell">31/06/2021</td>
-                            <td><span class="badge bg-danger">Cancelada</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="col-12 col-xl-8 d-xl-flex">
-            <div class="card flex-fill w-100">
-                <div class="card-header">
-                    <div class="card-actions float-end">
-
-                    </div>
                     <h5 class="card-title mb-0">Últimas Facturas</h5>
                 </div>
                 <table id="datatables-u_facturas" class="table table-striped my-0">
@@ -565,7 +488,7 @@
             //data: JSON.stringify({ 'prefactura': filter, 'uuid': arrayUUid, 'concepto': arrayC, 'id_pref':id }),
             success: function (data) {
                 var c = '';
-                for (var x = 0; x < data.length; x++)
+                for (var x = 0; x < 5; x++)
                 {
                     var estatus = data[x].status == 1 ? '<span class="badge bg-warning">En proceso</span>' : data[x].status == 2 ? '<span class="badge bg-success">Timbrada</span>' :'<span class="badge bg-danger">Cancelada</span>';
                     c += '<tr><td>' + data[x].cliente + '</td><td>' + data[x].tipo+'</td><td>'+data[x].fca_emision+'</td><td>'+estatus+'</td></tr>';

@@ -834,6 +834,482 @@ namespace Facturafast.Controllers
             //guardamos el string en un archivo
             System.IO.File.WriteAllText(pathXML, sXml);
         }
+        //XML Nota de Venta
+        public ActionResult GenXMLNota(Int32? id_)
+        {
+            //************************************
+            //Get Info Nota de Venta en DB
+            db = new BD_FFEntities();
+            var factura = db.tbd_Notas_Venta.ToList<tbd_Notas_Venta>().Where(u => u.id_nota_venta == id_).Single();
+            tbc_Usuarios usuario = Session["tbc_Usuarios"] as tbc_Usuarios;
+            var firma = db.tbd_Firmas.ToList<tbd_Firmas>().Where(u => u.rfc == usuario.rfc).Single();
+            //DatosCliente
+            var receptor_c = db.tbc_Clientes.ToList<tbc_Clientes>().Where(u => u.id_cliente == factura.id_cliente && u.rfc_usuario == usuario.rfc).Single();
+            //Ruta donde alojamos los Archivos
+            var fca_emision = factura.fecha_creacion.ToString();
+
+            String[] fechaE = fca_emision.Split(' ');
+            string aux_fc_emi = fechaE[0];
+            String[] auxfechaE = aux_fc_emi.Split('/');
+            string ax_fc_emi = auxfechaE[0] + auxfechaE[1] + auxfechaE[2];
+
+            var ruta_xml = @"NotasVenta\PDF\"+usuario.rfc+"\\"+ax_fc_emi;//factura.url_xml;
+            //string[] nom_doc = "Temp_";//factura.url_pdf.Split('\\');
+            //string[] nd = nom_doc[4].Split('.');
+            //string nf = nd[0];
+            string namefile = "tempXML";
+            //************************************
+            string aux_path = ruta_xml + @"\" + namefile + ".xml";
+            string path = Server.MapPath("~");
+            p = path;
+            string pathXML = path +"Plantillas\\"+ ruta_xml + "\\" + namefile + ".xml";
+            string pathCer = path + @"\Plantillas\Firmas\" + usuario.rfc + "\\" + firma.url_cer_sello;
+            string pathKey = path + @"\Plantillas\Firmas\" + usuario.rfc + "\\" + firma.url_key_sello;
+            string clavePrivada = firma.password_sello;
+            p_xml = pathXML;
+            //Obtenemos el Número de Certificado
+            string numeroCertificado, aa, b, c;
+            SelloDigital.leerCER(pathCer, out aa, out b, out c, out numeroCertificado);
+            //----------------Llenamos la clase COMPROBANTE ---------------------------
+            Comprobante oComprobante = new Comprobante();
+            oComprobante.Version = "4.0";
+            oComprobante.Serie = factura.serie;
+            oComprobante.Folio = factura.folio;
+            oComprobante.Fecha = DateTime.Now.AddMinutes(-2).ToString("yyyy-MM-ddTHH:mm:ss");
+            //oComprobante.Sello = ""; //sig video
+            oComprobante.FormaPago = db.tbc_Formas_Pago.Where(u => u.id_forma_pago == factura.id_forma_pago).Select(u => u.clave).First(); 
+            oComprobante.NoCertificado = numeroCertificado;
+            //oComprobante.Certificado = ""; //sig video
+            oComprobante.SubTotal = Math.Round(Convert.ToDecimal(factura.subtotal),2);
+            oComprobante.Moneda = "MXN";
+            oComprobante.Total = Math.Round(Convert.ToDecimal(factura.total),2);
+            oComprobante.TipoDeComprobante = "I";
+            oComprobante.MetodoPago = db.tbc_Metodos_Pago.Where(u => u.id_metodo_pago == factura.id_forma_pago).Select(u => u.clave).First();
+            oComprobante.LugarExpedicion = factura.lugar_expedicion;
+            oComprobante.Descuento = 0;
+            oComprobante.Exportacion = "01";
+
+            oComprobante.FormaPagoSpecified = true;
+            oComprobante.MetodoPagoSpecified = true;
+            //Emisor
+            ComprobanteEmisor oEmisor = new ComprobanteEmisor();
+            oEmisor.Rfc = usuario.rfc;
+            oEmisor.Nombre = usuario.nombre_razon;
+            oEmisor.RegimenFiscal = db.tbc_Regimenes.Where(u => u.id_regimen_fiscal == usuario.id_regimen_fiscal).Select(u => u.clave).First();
+            //Receptor
+            ComprobanteReceptor oReceptor = new ComprobanteReceptor();
+            oReceptor.Nombre = receptor_c.nombre_razon;
+            oReceptor.Rfc = receptor_c.rfc;
+            oReceptor.UsoCFDI = db.tbc_Usos_CFDI.Where(u => u.id_uso_cfdi == factura.id_uso_cfdi).Select(u => u.clave).First();
+            oReceptor.RegimenFiscalReceptor = db.tbc_Regimenes.Where(u => u.id_regimen_fiscal == receptor_c.id_regimen_fiscal).Select(u => u.clave).First();
+            oReceptor.DomicilioFiscalReceptor = receptor_c.direccion_fiscal;
+            //Asigno emisor y receptor
+            oComprobante.Emisor = oEmisor;
+            oComprobante.Receptor = oReceptor;
+            //Conceptos
+            List<ComprobanteConcepto> lstConceptos = new List<ComprobanteConcepto>();
+            ComprobanteConcepto oConcepto = new ComprobanteConcepto();
+            //--------------------------------------------------------------------------------------------------------
+            Decimal total_trasladado = 0;
+            Decimal total_retenido = 0;
+
+            Decimal total_iva_ret = 0;
+            Decimal total_isr_ret = 0;
+
+            Decimal base_iva = 0;
+            ComprobanteConceptoImpuestos conceptoImpuestos = new ComprobanteConceptoImpuestos();
+
+            ComprobanteConceptoImpuestosTraslado comprobanteConceptoImpuestosTraslado = new ComprobanteConceptoImpuestosTraslado();
+            ComprobanteImpuestosTraslado[] comprobanteImpuestosTraslados = new ComprobanteImpuestosTraslado[1];
+            ComprobanteImpuestos impuesto = new ComprobanteImpuestos();
+            var valorConc = db.tbd_Conceptos_Nota_Venta.ToList<tbd_Conceptos_Nota_Venta>().Where(u => u.id_nota_venta == id_).ToList();
+            for (int i = 0; i < valorConc.Count; i++)
+            {
+                Decimal canti = Convert.ToDecimal(valorConc[i].cantidad);
+                Decimal imp_unitario = Convert.ToDecimal(valorConc[i].precio_unitario);
+                Decimal imp_total = Convert.ToDecimal(valorConc[i].total);
+                Decimal descuento = Convert.ToDecimal(valorConc[i].total_descuento) == 0 ? 0 : Convert.ToDecimal(valorConc[i].total_descuento);
+                var cprodserv = db.tbc_ProdServ.ToList<tbc_ProdServ>().Where(u => u.id_sat == valorConc[i].id_sat).Select(u => u.c_pord_serv).Single();
+                var clv_unidad = db.tbc_Unidades_Medida.ToList<tbc_Unidades_Medida>().Where(u => u.id_unidad_medida == valorConc[i].id_unidad_medida).Select(u => u.clave).Single();
+                oConcepto.Importe = Math.Round(imp_unitario, 2);
+                oConcepto.ClaveProdServ = cprodserv;
+                oConcepto.Cantidad = Convert.ToDecimal(valorConc[i].cantidad);
+                oConcepto.ClaveUnidad = clv_unidad;
+                oConcepto.Descripcion = valorConc[i].concepto;
+                oConcepto.ValorUnitario = Math.Round(imp_unitario, 2);
+                oConcepto.Descuento = descuento;
+                oConcepto.ObjetoImp = "02";
+                //oConcepto.Unidad = valorConc[i].unidad;//"Pieza";
+
+                if (valorConc[i].total_iva > 0)
+                {
+                    Decimal i_total = Convert.ToDecimal(valorConc[i].total);
+                    comprobanteConceptoImpuestosTraslado.Base = Math.Round(imp_unitario, 2);//10
+                    comprobanteConceptoImpuestosTraslado.TasaOCuota = 0.160000m;
+                    comprobanteConceptoImpuestosTraslado.Impuesto = "002";
+                    comprobanteConceptoImpuestosTraslado.Importe = Math.Round(Convert.ToDecimal(valorConc[i].total_iva), 2);
+                    comprobanteConceptoImpuestosTraslado.TipoFactor = "Tasa";
+                    comprobanteConceptoImpuestosTraslado.ImporteSpecified = true;
+                    comprobanteConceptoImpuestosTraslado.TasaOCuotaSpecified = true;
+                    total_trasladado += Math.Round(Convert.ToDecimal(valorConc[i].total_iva), 2);
+                    base_iva += Math.Round(Convert.ToDecimal(imp_unitario), 2);
+                }
+                //Retenido
+                if (factura.iva_ret > 0)
+                {
+                    Decimal i_total = Convert.ToDecimal(factura.total);
+
+                    total_iva_ret += Convert.ToDecimal(factura.isr_ret);
+                }
+                //
+                if (factura.isr_ret > 0)
+                {
+                    Decimal i_total = Convert.ToDecimal(factura.total);
+
+                    total_retenido += Convert.ToDecimal(factura.iva_ret);
+                }
+
+                conceptoImpuestos.Traslados = new ComprobanteConceptoImpuestosTraslado[1];
+
+                conceptoImpuestos.Traslados[0] = comprobanteConceptoImpuestosTraslado;
+
+                oConcepto.Impuestos = new ComprobanteConceptoImpuestos();
+
+                oConcepto.Impuestos.Traslados = conceptoImpuestos.Traslados;
+
+                lstConceptos.Add(oConcepto);
+                oComprobante.Conceptos = lstConceptos.ToArray();
+
+                impuesto.TotalImpuestosTrasladados = Math.Round(Convert.ToDecimal(factura.iva), 2);//1.60m;
+
+                impuesto.TotalImpuestosTrasladadosSpecified = true;
+
+            }
+
+            //--------------------------------------------------------------------------------------------------------
+            comprobanteImpuestosTraslados[0] = new ComprobanteImpuestosTraslado();
+
+            comprobanteImpuestosTraslados[0].Base = base_iva;
+            comprobanteImpuestosTraslados[0].TasaOCuota = 0.160000m;
+            comprobanteImpuestosTraslados[0].Importe = total_trasladado;
+            comprobanteImpuestosTraslados[0].TipoFactor = "Tasa";
+            comprobanteImpuestosTraslados[0].Impuesto = "002";
+
+            comprobanteImpuestosTraslados[0].ImporteSpecified = true;
+            comprobanteImpuestosTraslados[0].TasaOCuotaSpecified = true;
+
+            impuesto.Traslados = comprobanteImpuestosTraslados;
+
+            oComprobante.Impuestos = impuesto;
+
+            //Creamos el xml
+            CreateXMLNota(oComprobante);
+
+            string cadenaOriginal = "";
+            string pathxsl = path + @"cadenaoriginal_4_0.xslt";
+            System.Xml.Xsl.XslCompiledTransform transformador = new System.Xml.Xsl.XslCompiledTransform(true);
+            transformador.Load(pathxsl);
+
+            using (StringWriter sw = new StringWriter())
+            using (XmlWriter xwo = XmlWriter.Create(sw, transformador.OutputSettings))
+            {
+                transformador.Transform(pathXML, xwo);
+                cadenaOriginal = sw.ToString();
+            }
+
+            SelloDigital oSelloDigital = new SelloDigital();
+            oComprobante.Certificado = oSelloDigital.Certificado(pathCer);
+            oComprobante.Sello = oSelloDigital.Sellar(cadenaOriginal, pathKey, clavePrivada);
+
+            //Creamos el xml
+            CreateXMLNota(oComprobante);
+            factura.url_xml = aux_path;
+            db.SaveChanges();
+            return Json("Success", JsonRequestBehavior.AllowGet);
+        }
+        private static void CreateXMLNota(Comprobante oComprobante)
+        {
+            //SERIALIZAMOS.-------------------------------------------------
+
+            //string pathXML = p + @"Plantillas\FacturaXML.xml";
+            string pathXML = p_xml;
+            XmlSerializerNamespaces xmlNameSpace = new XmlSerializerNamespaces();
+            xmlNameSpace.Add("cfdi", "http://www.sat.gob.mx/cfd/4");
+            xmlNameSpace.Add("xs", "http://www.w3.org/2001/XMLSchema");
+            xmlNameSpace.Add("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+
+            XmlSerializer oXmlSerializar = new XmlSerializer(typeof(Comprobante));
+
+            string sXml = "";
+
+            using (var sww = new CLS40.StringWriterWithEncoding(Encoding.UTF8))
+            {
+
+                using (XmlWriter writter = XmlWriter.Create(sww))
+                {
+                    oXmlSerializar.Serialize(writter, oComprobante, xmlNameSpace);
+                    sXml = sww.ToString();
+                    var text = sXml.Substring(55); //sXml.Split("<?xml version=\"1.0\" encoding=\"utf-8\"?><cfdi:Comprobante"); //55
+                    sXml = "<?xml version=\"1.0\" encoding=\"utf-8\"?><cfdi:Comprobante " + "xsi:schemaLocation=\"http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd\"" + text;
+                }
+
+            }
+
+            //guardamos el string en un archivo
+            System.IO.File.WriteAllText(pathXML, sXml);
+        }
+        //XML Pagos Servicio
+        public ActionResult genXMLPagosServicio(Int32? id_)
+        {
+            //************************************************************************************************************************************************
+            //Get Info Nota de Venta en DB
+            db = new BD_FFEntities();
+            var factura = db.tbd_Cobros.ToList<tbd_Cobros>().Where(u => u.id_cobro == id_).Single();
+            tbc_Usuarios usuario = Session["tbc_Usuarios"] as tbc_Usuarios;
+            var firma = db.tbd_Firmas.ToList<tbd_Firmas>().Where(u => u.rfc == usuario.rfc).Single();
+            //DatosIVA
+            var tipo = factura.timbres;
+            decimal iva_ = 0;
+            decimal s_iva = 0;
+            switch (tipo)
+            {
+                case 1:
+                    iva_ = 1.60m;
+                    break;
+                case 15:
+                    iva_ = 54.76m;
+                    break;
+                case 50:
+                    iva_ = 91.03m;
+                    break;
+                case 500:
+                    iva_ = 288.69m;
+                    break;
+                case 1000:
+                    iva_ = 467.59m;
+                    break;
+                case 2000:
+                    iva_ = 544.83m;
+                    break;
+                case 3000:
+                    iva_ = 668.14m;
+                    break;
+                case 4000:
+                    iva_ = 886.07m;
+                    break;
+                case 5000:
+                    iva_ = 1465.38m;
+                    break;
+            }
+            s_iva = factura.total - iva_;
+            //Ruta donde alojamos los Archivos
+            var fca_emision = factura.fecha_cobro.ToString();
+
+            String[] fechaE = fca_emision.Split(' ');
+            string aux_fc_emi = fechaE[0];
+            String[] auxfechaE = aux_fc_emi.Split('/');
+            string ax_fc_emi = auxfechaE[0] + auxfechaE[1] + auxfechaE[2];
+
+            var ruta_xml = @"XML\PDF\Facturafast\" + ax_fc_emi;//factura.url_xml;
+            //string[] nom_doc = "Temp_";//factura.url_pdf.Split('\\');
+            //string[] nd = nom_doc[4].Split('.');
+            //string nf = nd[0];
+            string namefile = "tempXML";
+            //************************************
+            string DirPrg_ = Server.MapPath("~");
+            bool fileExist = System.IO.File.Exists(DirPrg_+"Plantillas/"+ruta_xml);
+            FileInfo file = new FileInfo(DirPrg_+"Plantillas/"+ruta_xml);
+            try
+            {
+                file.Delete();
+                fileExist = System.IO.File.Exists(DirPrg_+"Plantillas/"+ruta_xml);
+            }
+            catch (Exception e)
+            {
+
+            }
+            if (!fileExist)
+            {
+                DirectoryInfo didoc = Directory.CreateDirectory(DirPrg_+"Plantillas/"+ruta_xml);
+            }
+            string aux_path = ruta_xml + @"\" + namefile + ".xml";
+            string path = Server.MapPath("~");
+            p = path;
+            string pathXML = path + @"Plantillas\"+ruta_xml + "\\" + namefile + ".xml";
+            
+            string pathCer = path + @"\Plantillas\Firmas\Facturafast\00001000000506285169.cer";
+            string pathKey = path + @"\Plantillas\Firmas\Facturafast\CSD_FACTURAFAST_SA_DE_CV_FAC201027H66_20210129_131834.key";
+            string clavePrivada = "HUEXOTITLA2021";
+            
+            p_xml = pathXML;
+            //Obtenemos el Número de Certificado
+            string numeroCertificado, aa, b, c;
+            SelloDigital.leerCER(pathCer, out aa, out b, out c, out numeroCertificado);
+            //----------------Llenamos la clase COMPROBANTE ---------------------------
+            Comprobante oComprobante = new Comprobante();
+            oComprobante.Version = "4.0";
+            oComprobante.Serie = "A";// factura.serie;
+            oComprobante.Folio = "1";// factura.folio;
+            oComprobante.Fecha = DateTime.Now.AddMinutes(-2).ToString("yyyy-MM-ddTHH:mm:ss");
+            //oComprobante.Sello = ""; //sig video
+            oComprobante.FormaPago = "03";//db.tbc_Formas_Pago.Where(u => u.id_forma_pago == factura.id_forma_pago).Select(u => u.clave).First();
+            oComprobante.NoCertificado = numeroCertificado;
+            //oComprobante.Certificado = ""; //sig video
+            oComprobante.SubTotal = s_iva;//Math.Round(Convert.ToDecimal(factura.importe), 2);
+            oComprobante.Moneda = "MXN";
+            oComprobante.Total = Math.Round(Convert.ToDecimal(factura.total), 2);
+            oComprobante.TipoDeComprobante = "I";
+            oComprobante.MetodoPago = "PUE";// db.tbc_Metodos_Pago.Where(u => u.id_metodo_pago == factura.id_forma_pago).Select(u => u.clave).First();
+            oComprobante.LugarExpedicion = "72534";
+            oComprobante.Descuento = 0;
+            oComprobante.Exportacion = "01";
+
+            oComprobante.FormaPagoSpecified = true;
+            oComprobante.MetodoPagoSpecified = true;
+            //Emisor
+            ComprobanteEmisor oEmisor = new ComprobanteEmisor();
+            oEmisor.Rfc = "FAC201027H66";//usuario.rfc;
+            oEmisor.Nombre = "FACTURAFAST";// usuario.nombre_razon;
+            oEmisor.RegimenFiscal = "601";
+            //Receptor
+            ComprobanteReceptor oReceptor = new ComprobanteReceptor();
+            oReceptor.Nombre = usuario.nombre_razon;
+            oReceptor.Rfc = usuario.rfc;
+            oReceptor.UsoCFDI = "G03";//db.tbc_Usos_CFDI.Where(u => u.id_uso_cfdi == factura.id_uso_cfdi).Select(u => u.clave).First();
+            oReceptor.RegimenFiscalReceptor = db.tbc_Regimenes.Where(u => u.id_regimen_fiscal == usuario.id_regimen_fiscal).Select(u => u.clave).First();
+            oReceptor.DomicilioFiscalReceptor = usuario.cp;
+            //Asigno emisor y receptor
+            oComprobante.Emisor = oEmisor;
+            oComprobante.Receptor = oReceptor;
+            //Conceptos
+            List<ComprobanteConcepto> lstConceptos = new List<ComprobanteConcepto>();
+            ComprobanteConcepto oConcepto = new ComprobanteConcepto();
+            //--------------------------------------------------------------------------------------------------------
+            Decimal total_trasladado = 0;
+            
+            Decimal base_iva = 0;
+            ComprobanteConceptoImpuestos conceptoImpuestos = new ComprobanteConceptoImpuestos();
+
+            ComprobanteConceptoImpuestosTraslado comprobanteConceptoImpuestosTraslado = new ComprobanteConceptoImpuestosTraslado();
+            ComprobanteImpuestosTraslado[] comprobanteImpuestosTraslados = new ComprobanteImpuestosTraslado[1];
+            ComprobanteImpuestos impuesto = new ComprobanteImpuestos();
+            
+            
+            Decimal imp_unitario = Convert.ToDecimal(factura.importe);
+            Decimal imp_total = Convert.ToDecimal(factura.total);
+            Decimal descuento = 0;
+
+            oConcepto.Importe = s_iva;//Math.Round(imp_unitario, 2);
+            oConcepto.ClaveProdServ = "84111506";
+            oConcepto.Cantidad = 1;
+            oConcepto.ClaveUnidad = "E48";
+            oConcepto.Descripcion = db.tbc_Paquetes.Where(u => u.id_paquete== factura.id_paquete).Select(u => u.nombre_paquete).First(); ;
+            oConcepto.ValorUnitario = s_iva;//Math.Round(imp_unitario, 2);
+            oConcepto.Descuento = descuento;
+            oConcepto.ObjetoImp = "02";
+            //{        
+            Decimal i_total = s_iva;//Convert.ToDecimal(factura.total);
+            comprobanteConceptoImpuestosTraslado.Base = s_iva;//Math.Round(imp_unitario, 2);//10
+                    comprobanteConceptoImpuestosTraslado.TasaOCuota = 0.160000m;
+                    comprobanteConceptoImpuestosTraslado.Impuesto = "002";
+                    comprobanteConceptoImpuestosTraslado.Importe = Math.Round(iva_, 2);
+                    comprobanteConceptoImpuestosTraslado.TipoFactor = "Tasa";
+                    comprobanteConceptoImpuestosTraslado.ImporteSpecified = true;
+                    comprobanteConceptoImpuestosTraslado.TasaOCuotaSpecified = true;
+                    total_trasladado += Math.Round(iva_, 2);
+                    base_iva += Math.Round(Convert.ToDecimal(imp_unitario), 2);
+                //}
+                
+                conceptoImpuestos.Traslados = new ComprobanteConceptoImpuestosTraslado[1];
+
+                conceptoImpuestos.Traslados[0] = comprobanteConceptoImpuestosTraslado;
+
+                oConcepto.Impuestos = new ComprobanteConceptoImpuestos();
+
+                oConcepto.Impuestos.Traslados = conceptoImpuestos.Traslados;
+
+                lstConceptos.Add(oConcepto);
+                oComprobante.Conceptos = lstConceptos.ToArray();
+
+                impuesto.TotalImpuestosTrasladados = Math.Round(iva_, 2);
+
+                impuesto.TotalImpuestosTrasladadosSpecified = true;
+
+            //}
+
+            //--------------------------------------------------------------------------------------------------------
+            comprobanteImpuestosTraslados[0] = new ComprobanteImpuestosTraslado();
+
+            comprobanteImpuestosTraslados[0].Base = s_iva;
+            comprobanteImpuestosTraslados[0].TasaOCuota = 0.160000m;
+            comprobanteImpuestosTraslados[0].Importe = total_trasladado;
+            comprobanteImpuestosTraslados[0].TipoFactor = "Tasa";
+            comprobanteImpuestosTraslados[0].Impuesto = "002";
+
+            comprobanteImpuestosTraslados[0].ImporteSpecified = true;
+            comprobanteImpuestosTraslados[0].TasaOCuotaSpecified = true;
+
+            impuesto.Traslados = comprobanteImpuestosTraslados;
+
+            oComprobante.Impuestos = impuesto;
+
+            //Creamos el xml
+            CreateXMLPagos(oComprobante);
+
+            string cadenaOriginal = "";
+            string pathxsl = path + @"cadenaoriginal_4_0.xslt";
+            System.Xml.Xsl.XslCompiledTransform transformador = new System.Xml.Xsl.XslCompiledTransform(true);
+            transformador.Load(pathxsl);
+
+            using (StringWriter sw = new StringWriter())
+            using (XmlWriter xwo = XmlWriter.Create(sw, transformador.OutputSettings))
+            {
+                transformador.Transform(pathXML, xwo);
+                cadenaOriginal = sw.ToString();
+            }
+
+            SelloDigital oSelloDigital = new SelloDigital();
+            oComprobante.Certificado = oSelloDigital.Certificado(pathCer);
+            oComprobante.Sello = oSelloDigital.Sellar(cadenaOriginal, pathKey, clavePrivada);
+
+            //Creamos el xml
+            CreateXMLPagos(oComprobante);
+            factura.url_xml = aux_path;
+            db.SaveChanges();
+            return Json("Success", JsonRequestBehavior.AllowGet);
+        }
+        public static void CreateXMLPagos(Comprobante oComprobante)
+        {
+            //SERIALIZAMOS.-------------------------------------------------
+
+            //string pathXML = p + @"Plantillas\FacturaXML.xml";
+            string pathXML = p_xml;
+            XmlSerializerNamespaces xmlNameSpace = new XmlSerializerNamespaces();
+            xmlNameSpace.Add("cfdi", "http://www.sat.gob.mx/cfd/4");
+            xmlNameSpace.Add("xs", "http://www.w3.org/2001/XMLSchema");
+            xmlNameSpace.Add("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+
+            XmlSerializer oXmlSerializar = new XmlSerializer(typeof(Comprobante));
+
+            string sXml = "";
+
+            using (var sww = new CLS40.StringWriterWithEncoding(Encoding.UTF8))
+            {
+
+                using (XmlWriter writter = XmlWriter.Create(sww))
+                {
+                    oXmlSerializar.Serialize(writter, oComprobante, xmlNameSpace);
+                    sXml = sww.ToString();
+                    var text = sXml.Substring(55); //sXml.Split("<?xml version=\"1.0\" encoding=\"utf-8\"?><cfdi:Comprobante"); //55
+                    sXml = "<?xml version=\"1.0\" encoding=\"utf-8\"?><cfdi:Comprobante " + "xsi:schemaLocation=\"http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd\"" + text;
+                }
+
+            }
+
+            //guardamos el string en un archivo
+            System.IO.File.WriteAllText(pathXML, sXml);
+        }
+
         //Requisitos para XML
         void FabricaPEM(String cer, String key, String pass, String passCSDoFIEL, String rfc)
         {
@@ -935,14 +1411,18 @@ namespace Facturafast.Controllers
                     if (cancelResponse.cancelResult.Folios.Length > 0)
                     {
                         Array foliofiscal = cancelResponse.cancelResult.Folios;
+                        var estatusCancelacionFiel = "";
                         for (int pos = 0; pos < foliofiscal.Length; pos++)
                         {
+                            estatusCancelacionFiel = cancelResponse.cancelResult.Folios[pos].EstatusUUID;
                             mensaje = "Cancelado|UUID: " + cancelResponse.cancelResult.Folios[pos].UUID +
                                 "|Estatus cancelación: " + cancelResponse.cancelResult.Folios[pos].EstatusCancelacion +
                                 "|Estatus UUID: " + cancelResponse.cancelResult.Folios[pos].EstatusUUID;
+
                         }
                         using (BD_FFEntities db = new BD_FFEntities())
                         {
+                            
                             db.Configuration.LazyLoadingEnabled = false;
                             if (tipo != "Pago")
                             {
@@ -950,8 +1430,10 @@ namespace Facturafast.Controllers
                                 var valorPreFac = db.tbd_Pre_Factura.ToList<tbd_Pre_Factura>().Where(u => u.id_pre_factura == id).FirstOrDefault();
                                 //valor.status = "3";
                                 valorPreFac.status = 3;
-                                var updFact = db.tbd_Facturas.ToList<tbd_Facturas>().Where(u => u.uuid == valorPreFac.uuid).FirstOrDefault();
-                                updFact.id_estatus = 8;
+                                //if (estatusCancelacionFiel == "201") {
+                                //    var updFact = db.tbd_Facturas.ToList<tbd_Facturas>().Where(u => u.uuid == valorPreFac.uuid).FirstOrDefault();
+                                //    updFact.id_estatus = 8;
+                                //}
                             }
                             else
                             {
@@ -972,6 +1454,12 @@ namespace Facturafast.Controllers
                                 estatus_uuid = cancelResponse.cancelResult.Folios[0].EstatusUUID
                             };
                             db.tbd_Cancelacion_Factura.Add(cancelaFac);
+                            if (estatusCancelacionFiel == "201" || estatusCancelacionFiel == "202")
+                            {
+                                var factura = db.tbd_Facturas.ToList<tbd_Facturas>().Where(u => u.uuid == ffiscal).FirstOrDefault();
+                                factura.id_estatus = 8;
+                            }
+                            
                             db.SaveChanges();
                         }
                     }
@@ -1073,13 +1561,23 @@ namespace Facturafast.Controllers
             {
                 var cartaPorte = db.tbd_Pre_Carta_Porte.ToList<tbd_Pre_Carta_Porte>().Where(u => u.id == id_).Single();
                 var factura = db.tbd_Pre_Factura.ToList<tbd_Pre_Factura>().Where(u => u.id_pre_factura == cartaPorte.id_prefactura).Single();
-                ruta_pdf = factura.url_pdf;
-                ruta_xml = factura.url_xml;
+                ruta_pdf = "Plantillas\\" + factura.url_pdf;
+                ruta_xml = "Plantillas\\" + factura.url_xml;
                 string[] nom_doc = factura.url_pdf.Split('\\');
                 string[] nd = nom_doc[5].Split('.');
                 string nf = nd[0];
                 namefile = nf;
             }
+            else if (tipo == "FacturaNV") {
+                var factura = db.tbd_Notas_Venta.ToList<tbd_Notas_Venta>().Where(u => u.id_nota_venta == id_).Single();
+                ruta_xml = factura.url_xml;
+                ruta_pdf = factura.url_pdf;
+                string[] nom_doc = factura.url_pdf.Split('/');
+                string[] nd = nom_doc[4].Split('.');
+                string nf = nd[0];
+                namefile = "tempXML";
+                ruta_xml = "XML\\PDF\\Facturafast\\";
+            } 
             else
             {
                 var factura = db.tbd_Pre_Factura.ToList<tbd_Pre_Factura>().Where(u => u.id_pre_factura == id_).Single();
@@ -1105,8 +1603,8 @@ namespace Facturafast.Controllers
 
             //Parametros
             XmlDocument xmlDocument = new XmlDocument();
-            xmlDocument.Load(DirPrg + @"\Plantillas\" + ruta_xml + "\\" + n_doc);
-            string rutaO = DirPrg + @"\Plantillas\" + ruta_pdf;// + "\\" + n_doc;
+            xmlDocument.Load(DirPrg +"Plantillas\\"+ruta_xml + "\\" + n_doc);
+            string rutaO = DirPrg + ruta_pdf;// + "\\" + n_doc;
             string rutaM = "";
             //Conviertes el archivo en Byte
             byte[] byteXmlDocument = Encoding.UTF8.GetBytes(xmlDocument.OuterXml);
@@ -1114,9 +1612,9 @@ namespace Facturafast.Controllers
             byteXmlDocument = Convert.FromBase64String(stringByteXmlDocument);
 
             //Timbras el Archivo
-            fx.xml = byteXmlDocument;
-            fx.username = "programador1@consultoriacastelan.com";
-            fx.password = "Programador1*";
+            //fx.xml = byteXmlDocument;
+            //fx.username = "programador1@consultoriacastelan.com";
+            //fx.password = "Programador1*";
 
             stamp.xml = byteXmlDocument;
             stamp.username = "cfdi@facturafast.mx";
@@ -1126,7 +1624,7 @@ namespace Facturafast.Controllers
             //Generamos Request
             String usuario;
             usuario = Environment.UserName;
-            String url = DirPrg + "\\Plantillas\\" + ruta_xml;
+            String url = DirPrg + "Plantillas\\"+ruta_xml;
             StreamWriter XML = new StreamWriter(url + "SOAP_Request.xml");
             //Direccion donde guardaremos el SOAP Envelope
             XmlSerializer soap = new XmlSerializer(stamp.GetType());
@@ -1158,8 +1656,8 @@ namespace Facturafast.Controllers
                 XMLL.Write(selloResponse.stampResult.xml);
                 XMLL.Close();
                 //Cambiar nombre a PDF
-                rutaM = DirPrg + @"\Plantillas\" + ruta_xml + "\\" + uuidR + ".pdf";
-                var rutaXMLO = DirPrg + @"\Plantillas\" + ruta_xml + "\\" + n_doc;
+                rutaM = DirPrg + ruta_xml + "\\" + uuidR + ".pdf";
+                var rutaXMLO = DirPrg + ruta_xml + "\\" + n_doc;
                 if (System.IO.File.Exists(rutaO))
                 {
                     System.IO.File.Move(rutaO, rutaM);
@@ -1194,22 +1692,29 @@ namespace Facturafast.Controllers
                     }
                     else if (tipo != "Pago")
                     {
-                        db.Configuration.LazyLoadingEnabled = false;
-                        var valorPreFac = db.tbd_Pre_Factura.ToList<tbd_Pre_Factura>().Where(u => u.id_pre_factura == id_).FirstOrDefault();
-                        valorPreFac.selloSAT = selloResponse.stampResult.SatSeal;
-                        valorPreFac.ccertificacion = selloResponse.stampResult.NoCertificadoSAT;
-                        valorPreFac.url_xml = ruta_xml + uuidR + ".xml";
-                        valorPreFac.url_pdf = ruta_xml + uuidR + ".pdf";
-                        valorPreFac.status = 2;
-                        //Guardar CFDI
-                        tbd_Cfdi_Uuid cfdi = new tbd_Cfdi_Uuid
-                        {
-                            id_pre_factura = id_,
-                            id_relacion = "1",
-                            uuid = uuidR
-                        };
-                        db.tbd_Cfdi_Uuid.Add(cfdi);
-                        db.SaveChanges();
+                        if (tipo == "FacturaNV") {
+                            db.Configuration.LazyLoadingEnabled = false;
+                            var valorNota = db.tbd_Notas_Venta.ToList<tbd_Notas_Venta>().Where(u => u.id_nota_venta == id_).FirstOrDefault();
+                            valorNota.id_estatus = 7;
+                            db.SaveChanges();
+                        } else {
+                            db.Configuration.LazyLoadingEnabled = false;
+                            var valorPreFac = db.tbd_Pre_Factura.ToList<tbd_Pre_Factura>().Where(u => u.id_pre_factura == id_).FirstOrDefault();
+                            valorPreFac.selloSAT = selloResponse.stampResult.SatSeal;
+                            valorPreFac.ccertificacion = selloResponse.stampResult.NoCertificadoSAT;
+                            valorPreFac.url_xml = ruta_xml + uuidR + ".xml";
+                            valorPreFac.url_pdf = ruta_xml + uuidR + ".pdf";
+                            valorPreFac.status = 2;
+                            //Guardar CFDI
+                            tbd_Cfdi_Uuid cfdi = new tbd_Cfdi_Uuid
+                            {
+                                id_pre_factura = id_,
+                                id_relacion = "1",
+                                uuid = uuidR
+                            };
+                            db.tbd_Cfdi_Uuid.Add(cfdi);
+                            db.SaveChanges();
+                        }
                     }
                     else
                     {
@@ -1225,19 +1730,15 @@ namespace Facturafast.Controllers
                     }
                 }
                 //Restar timbre
-
                 tbc_Timbres timbres = db.tbc_Timbres.Where(s => s.rfc_usuario == usuario_.rfc).Single();
 
                 timbres.timbres_usados++;
                 timbres.timbres_disponibles--;
 
                 db.SaveChanges();
-                
-
-
                 //---------Agregar a base Facturas-------------------
 
-                string root_xml = DirPrg + @"\Plantillas\" + ruta_xml + "\\" + uuidR + ".xml";
+                string root_xml = DirPrg  +"Plantillas\\"+ ruta_xml + "\\" + uuidR + ".xml";
 
                 LeerArchivo(root_xml, usuario_.rfc, id_, tipo);
             }
@@ -1705,21 +2206,25 @@ namespace Facturafast.Controllers
                                     if (url_xml_ == 0)
                                     {
                                         url_xml_ = db.tbd_Pre_Pagos.Where(s => s.uuid == _uuid).Select(u => u.id_pre_factura).SingleOrDefault();
+                                    }else if (tipo == "FacturaNV") {
+                                        r_xml = "Plantillas/"+db.tbd_Notas_Venta.Where(s => s.id_nota_venta == id_prefac).Select(u => u.url_xml).SingleOrDefault();
                                     }
-                                    r_xml = db.tbd_Pre_Factura.Where(s => s.id_pre_factura == url_xml_).Select(u => u.url_xml).SingleOrDefault();
-                                    if (r_xml == null)
-                                    {
-                                        r_xml = db.tbd_Pre_Pagos.Where(s => s.id_pre_factura == url_xml_).Select(u => u.url_xml).SingleOrDefault();
+                                    else {
+                                        r_xml = db.tbd_Pre_Factura.Where(s => s.id_pre_factura == url_xml_).Select(u => u.url_xml).SingleOrDefault();
+
+                                        if (r_xml == null)
+                                        {
+                                            r_xml = db.tbd_Pre_Pagos.Where(s => s.id_pre_factura == url_xml_).Select(u => u.url_xml).SingleOrDefault();
+                                        }
                                     }
-                                }
-                                else {
+                                }else {
                                     r_xml = db.tbd_Pre_Pagos.Where(s => s.uuid == _uuid).Select(u => u.url_xml).SingleOrDefault();
                                 }
                                 
                                 //----------------------------------------------------------------------------------------------------------------------------- 
-                                String Url_Almacen = Server.MapPath("~") + "\\" + r_xml;//variable.url_facturas + DirectoryFecha;
-                                if (!Directory.Exists(Url_Almacen))
-                                    Directory.CreateDirectory(Url_Almacen); //! Directorio Por Fecha (yyyyMMdd) dependiendo de la fecha de timbrado
+                                String Url_Almacen = Server.MapPath("~") + r_xml;//variable.url_facturas + DirectoryFecha;
+                                //if (!Directory.Exists(Url_Almacen))
+                                    //Directory.CreateDirectory(Url_Almacen); //! Directorio Por Fecha (yyyyMMdd) dependiendo de la fecha de timbrado
 
                                 String Url_XML = Url_Almacen;//+ _uuid + ".xml";
 
@@ -1737,13 +2242,25 @@ namespace Facturafast.Controllers
                                         db.Configuration.LazyLoadingEnabled = false;
                                         if (tipo != "Pago")
                                         {
-                                            var prefac = db.tbd_Pre_Factura.ToList<tbd_Pre_Factura>().Where(u => u.id_pre_factura == id_prefac).FirstOrDefault();
-                                            prefac.selloSAT = nuevaFactura.sello_sat;
-                                            prefac.ccertificacion = nuevaFactura.certificado_sat;
-                                            prefac.version_timbrado = _versionTimbreFiscalDigital;
-                                            prefac.uuid = nuevaFactura.uuid;
-                                            prefac.selloCFDI = nuevaFactura.sello_cfdi;
-                                            prefac.fca_timbrado = nuevaFactura.fecha_timbrado;
+                                            if (tipo == "FacturaNV") {
+                                                var prefac = db.tbd_Cobros.ToList<tbd_Cobros>().Where(u => u.id_cobro == id_prefac).FirstOrDefault();
+                                                //Guardar a PreFactura
+                                                tbd_Pre_Factura preFac = new tbd_Pre_Factura
+                                                {
+                                                    
+                                                };
+                                                db.tbd_Pre_Factura.Add(preFac);
+                                                db.SaveChanges();
+                                            }
+                                            else {
+                                                var prefac = db.tbd_Pre_Factura.ToList<tbd_Pre_Factura>().Where(u => u.id_pre_factura == id_prefac).FirstOrDefault();
+                                                prefac.selloSAT = nuevaFactura.sello_sat;
+                                                prefac.ccertificacion = nuevaFactura.certificado_sat;
+                                                prefac.version_timbrado = _versionTimbreFiscalDigital;
+                                                prefac.uuid = nuevaFactura.uuid;
+                                                prefac.selloCFDI = nuevaFactura.sello_cfdi;
+                                                prefac.fca_timbrado = nuevaFactura.fecha_timbrado;
+                                            }
                                         }
                                         else {
                                             var prefac = db.tbd_Pre_Pagos.ToList<tbd_Pre_Pagos>().Where(u => u.id == id_prefac).FirstOrDefault();

@@ -5,19 +5,21 @@
 <script src="~/js/utilsFactura.js"></script>
 <h1 class="h3 mb-3">PreFactura</h1>
 <div class="row">
+    <input type="hidden" id="tmp_pdf" />
+    <input type="hidden" id="tmp_xml" />
     <div class="col-md-2 col-xs-2">
         <input type="hidden" value="@Model.id_pre_factura" id="idprefac" />
-        <button class="btn btn-danger btnEstatus mb-3" id="btnTimbrar" style="visibility:hidden" onclick="timbrarModal(@Model.id_pre_factura)">Timbrar</button><br/>
+        <button class="btn btn-danger btnEstatus mb-3" id="btnTimbrar" style="visibility:hidden" onclick="timbrarModal(@Model.id_pre_factura)">Timbrar</button><br />
         <a class="btn btn-warning btnEstatus mb-3" id="btnEditar" href="/Facturacion/Factura?id=@Model.id_pre_factura" style="visibility: hidden"><i class="fas fa-edit"></i> Editar</a><br />
         <a class="btn btn-success btnTimbrar" id="btnListar" href='/Facturacion/ListaFactura' style="visibility: hidden"><i class="fas fa-file-alt"></i> Listar</a>
     </div>
     <div class="col-md-10 col-xs-10" id="d_prefactura" style="visibility:hidden">
         <div class="card">
             <div class="card-header">
-                
+
             </div>
             <div class="row rpdf">
-                
+
             </div>
         </div>
     </div>
@@ -83,14 +85,16 @@
 </div>
 <script>
     const estatus = '@ViewBag.Estatus';
-    setTimeout(function () { abrirCargando(); previsualizar(); }, 1000);
+    setTimeout(function () { abrirCargando(); previsualizar(0); }, 1000);
 
     var f_pdf, f_doc = "";
 
-    function previsualizar()
+    function previsualizar(v)
     {
+        abrirCargando();
         let id = $("#idprefac").val();
         $("#d_prefactura").css("visibility", "visible");
+        $(".rpdf").empty();
         //-------------------------------------------------------------------------
         $.ajax({
             type: "POST",
@@ -99,8 +103,8 @@
             url: '/Facturacion/PreFacturar?id='+id,
             data: JSON.stringify({ 'id': id}),
             success: function (data) {
-                console.log(data);
                 var response = data;
+                cerrarCargando();
                 if (response == "NG")
                 {
                     previsualizar();
@@ -109,17 +113,24 @@
                 {
                     f_pdf = response;
                     //setTimeout(function () {
-                        $(".rpdf").html('<iframe src="/' + response + '" style="height:100vh"></iframe>');
-                        cerrarCargando();
-                        $("#btnPreTimbrar").css("display", "none");
-                        $(".btnTimbrar").css("visibility", "visible");
-                        if (estatus == 1) {
+                    $(".rpdf").html('<iframe src="/' + response + '" style="height:100vh"></iframe>');
+                    $("#tmp_pdf").val(response);
+                    $("#btnPreTimbrar").css("display", "none");
+                    $(".btnTimbrar").css("visibility", "visible");
+                    console.log(v + "-----" + estatus);
+                        if (estatus == 1 && v == 0) {
                             $(".btnEstatus").css("visibility", "visible");
+                            $("#btnTimbrar").css("visibility", "visible");
                             gen_xml(id);
+                        }
+                        if (v != 0) {
+                            $("#btnTimbrar").css("visibility", "hidden");
+                            $("#btnEditar").css("visibility", "hidden");
+                            genBtn();
                         }
                         f_doc = f_pdf.replace('PDF', 'DOCX');
                         f_doc = f_doc.replace('.pdf', '.docx');
-
+                        
                     //}, 15000);
                 }
             },
@@ -166,22 +177,18 @@
             data: JSON.stringify({ 'id_': id, 'n_doc': 'Factura.xml', 'tipo': 'Factura' }),
             success: function (data) {
                 var response = data.split("|");
-                console.log(response);
                 if (response[0] == "Timbrado") {
                     notificacionAlert("Timbrado Correctamente", "success");
-                    previsualizar();
-                    setTimeout(function () {
-                        $(".modal-footer").html('<button class="btn btn-primary" onclick=sendcorreo()><i class="fas fa-envelope"></i>&nbsp; Enviar Correo</button>' +
-                            '<a target="_blank" class="btn btn-success" href="../' + f_pdf + '"><i class="fas fa-file"></i>&nbsp; Descargar PDF</button>' +
-                            '<a class="btn btn-info" href="../' + response[1] + '"><i class="fas fa-file"></i>&nbsp; Descargar XML</button>');
-                    }, 5000);
-
+                    previsualizar(1);
+                    $("#btnEditar").css('visibility', 'hidden');
+                    $("#btnTimbrar").css('visibility', 'hidden');   
+                    //$("#tmp_xml").val(response[1]);
                     cerrarCargando();
                 } else {
                     notificacionAlert("Error, " + response[2] + " ,vuelva a intentar", "danger");
                     cerrarCargando();
                 }
-                
+
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
@@ -189,6 +196,7 @@
             }
         });
         //-------------------------------------------------------------------------
+        
     }
 
     function sendcorreo()
@@ -224,7 +232,7 @@
 
     function gen_xml(id)
     {
-    //-------------------------------------------------------------------------
+        //-------------------------------------------------------------------------
         $.ajax({
             type: "POST",
             contentType: "application/json; charset=utf-8",
@@ -253,6 +261,22 @@
             }
         });
         //-------------------------------------------------------------------------
+    }
+
+    function genBtn()
+    {
+        var rutaPDF = $("#tmp_pdf").val();
+        $("#btnTimbrar").css('visibility', 'hidden');
+        var rutaPDF = $("#tmp_pdf").val();
+        var rxml_tmp = rutaPDF.split("/");
+        var nombre_f = rxml_tmp[5].split(".");
+        var r_temp_xml = rxml_tmp[0] + "/" + rxml_tmp[1] + "/" + rxml_tmp[2] + "/" + rxml_tmp[3] + "/" + rxml_tmp[4] + "/" + nombre_f[0] + ".xml";
+        $("#tmp_xml").val(r_temp_xml);
+        var rutaXML = r_temp_xml;
+        $(".modal-footer").empty();
+        $(".modal-footer").html('<button class="btn btn-primary" onclick=sendcorreo()><i class="fas fa-envelope"></i>&nbsp; Enviar Correo</button>' +
+            '<a target="_blank" class="btn btn-success" href="../' + rutaPDF + '"><i class="fas fa-file"></i>&nbsp; Descargar PDF</button>' +
+            '<a class="btn btn-info" href="../' + rutaXML + '"><i class="fas fa-file"></i>&nbsp; Descargar XML</button>');
     }
 
 </script>

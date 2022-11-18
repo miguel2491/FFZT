@@ -493,7 +493,7 @@ namespace Facturafast.Controllers
             decimal _importe = Convert.ToDecimal(formCollection["txtImporte"]);
             decimal _iva = Convert.ToDecimal(formCollection["txtIVA"]);
             int _idEstatus = Convert.ToInt32(formCollection["cmbEstatus"]);
-
+            int _Comision = Convert.ToInt32(formCollection["txtComision"]);
             db = new BD_FFEntities();
 
             if (_idPaquete == 0)
@@ -507,7 +507,8 @@ namespace Facturafast.Controllers
                     nombre_paquete = _nombrePaquete,
                     id_estatus = _idEstatus,
                     iva = _iva,
-                    importe = _importe
+                    importe = _importe,
+                    comision = _Comision
                 };
                 db.tbc_Paquetes.Add(nuevo);
                 db.SaveChanges();
@@ -526,6 +527,7 @@ namespace Facturafast.Controllers
                 actualizar.id_estatus = _idEstatus;
                 actualizar.iva = _iva;
                 actualizar.importe = _importe;
+                actualizar.comision = _Comision;
 
                 db.SaveChanges();
 

@@ -187,7 +187,7 @@
             </div>
             <div class="modal-footer">
                 <div class="dbtn">
-                    <button class="btn btn-warning btn-sm" onclick="cancelaFactura()">Cancelar</button>
+                    <button class="btn btn-warning btn-sm" id="btnCancelar" onclick="cancelaFactura()">Cancelar</button>
                     <button class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 </div>
                 <br />
@@ -270,6 +270,7 @@
             //abrirCargando();
             var myVal = $(event.relatedTarget).data('id');
             var tipo = $(event.relatedTarget).data('tipo');
+            console.log(myVal);
             if (tipo == "Estatus") {
                 $.get("@Url.Action("getStatusXML", "CartaPorte")?id=" + myVal, async function (data) {
                     console.log(data);
@@ -412,12 +413,14 @@
     {
         $.get("@Url.Action("getFacturasUuid", "Facturacion")?id=" + id, async function (data)
         {
+            console.log(data);
             $("#txtFolioFiscal").val(data[0].uuid);
         });
     }
 
     function cancelaFactura()
     {
+        $("#btnCancelar").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class= "sr-only">Loading...</span>');
         //-------------------------------------------------------------------------
         $.ajax({
             type: "POST",
@@ -431,9 +434,10 @@
                 cerrarCargando();
                 if (response[0] == "Cancelado") {
                     notificacionAlert("Se cancelo correctamente.", "success");
-                    setTimeout(function () { window.location = '@Url.Action("ListaFactura", "Facturacion")' }, 3000);
+                    setTimeout(function () { window.location = '@Url.Action("ListaFactura", "Facturacion")' }, 1000);
                 } else {
                     notificacionAlert("Ocurrio un problema al cancelar, intentelo mas tarde.", "danger");
+                    $("#btnCancelar").css('visibility', 'hidden');
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {

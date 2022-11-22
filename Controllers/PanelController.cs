@@ -25,6 +25,10 @@ using QRCoder;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
+using System.Net.Mail;
+using System.Net.Mime;
+using System.Net;
+using System.Net.Security;
 
 namespace Facturafast.Controllers
 {
@@ -1587,7 +1591,31 @@ namespace Facturafast.Controllers
             return File(path, "application/pdf", "Nota de Venta " + NotaVenta.clave_nota + "_" + cliente.rfc + ".PDF");
         }
 
+        public ActionResult DescargarNotaVentaXML(Int32? idNotaVenta)
+        {
+            if (Session["tbc_Usuarios"] == null)
+                return Json("Error", JsonRequestBehavior.AllowGet);
+            tbc_Usuarios usuario = Session["tbc_Usuarios"] as tbc_Usuarios;
+            db = new BD_FFEntities();
+            tbd_Notas_Venta NotaVenta = db.tbd_Notas_Venta.Where(s => s.id_nota_venta == idNotaVenta).Single();
+            tbc_Clientes cliente = db.tbc_Clientes.Where(s => s.id_cliente == NotaVenta.id_cliente).Single();
+            string DirPrg = Server.MapPath("~");
+            string path = DirPrg + "Plantillas/" + NotaVenta.url_xml;
 
+            return File(path, "application/xml", "Nota de Venta " + NotaVenta.clave_nota + "_" + cliente.rfc + ".xml");
+        }
+        public ActionResult DescargarFacturaFacturafastXML(Int32? idcobro)
+        {
+            if (Session["tbc_Usuarios"] == null)
+                return Json("Error", JsonRequestBehavior.AllowGet);
+            tbc_Usuarios usuario = Session["tbc_Usuarios"] as tbc_Usuarios;
+            db = new BD_FFEntities();
+            tbd_Cobros cobro = db.tbd_Cobros.Where(s => s.id_cobro == idcobro).Single();
+            string DirPrg = Server.MapPath("~");
+            string path = DirPrg + "Plantillas/" + cobro.url_xml;
+
+            return File(path, "application/xml", "Cobro " + cobro.uuid + "_" + usuario.rfc + ".xml");
+        }
         public String enviarCorreosNota(List<ListaCorreos> correos, Int32 txtIdNotaVenta)
         {
             if (Session["tbc_Usuarios"] == null)
@@ -2094,7 +2122,8 @@ namespace Facturafast.Controllers
                 }
                 //Restar timbre
                 //tbc_Timbres timbres = db.tbc_Timbres.Where(s => s.rfc_usuario == usuario_.rfc).Single();
-
+                //Enviar Correo
+                enviarCorreoPago(id_);
                 //timbres.timbres_usados++;
                 //timbres.timbres_disponibles--;
 
@@ -2962,6 +2991,99 @@ namespace Facturafast.Controllers
             return File(DirPrg_+"Plantillas\\" + path, "application/pdf", "Facturafast " + paquete.descripcion_paquete + ".PDF");
         }
         #endregion
+        public ActionResult enviarCorreoPago(int id_)
+        {
+            String mensaje;
+            String url = "https://castelanauditores.com/FFDemo/img/cuentas/";
+            db = new BD_FFEntities();
+            string DirPrg = Server.MapPath("~");
+            string fullPath = "";
+            string fullPathXML = "";
+            string nombre_rfc = ""; string rfc = ""; string url_pdf = ""; string url_xml = ""; string title_ = "";
+            string correo_ = "";
 
+            tbc_Usuarios usuario = Session["tbc_Usuarios"] as tbc_Usuarios;
+            tbd_Cobros pago = db.tbd_Cobros.Where(s => s.id_cobro == id_).Single();
+            url_pdf = pago.url_pdf;
+            url_xml = pago.url_xml;
+            rfc = usuario.rfc;
+            nombre_rfc = usuario.nombre_razon;
+            fullPath = DirPrg + @"Plantillas\" + url_pdf;
+            fullPathXML = DirPrg + @"Plantillas\" + url_xml;
+            title_ = "Archivos de pagos";
+            correo_ = usuario.correo_electronico;
+            
+            String cuerpo =
+                @"<center>
+                <style>.formEmail{font-family:'Open Sans',sans-serif;width:750px;text-align:center;}.formBorder{width:100%;height:30px;background-color:rgb(0,33,96);}</style>
+                <div class='formEmail'>
+                    <div class='formBorder'></div>
+                    <table style='border-collapse:collapse; width:100%;'>
+                        <tr>                            
+                            <td style='padding:20px;text-align:center;'>
+                                <h2 style='font-weight:bold;'>Apreciable</h2>
+                                <h3 style='font-weight:bold;'>" + rfc + @"</h3>
+                                <h4 style='font-weight:bold;'>" + nombre_rfc + @"</h4>                             
+                                <p>Es un gusto para mi poder saludar y reiterarme a sus órdenes!</p>
+                                <p>Me permito extender los presentes documentos.</p>
+                                <p>Reitero nuevamente nuestro agradecimiento, quedando a sus órdenes.</p><br /><br />
+                                <br>
+                            </td>
+                        </tr>
+                    </table>
+                    <br /><br />
+                    <p>&copy; 2022 <strong>CASTELÁN AUDITORES S.C.</strong></p>
+                    <div class='formBorder'></div>
+                </div>
+                </center>";
+            try
+            {
+                //string email = "contabilidad@consultoriacastelan.com";
+                string email = "cobranza@consultoriacastelan.com";
+
+                MailMessage msg = new MailMessage();
+                string DireccionaEnviar = correo_; //"programador1@consultoriacastelan.com"
+                msg.To.Add(DireccionaEnviar);
+                msg.From = new MailAddress(email, "CASTELÁN AUDITORES S.C.", System.Text.Encoding.UTF8);
+                //msg.From = new MailAddress("comunicados@facturafast.mx", "FACTURAFAST ", System.Text.Encoding.UTF8);
+
+                msg.Subject = title_;
+                msg.SubjectEncoding = System.Text.Encoding.UTF8;
+                msg.Body = cuerpo;
+                /* Archivo adjunto */
+
+
+                Attachment data = new Attachment(fullPath, MediaTypeNames.Application.Pdf);
+                Attachment dataXML = new Attachment(fullPathXML);
+                msg.Attachments.Add(data);
+                msg.Attachments.Add(dataXML);
+                /*******/
+                msg.BodyEncoding = System.Text.Encoding.UTF8;
+                msg.IsBodyHtml = true;
+
+                SmtpClient client = new SmtpClient();
+                //client.Credentials = new NetworkCredential(email, "29tR#+54thfq");
+                client.Credentials = new NetworkCredential(email, "C0nsultor1a*128");
+
+                client.Port = 587;
+                client.Host = "mail.consultoriacastelan.com";
+                client.EnableSsl = false;
+                ServicePointManager.ServerCertificateValidationCallback = delegate (object s, X509Certificate certificate, X509Chain chai, SslPolicyErrors sslPolicyErrors)
+                { return true; };
+
+                client.Send(msg);
+                mensaje = "Enviado";
+            }
+            catch (Exception ex)
+            {
+                mensaje = "Ocurrio un problema";
+                //nuevoCorreo.mensaje = ex.Message;
+            }
+            finally
+            {
+                GC.Collect();
+            }
+            return Json(mensaje, JsonRequestBehavior.AllowGet);
+        }
     }
 }

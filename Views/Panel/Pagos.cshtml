@@ -50,14 +50,17 @@
                                                     <td style="padding:0px 5px;">
                                                         <a href="#" onclick="descargarPDF(@item.id_cobro)" class="btn btn-danger btn-sm"><i class="fas fa-file-pdf"></i></a>
                                                     </td>
+                                                    if (item.uuid != null)
+                                                    {
+                                                        <td style="padding:0px 5px;">
+                                                            <a href="#" onclick="descargarXML(@item.id_cobro)" title="Descargar XML" class="btn btn-info btn-sm"><i class="fas fa-download"></i></a>
+                                                        </td>
+                                                    }
                                                     <td style="padding:0px 5px;">
-                                                        <a href="#" class="btn btn-info btn-sm"><i class="fas fa-file-archive"></i></a>
-                                                    </td>
-                                                    <td style="padding:0px 5px;">
-                                                        @if (item.lugar_expedicion == null)
+                                                        @if (item.uuid == null)
                                                         {
                                                             @*<a href="@Url.Action("genXMLPagos","XML", new { id_ = item.id_cobro })" class="btn btn-info btn-sm" title="GenXML"><i class="fas fa-credit-card"></i> </a>*@
-                                                           <button data-bs-toggle="modal" data-bs-target="#modalTimbre" class="btn btn-sm btn-warning" onclick="timbrarModalCobro(@item.id_cobro)"><i class="fas fa-bell"></i></button>
+                                                            <button data-bs-toggle="modal" data-bs-target="#modalTimbre" class="btn btn-sm btn-warning" onclick="timbrarModalCobro(@item.id_cobro)"><i class="fas fa-bell"></i></button>
                                                         }
                                                     </td>
                                                 }
@@ -226,6 +229,10 @@
     function descargarPDF(id_cobro) {
         console.log(id_cobro);
         window.location = '@Url.Action("DescargarFacturaFacturafast", "Panel")' + '?idcobro=' + id_cobro;
+    }
+
+    function descargarXML(id_cobro) {
+        window.location = '@Url.Action("DescargarFacturaFacturafastXML", "Panel")' + '?idcobro=' + id_cobro;
     }
 
 </script>

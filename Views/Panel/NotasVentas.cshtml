@@ -124,9 +124,6 @@
                                             @if (item.id_estatus == 1)
                                             {
                                                 <td style="padding:0px 5px;">
-                                                    <a href="#" class="btn btn-primary btn-sm" title="Enviar Nota de Venta" data-bs-toggle="modal" data-bs-target="#modalEnviarCorreo" onclick="enviarCorreo(@item.id_nota_venta, '@cliente.rfc', '@cliente.nombre_razon', @cliente.id_cliente);"><i class="fas fa-envelope"></i></a>
-                                                </td>
-                                                <td style="padding:0px 5px;">
                                                     <a href="#" class="btn btn-danger btn-sm" title="Cancelar Nota de Venta" data-bs-toggle="modal" data-bs-target="#modalCancelarNota" onclick="cancelarNota(@item.id_nota_venta, '@cliente.nombre_razon', '@item.total.ToString("c")');"><i class="fas fa-ban"></i></a>
                                                 </td>
 
@@ -134,11 +131,17 @@
                                             @if (item.id_estatus == 7)
                                             {
                                                 <td style="padding:0px 5px;">
-                                                    <a href="#" class="btn btn-danger btn-sm" title="Descargar Factura"><i class="fas fa-file-pdf"></i></a>
+                                                    <a href="#" class="btn btn-primary btn-sm" title="Enviar Nota de Venta" data-bs-toggle="modal" data-bs-target="#modalEnviarCorreo" onclick="enviarCorreo(@item.id_nota_venta, '@cliente.rfc', '@cliente.nombre_razon', @cliente.id_cliente);"><i class="fas fa-envelope"></i></a>
+                                                </td>
+                                            }
+                                            @if (item.uuid != null)
+                                            {
+                                                <td style="padding:0px 5px;">
+                                                    <a href="#" class="btn btn-primary btn-sm" onclick="descargarXML(@item.id_nota_venta)" title="Descargar Factura"><i class="fas fa-download"></i></a>
                                                 </td>
                                             }
 
-                                            @if (item.id_estatus != 6)
+                                            @if (item.uuid == null)
                                             {
                                                 <td style="padding:0px 5px;">
                                                     @*<a href="#" class="btn btn-success btn-sm" style="visibility:hidden" title="Pagos" data-bs-toggle="modal" data-bs-target="#modalPagoNota" onclick="pagarNota(@item.id_nota_venta, @restante);"><i class="fas fa-money-bill-wave"></i></a>*@
@@ -146,7 +149,7 @@
                                                 </td>
                                             }
 
-                                        </tr>
+                                            </tr>
                                     </table>
                                 </td>
                                 <td>@cliente.nombre_razon</td>
@@ -1351,11 +1354,13 @@
                                 if (response.Estatus == 1) {
                                     console.log(response);
                                     generarPDF(response.Id);
+                                    notificacionAlert("Guardado exitoso", "success");
                                 }
                                 else {
                                     notificacionAlert(response.Mensaje, "danger");
+                                    cerrarCargando();
                                 }
-                                cerrarCargando();
+
                             }
                         });
                     }
@@ -1374,15 +1379,20 @@
     }
 
     function descargarPDF(id) {
-        @*window.location = '@Url.Action("DescargarNotaVenta", "Panel")' + '?idNotaVenta=' + id;*@
+
         window.location = '@Url.Action("DescargarNotaVenta", "Panel")' + '?idNotaVenta=' + id;
     }
 
+    function descargarXML(id) {
+
+        window.location = '@Url.Action("DescargarNotaVentaXML", "Panel")' + '?idNotaVenta=' + id;
+    }
 
     function loadFile(url, callback) {
         PizZipUtils.getBinaryContent(url, callback);
     }
     function generarPDF(id) {
+        abrirCargando();
         //--------------------------------------------------------------------------------------
         $.ajax({
             type: "POST",
@@ -1449,28 +1459,7 @@
     {
         //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         $("#txtIdNotaVenta").val(id);
-        //--------------------------------------------------------------------------------------
-        $.ajax({
-            type: "POST",
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            url: '/Panel/conNotaVenta?id=' + id,
-            success: function (data) {
-                var response = data;
-                console.log(response);
-                console.log(response.forma_pago);
-                if (response.forma_pago == null || response.metodo_pago == null || response.lugar_expedicion == null || response.uso_cfdi == null) {
-                    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalTimbrado")).show();
-                } else {
-                    notificacionAlert("Factura ya timbrada anteriormente", "danger")
-                    bootstrap.Modal.getOrCreateInstance(document.getElementById("modalTimbrado")).hide();
-                }
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                notificacionAlert("Ocurrio un error, vuelva a intentar", "danger");
-                cerrarCargando();
-            }
-        });
+        bootstrap.Modal.getOrCreateInstance(document.getElementById("modalTimbrado")).show();
         //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     }
 
@@ -1548,6 +1537,7 @@
                 var res = response.split("|");
                 if (res[0] == "Timbrado") {
                     notificacionAlert(res[0], "success");
+                    window.location = '@Url.Action("NotasVentas", "Panel")';
                 } else {
                     notificacionAlert(res[0], "danger");
                 }

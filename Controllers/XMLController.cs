@@ -863,8 +863,8 @@ namespace Facturafast.Controllers
             string path = Server.MapPath("~");
             p = path;
             string pathXML = path +"Plantillas\\"+ ruta_xml + "\\" + namefile + ".xml";
-            string pathCer = path + @"\Plantillas\Firmas\" + usuario.rfc + "\\" + firma.url_cer_sello;
-            string pathKey = path + @"\Plantillas\Firmas\" + usuario.rfc + "\\" + firma.url_key_sello;
+            string pathCer = path + @"Plantillas\Firmas\" + usuario.rfc + "\\" + firma.url_cer_sello;
+            string pathKey = path + @"Plantillas\Firmas\" + usuario.rfc + "\\" + firma.url_key_sello;
             string clavePrivada = firma.password_sello;
             p_xml = pathXML;
             //Obtenemos el Número de Certificado
@@ -1574,9 +1574,9 @@ namespace Facturafast.Controllers
                 ruta_pdf = factura.url_pdf;
                 string[] nom_doc = factura.url_pdf.Split('/');
                 string[] nd = nom_doc[4].Split('.');
+                ruta_xml = nom_doc[0]+"\\"+ nom_doc[1]+"\\"+nom_doc[2]+"\\"+nom_doc[3]+"\\";
                 string nf = nd[0];
                 namefile = "tempXML";
-                ruta_xml = "XML\\PDF\\Facturafast\\";
             } 
             else
             {
@@ -1696,6 +1696,9 @@ namespace Facturafast.Controllers
                             db.Configuration.LazyLoadingEnabled = false;
                             var valorNota = db.tbd_Notas_Venta.ToList<tbd_Notas_Venta>().Where(u => u.id_nota_venta == id_).FirstOrDefault();
                             valorNota.id_estatus = 7;
+                            valorNota.uuid = uuidR;
+                            valorNota.url_xml = ruta_xml + uuidR + ".xml";
+                            //valorNota.url_pdf = ruta_xml + uuidR + ".pdf";
                             db.SaveChanges();
                         } else {
                             db.Configuration.LazyLoadingEnabled = false;
@@ -2200,14 +2203,18 @@ namespace Facturafast.Controllers
                                 //------------------------------ Buscar url -----------------------------
                                 var url_xml_ = 0;
                                 var r_xml = "";
+                                var r_pdf = "";
+                                var usuario_id = 0;
                                 if (tipo != "Pago")
                                 {
                                     url_xml_ = db.tbd_Cfdi_Uuid.Where(s => s.uuid == _uuid).Select(u => u.id_pre_factura).SingleOrDefault();
-                                    if (url_xml_ == 0)
+                                    if (url_xml_ == 0 && tipo != "FacturaNV")
                                     {
                                         url_xml_ = db.tbd_Pre_Pagos.Where(s => s.uuid == _uuid).Select(u => u.id_pre_factura).SingleOrDefault();
                                     }else if (tipo == "FacturaNV") {
                                         r_xml = "Plantillas/"+db.tbd_Notas_Venta.Where(s => s.id_nota_venta == id_prefac).Select(u => u.url_xml).SingleOrDefault();
+                                        r_pdf = "Plantillas/" + db.tbd_Notas_Venta.Where(s => s.id_nota_venta == id_prefac).Select(u => u.url_pdf).SingleOrDefault();
+                                        usuario_id = db.tbd_Notas_Venta.Where(s => s.id_nota_venta == id_prefac).Select(u => u.id_usuario).SingleOrDefault();
                                     }
                                     else {
                                         r_xml = db.tbd_Pre_Factura.Where(s => s.id_pre_factura == url_xml_).Select(u => u.url_xml).SingleOrDefault();
@@ -2247,7 +2254,40 @@ namespace Facturafast.Controllers
                                                 //Guardar a PreFactura
                                                 tbd_Pre_Factura preFac = new tbd_Pre_Factura
                                                 {
-                                                    
+                                                    id_usuario = usuario_id,
+                                                    rfc_usuario = nuevaFactura.rfc_emisor,
+                                                    nombre_usuario_rfc = nuevaFactura.nombre_emisor,
+                                                    uuid = nuevaFactura.uuid,
+                                                    rfc_cliente = nuevaFactura.rfc_receptor,
+                                                    nombre_rfc = nuevaFactura.nombre_receptor,
+                                                    tipo = tipo,
+                                                    exportacion = "01",
+                                                    reg_fiscal_usuario = db.tbc_Regimenes.ToList<tbc_Regimenes>().Where(u => u.id_regimen_fiscal == nuevaFactura.id_regimen_fiscal_emisor).Select(u => u.clave).FirstOrDefault(),
+                                                    serie = nuevaFactura.serie,
+                                                    folio = nuevaFactura.folio,
+                                                    tipo_comprobante = db.tbc_Tipos_Comprobante.ToList<tbc_Tipos_Comprobante>().Where(u => u.id_tipo_comprobante == nuevaFactura.id_tipo_comprobante).Select(u => u.tipo_comprobante).Single(),
+                                                    lugar_expedicion = nuevaFactura.lugar_expedicion,
+                                                    moneda = nuevaFactura.moneda,
+                                                    forma_pago = nuevaFactura.id_forma_pago,//db.tbc_Formas_Pago.ToList<tbc_Formas_Pago>().Where(u => u.id_forma_pago == nuevaFactura.id_forma_pago).Select(u => u.forma_pago).Single(),
+                                                    metodo_pago = nuevaFactura.id_metodo_pago,
+                                                    tipo_cambio = Convert.ToString(nuevaFactura.tipo_cambio),
+                                                    clave_reg_fiscal = db.tbc_Regimenes.ToList<tbc_Regimenes>().Where(u => u.id_regimen_fiscal == nuevaFactura.id_regimen_fiscal_receptor).Select(u => u.clave).FirstOrDefault(),
+                                                    clave_uso_cfdi = nuevaFactura.id_uso_cfdi,
+                                                    fecha_emision = DateTime.Now,
+                                                    subtotal = nuevaFactura.subtotal.ToString(),
+                                                    total = nuevaFactura.total_original.ToString(),
+                                                    total_imp_ret = nuevaFactura.total.ToString(),
+                                                    total_isr_ret = "0.0",
+                                                    total_iva_ret = "0.0",
+                                                    descuento2 = nuevaFactura.descuento.ToString(),
+                                                    selloCFDI = nuevaFactura.sello_cfdi,
+                                                    selloSAT = nuevaFactura.sello_sat,
+                                                    ccertificacion = nuevaFactura.certificado_sat,
+                                                    fca_timbrado = nuevaFactura.fecha_timbrado,
+                                                    version_timbrado = _versionTimbreFiscalDigital,
+                                                    url_pdf = r_pdf,
+                                                    url_xml = r_xml,
+                                                    status = 2
                                                 };
                                                 db.tbd_Pre_Factura.Add(preFac);
                                                 db.SaveChanges();

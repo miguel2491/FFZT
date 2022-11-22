@@ -466,6 +466,5 @@ namespace Facturafast.Controllers
             return File(fullPath, "application/pdf", "CartaPorte " + fact.serie + "_" + fact.folio + ".PDF");
         }
 
-        
     }
 }

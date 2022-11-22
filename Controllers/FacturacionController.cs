@@ -607,7 +607,7 @@ namespace Facturafast.Controllers
                               join uso_cfdi in db.tbc_Usos_CFDI on fac.clave_uso_cfdi equals uso_cfdi.id_uso_cfdi into u_cfdi
                               from ucfdi in u_cfdi.DefaultIfEmpty()
                               where fac.rfc_usuario == usuario.rfc && fac.status != 0 && fac.fecha_emision >= f_inicial && fac.fecha_emision <= f_final
-                              orderby fac.id_pre_factura
+                              orderby fac.id_pre_factura ascending
                               select new
                               {
                                   id = fac.id_pre_factura,
@@ -834,7 +834,23 @@ namespace Facturafast.Controllers
                     ObjDoc.Bookmarks.get_Item(ref Imagen_QR).Range.InlineShapes.AddPicture((DirPrg + "/Plantillas/XML/DOCX/" + prefactura_.rfc_usuario + "/" + ax_fc_emi + "/" + fileName + ".jpg"), false, true);
                     //Fin Crear Codigo QR
                 }
-
+                //
+                object Numero_cuenta = "Numero_cuenta";
+                Word.Range Numerocuenta = ObjDoc.Bookmarks.get_Item(ref Numero_cuenta).Range;
+                Numerocuenta.Text = prefactura_.numero_cuenta == null ? "" : " ";
+                object Nombre_banco = "Nombre_banco";
+                Word.Range Nombrebanco = ObjDoc.Bookmarks.get_Item(ref Nombre_banco).Range;
+                Nombrebanco.Text = prefactura_.nom_banco == null ? "" : " ";
+                object Condiciones_pago = "Condiciones_pago";
+                Word.Range Condicionespago = ObjDoc.Bookmarks.get_Item(ref Condiciones_pago).Range;
+                Condicionespago.Text = prefactura_.cond_pago == null ? "" : " ";
+                object Cuenta_predial = "Cuenta_predial";
+                Word.Range Cuentapredial = ObjDoc.Bookmarks.get_Item(ref Cuenta_predial).Range;
+                Cuentapredial.Text = prefactura_.cuenta_predial == null ? "" : " ";
+                object Observaciones_ = "Observaciones_";
+                Word.Range Observaciones = ObjDoc.Bookmarks.get_Item(ref Observaciones_).Range;
+                Observaciones.Text = prefactura_.observacion == null ? "" : " ";
+                //
                 //Agregar texto al marcador
                 string tc = prefactura_.tipo_comprobante;
                 string auxcad = tc == "I" ? "Ingreso":tc == "E" ? "Egreso":tc== "T" ? "Traslado":tc == "N" ? "Nómina":tc == "P" ? "Pago":"Pago";
@@ -1292,7 +1308,7 @@ namespace Facturafast.Controllers
                 string email = "cobranza@consultoriacastelan.com";
 
                 MailMessage msg = new MailMessage();
-                string DireccionaEnviar = correo_; //"programador1@consultoriacastelan.com";
+                string DireccionaEnviar = correo_; //"programador1@consultoriacastelan.com"
                 msg.To.Add(DireccionaEnviar);
                 msg.From = new MailAddress(email, "CASTELÁN AUDITORES S.C.", System.Text.Encoding.UTF8);
                 //msg.From = new MailAddress("comunicados@facturafast.mx", "FACTURAFAST ", System.Text.Encoding.UTF8);

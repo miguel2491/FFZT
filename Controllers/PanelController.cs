@@ -720,14 +720,13 @@ namespace Facturafast.Controllers
             var res = genXMLPagosServicio(actualizar.id_cobro);
             if (res == "Success") 
             {
-                TimbrarXMLPago(actualizar.id_cobro, "FacturaC", "FacturaC");
+                enviarCorreoPago(actualizar.id_cobro, "Pago");
+                //TimbrarXMLPago(actualizar.id_cobro, "FacturaC", "FacturaC");
             }
 
             return View();
         }
         
-        
-
         public ActionResult PagoFinalizado()
         {
             String _idPreference = Request["preference_id"];
@@ -1448,8 +1447,10 @@ namespace Facturafast.Controllers
 
             object fecha_ = "fecha"; //Definir marcador
             Word.Range fecha = ObjDoc.Bookmarks.get_Item(ref fecha_).Range; //Busqueda de marcador en la plantilla
-            fecha.Text = NotaVenta.fecha_creacion.ToString(); //Agregar texto al marcador
-                                                              //
+            
+            string auxfca = String.Format("{0:yyyy-MM-ddTHH:mm:ss}", NotaVenta.fecha_creacion);//
+            fecha.Text = auxfca;//NotaVenta.fecha_creacion.ToString(); //Agregar texto al marcador
+
             var conceptos = db.tbd_Conceptos_Nota_Venta.Where(s => s.id_nota_venta == idNotaVenta).ToList();
             conceptos.Count();
             int i = 1;
@@ -1623,11 +1624,12 @@ namespace Facturafast.Controllers
 
             tbc_Usuarios usuario = Session["tbc_Usuarios"] as tbc_Usuarios;
             db = new BD_FFEntities();
-
+            string ruta = Server.MapPath("~");
             foreach (var item in correos)
             {
+
                 Correos enviar = new Correos();
-                enviar.emailEnvioNotaVenta(item, txtIdNotaVenta, usuario);
+                enviar.emailEnvioNotaVenta(item, txtIdNotaVenta, usuario, ruta);
             }
 
             return "{\"Estatus\":1, \"Mensaje\":\"Los correos electrónicos fueron enviados. Puede checar el estatus de envío desde el registro de la Nota de Venta.\"}";
@@ -2123,16 +2125,14 @@ namespace Facturafast.Controllers
                 //Restar timbre
                 //tbc_Timbres timbres = db.tbc_Timbres.Where(s => s.rfc_usuario == usuario_.rfc).Single();
                 //Enviar Correo
-                enviarCorreoPago(id_);
+                enviarCorreoPago(id_,"NV");
                 //timbres.timbres_usados++;
                 //timbres.timbres_disponibles--;
 
                 db.SaveChanges();
                 //---------Agregar a base Facturas-------------------
-
-                
-
                 LeerArchivo(root_xml, usuario_.rfc, id_, tipo);
+                enviarCorreoPago(id_, "Pago");
             }
             //FacturafacturaFast(id_);
             return Json(mensaje, JsonRequestBehavior.AllowGet);
@@ -2870,7 +2870,7 @@ namespace Facturafast.Controllers
                 folio_.Text = "-" + prefactura_.folio;
             }
             serie_.Text = prefactura_.serie;
-            string auxfca = prefactura_.fecha_emision.ToString();
+            string auxfca = String.Format("{0:yyyy-MM-ddTHH:mm:ss}",prefactura_.fecha_emision);
             fechaemision.Text = auxfca;
 
             cliente_.Text = prefactura_.nombre_rfc;
@@ -2940,7 +2940,8 @@ namespace Facturafast.Controllers
             tiporelacion.Text = " ";
             uuid_.Text = prefactura_.uuid;
             nocertificadosat.Text = prefactura_.ccertificacion;
-            fechatimbrado.Text = prefactura_.fca_timbrado.ToString();
+            fechatimbrado.Text = String.Format("{0:yyyy-MM-ddTHH:mm:ss}", prefactura_.fca_timbrado);
+            
             //Si ya timbro
             string selloCFDI = prefactura_.status != 1 ? db.tbd_Facturas.Where(u => u.sello_sat == prefactura_.selloSAT).Select(u => u.sello_cfdi).First() : "";
             SelloCFD.Text = selloCFDI;
@@ -2991,7 +2992,7 @@ namespace Facturafast.Controllers
             return File(DirPrg_+"Plantillas\\" + path, "application/pdf", "Facturafast " + paquete.descripcion_paquete + ".PDF");
         }
         #endregion
-        public ActionResult enviarCorreoPago(int id_)
+        public ActionResult enviarCorreoPago(int id_, string tipo)
         {
             String mensaje;
             String url = "https://castelanauditores.com/FFDemo/img/cuentas/";
@@ -3001,41 +3002,41 @@ namespace Facturafast.Controllers
             string fullPathXML = "";
             string nombre_rfc = ""; string rfc = ""; string url_pdf = ""; string url_xml = ""; string title_ = "";
             string correo_ = "";
-
-            tbc_Usuarios usuario = Session["tbc_Usuarios"] as tbc_Usuarios;
-            tbd_Cobros pago = db.tbd_Cobros.Where(s => s.id_cobro == id_).Single();
-            url_pdf = pago.url_pdf;
-            url_xml = pago.url_xml;
-            rfc = usuario.rfc;
-            nombre_rfc = usuario.nombre_razon;
-            fullPath = DirPrg + @"Plantillas\" + url_pdf;
-            fullPathXML = DirPrg + @"Plantillas\" + url_xml;
-            title_ = "Archivos de pagos";
-            correo_ = usuario.correo_electronico;
+            String cuerpo = "";
             
-            String cuerpo =
-                @"<center>
-                <style>.formEmail{font-family:'Open Sans',sans-serif;width:750px;text-align:center;}.formBorder{width:100%;height:30px;background-color:rgb(0,33,96);}</style>
-                <div class='formEmail'>
-                    <div class='formBorder'></div>
-                    <table style='border-collapse:collapse; width:100%;'>
-                        <tr>                            
-                            <td style='padding:20px;text-align:center;'>
-                                <h2 style='font-weight:bold;'>Apreciable</h2>
-                                <h3 style='font-weight:bold;'>" + rfc + @"</h3>
-                                <h4 style='font-weight:bold;'>" + nombre_rfc + @"</h4>                             
-                                <p>Es un gusto para mi poder saludar y reiterarme a sus órdenes!</p>
-                                <p>Me permito extender los presentes documentos.</p>
-                                <p>Reitero nuevamente nuestro agradecimiento, quedando a sus órdenes.</p><br /><br />
-                                <br>
-                            </td>
-                        </tr>
-                    </table>
-                    <br /><br />
-                    <p>&copy; 2022 <strong>CASTELÁN AUDITORES S.C.</strong></p>
-                    <div class='formBorder'></div>
-                </div>
-                </center>";
+                tbc_Usuarios usuario = Session["tbc_Usuarios"] as tbc_Usuarios;
+                tbd_Cobros pago = db.tbd_Cobros.Where(s => s.id_cobro == id_).Single();
+                url_pdf = pago.url_pdf;
+                url_xml = pago.url_xml;
+                fullPath = DirPrg + @"Plantillas\" + url_pdf;
+                fullPathXML = DirPrg + @"Plantillas\" + url_xml;
+                rfc = usuario.rfc;
+                nombre_rfc = usuario.nombre_razon;
+                title_ = "Archivos de pagos";
+                correo_ = usuario.correo_electronico;            
+                cuerpo =
+                    @"<center>
+                    <style>.formEmail{font-family:'Open Sans',sans-serif;width:750px;text-align:center;}.formBorder{width:100%;height:30px;background-color:rgb(0,33,96);}</style>
+                    <div class='formEmail'>
+                        <div class='formBorder'></div>
+                        <table style='border-collapse:collapse; width:100%;'>
+                            <tr>                            
+                                <td style='padding:20px;text-align:center;'>
+                                    <h2 style='font-weight:bold;'>Apreciable</h2>
+                                    <h3 style='font-weight:bold;'>" + rfc + @"</h3>
+                                    <h4 style='font-weight:bold;'>" + nombre_rfc + @"</h4>                             
+                                    <p>Es un gusto para mi poder saludar y reiterarme a sus órdenes!</p>
+                                    <p>Me permito extender los presentes documentos.</p>
+                                    <p>Reitero nuevamente nuestro agradecimiento, quedando a sus órdenes.</p><br /><br />
+                                    <br>
+                                </td>
+                            </tr>
+                        </table>
+                        <br /><br />
+                        <p>&copy; 2022 <strong>CASTELÁN AUDITORES S.C.</strong></p>
+                        <div class='formBorder'></div>
+                    </div>
+                    </center>";
             try
             {
                 //string email = "contabilidad@consultoriacastelan.com";

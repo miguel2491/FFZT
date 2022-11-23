@@ -296,7 +296,7 @@
             $("#idprepago_modal").val(id);
             $("#mdl_fo").html('<button class="btn btn-primary" onclick=sendcorreo()><i class="fas fa-envelope"></i>&nbsp; Enviar Correo</button>' +
                 '<a target="_blank" class="btn btn-success" href="../Plantillas/' + data.url_pdf + '"><i class="fas fa-file"></i>&nbsp; Descargar PDF</button>' +
-                '<a class="btn btn-info" href="../Plantillas/' + data.url_xml + '"><i class="fas fa-file"></i>&nbsp; Descargar XML</button>');
+                '<a target="_blank" class="btn btn-info" href="../Plantillas/' + data.url_xml + '"><i class="fas fa-file"></i>&nbsp; Descargar XML</button>');
         });
     }
 
@@ -317,7 +317,7 @@
                 cerrarCargando();
                 if (response == "Enviado") {
                     notificacionAlert("Correo enviado satisfactoriamente.", "success");
-                    setTimeout(function () { window.location = '@Url.Action("ListaFactura", "Facturacion")' }, 3000);
+                    setTimeout(function () { window.location = '@Url.Action("ListaComplemento", "Facturacion")' }, 3000);
                 } else {
                     notificacionAlert("Ocurrio un problema al enviar el correo, intentelo mas tarde.", "danger");
                 }

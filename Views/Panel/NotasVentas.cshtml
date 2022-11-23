@@ -1354,7 +1354,7 @@
                                 if (response.Estatus == 1) {
                                     console.log(response);
                                     generarPDF(response.Id);
-                                    notificacionAlert("Guardado exitoso", "success");
+                                    
                                 }
                                 else {
                                     notificacionAlert(response.Mensaje, "danger");
@@ -1402,7 +1402,9 @@
             success: function (data) {
                 var response = data;
                 console.log(response);
+
                 if (response == "Ok") {
+                    notificacionAlert("Guardado exitoso", "success");
                     window.location = '@Url.Action("NotasVentas","Panel")';
                     cerrarCargando();
                 }

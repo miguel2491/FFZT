@@ -361,6 +361,7 @@
             url: '@Url.Action("filtrarFacturas","Facturacion")',
             data: JSON.stringify({ 'fecha_i': fi,'fecha_f': ff }),
              success: function (data) {
+                 console.log(data);
                  if (data.length == 0) {
                      notificacionAlert("No se encontraron registros.", "warning");
                  }
@@ -490,7 +491,7 @@
             $("#razon_recpetor_").val(data[0].n_rfc);
             $("#mdl_fo").html('<button class="btn btn-primary" onclick=sendcorreo()><i class="fas fa-envelope"></i>&nbsp; Enviar Correo</button>' +
                 '<a target="_blank" class="btn btn-success" href="../Plantillas/' + data[0].url_pdf + '"><i class="fas fa-file"></i>&nbsp; Descargar PDF</a>' +
-                '<a class="btn btn-info" href="../Plantillas/' + data[0].url_xml + '"><i class="fas fa-file"></i>&nbsp; Descargar XML</a>');
+                '<a target="_blank" class="btn btn-info" href="../Plantillas/' + data[0].url_xml + '"><i class="fas fa-file"></i>&nbsp; Descargar XML</a>');
         });
     }
 
@@ -511,7 +512,7 @@
                 cerrarCargando();
                 if (response == "Enviado") {
                     notificacionAlert("Correo enviado satisfactoriamente.", "success");
-                    setTimeout(function () { window.location = '@Url.Action("ListaComplemento", "Facturacion")' }, 3000);
+                    setTimeout(function () { window.location = '@Url.Action("ListaFactura", "Facturacion")' }, 3000);
                 } else {
                     notificacionAlert("Ocurrio un problema al enviar el correo, intentelo mas tarde.", "danger");
                 }

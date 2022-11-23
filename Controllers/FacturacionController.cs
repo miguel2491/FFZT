@@ -875,8 +875,9 @@ namespace Facturafast.Controllers
                     folio_.Text = "-" + prefactura_.folio;
                 }
                 serie_.Text = prefactura_.serie;
-                string auxfca = prefactura_.fecha_emision.ToString();
-                fechaemision.Text = auxfca;
+                //string auxfca = prefactura_.fecha_emision.ToString();
+                fechaemision.Text = String.Format("{0:yyyy-MM-ddTHH:mm:ss}", prefactura_.fecha_emision); /*auxfca*/;
+
 
                 cliente_.Text = prefactura_.nombre_rfc;
                 rfcreceptor.Text = prefactura_.rfc_cliente;
@@ -944,7 +945,8 @@ namespace Facturafast.Controllers
                 tiporelacion.Text = " ";
                 uuid_.Text = prefactura_.uuid;
                 nocertificadosat.Text = prefactura_.ccertificacion;
-                fechatimbrado.Text = prefactura_.fca_timbrado.ToString();
+                fechatimbrado.Text = String.Format("{0:yyyy-MM-ddTHH:mm:ss}", prefactura_.fca_timbrado);
+
                 //Si ya timbro
                 string selloCFDI = prefactura_.status != 1 ?  db.tbd_Facturas.Where(u => u.sello_sat == prefactura_.selloSAT).Select(u => u.sello_cfdi).First():"";
                 SelloCFD.Text = selloCFDI;
@@ -1265,7 +1267,7 @@ namespace Facturafast.Controllers
                 nombre_rfc = db.tbc_Clientes.Where(u => u.id_cliente == precarta_.id_receptor).Select(u => u.nombre_razon).First();
                 fullPath = DirPrg + @"Plantillas\" + url_pdf;
                 fullPathXML = DirPrg + @"Plantillas\" + url_xml;
-                title_ = "Archivos de Carta Porte (Test)";
+                title_ = "Archivos de Carta Porte";
             }
             else
             {
@@ -1276,7 +1278,7 @@ namespace Facturafast.Controllers
                 nombre_rfc = prefactura_.nombre_rfc;
                 fullPath = DirPrg + @"Plantillas\" + url_pdf;
                 fullPathXML = DirPrg + @"Plantillas\" + url_xml;
-                title_ = "Timbrado de Facturas (Test).";
+                title_ = "Timbrado de Facturas.";
             }
             
             String cuerpo =
@@ -1308,7 +1310,7 @@ namespace Facturafast.Controllers
                 string email = "cobranza@consultoriacastelan.com";
 
                 MailMessage msg = new MailMessage();
-                string DireccionaEnviar = correo_; //"programador1@consultoriacastelan.com"
+                string DireccionaEnviar = "lexus_puyol@live.com";//correo_;
                 msg.To.Add(DireccionaEnviar);
                 msg.From = new MailAddress(email, "CASTELÁN AUDITORES S.C.", System.Text.Encoding.UTF8);
                 //msg.From = new MailAddress("comunicados@facturafast.mx", "FACTURAFAST ", System.Text.Encoding.UTF8);
@@ -1964,7 +1966,7 @@ namespace Facturafast.Controllers
                 seriefolio2.Text = prepago_.folio;//db.tbc_Clientes.Where(u => u.rfc == prefactura_.rfc_usuario).Select(u => u.nombre_razon).First();
                 rfcemisor.Text = usuario.rfc;
                 lugarexpedicion.Text = usuario.cp;
-                fecha.Text = prepago_.fecha_emision.ToString();
+                fecha.Text = String.Format("{0:yyyy-MM-ddTHH:mm:ss}", prepago_.fecha_emision);
                 CPEmisor.Text = usuario.cp;
 
                 nombrecliente.Text = db.tbc_Clientes.Where(u => u.id_cliente == prepago_.id_cliente).Select(u => u.nombre_razon).First();
@@ -2041,7 +2043,7 @@ namespace Facturafast.Controllers
                 cadenaoriginal.Text = "";//db.tbd_Firmas.Where(u => u.rfc == cliente.rfc).Select(u => u.certificado_fiel).First();
                 sellocfd.Text = prepago_.selloCFDI;
                 sellosat.Text = prepago_.selloSAT;
-                fechatimbrado.Text = prepago_.fca_timbrado.ToString();
+                fechatimbrado.Text = String.Format("{0:yyyy-MM-ddTHH:mm:ss}", prepago_.fca_timbrado);
                 versiontimbre.Text = prepago_.version_cfdi;
                 certificadosat.Text = prepago_.ccertificacion;
                 uuid_.Text = prepago_.uuid;

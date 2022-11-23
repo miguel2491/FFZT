@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="724a436f3221449bba44595ce260d7ef" Name="Diagram1">
+        <EntityTypeShape EntityType="BD_FFModel.sysdiagrams" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Clave_STCC" Width="1.5" PointX="2.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Clave_Tipo_Carga" Width="1.5" PointX="0.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Codigo_Transporte_Aereo" Width="1.5" PointX="4.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Config_AutoTransporte" Width="1.5" PointX="4.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Config_Maritima" Width="1.5" PointX="6.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Contactos_Cliente" Width="1.5" PointX="6.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Contenedor_Maritimo" Width="1.5" PointX="4.75" PointY="7.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Cuentas_Bancarias" Width="1.5" PointX="6.75" PointY="7.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Derecho_Paso" Width="1.5" PointX="8.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Empleados" Width="1.5" PointX="0.75" PointY="8.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Estados" Width="1.5" PointX="8.75" PointY="4.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Estatus" Width="1.5" PointX="8.75" PointY="7.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Ferroviarios" Width="1.5" PointX="10.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Figuras_Transporte" Width="1.5" PointX="2.75" PointY="10.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Formas_Pago" Width="1.5" PointX="10.75" PointY="5.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Fracciones_Arancelaria" Width="1.5" PointX="10.75" PointY="8.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Grupos_Empleados" Width="1.5" PointX="4.75" PointY="11.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_IEPS" Width="1.5" PointX="6.75" PointY="11.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_ISR" Width="1.5" PointX="8.75" PointY="11.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_IVA" Width="1.5" PointX="10.75" PointY="11.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_IVA_Ret" Width="1.5" PointX="12.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Localidades" Width="1.5" PointX="12.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Materiales_Peligrosos" Width="1.5" PointX="12.75" PointY="6.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Metodos_Pago" Width="1.5" PointX="12.75" PointY="9.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Num_Autorizacion_Naviero" Width="1.5" PointX="12.75" PointY="12.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Paises" Width="1.5" PointX="14.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Paquetes" Width="1.5" PointX="14.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Partes_Transporte" Width="1.5" PointX="6.75" PointY="14.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Perfiles" Width="1.5" PointX="14.75" PointY="7.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Periodicidades_Pago" Width="1.5" PointX="8.75" PointY="14.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_ProdServ" Width="1.5" PointX="14.75" PointY="10.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Productos_Servicios" Width="1.5" PointX="14.75" PointY="13.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Regimenes" Width="1.5" PointX="2.75" PointY="15.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Regimenes_Contratacion" Width="1.5" PointX="10.75" PointY="15.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Riesgos_Puesto" Width="1.5" PointX="16.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Timbres" Width="1.5" PointX="16.75" PointY="6.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Tipos_Comprobante" Width="1.5" PointX="16.75" PointY="10.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Tipos_Contratos" Width="1.5" PointX="16.75" PointY="13.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Tipos_Embalaje" Width="1.5" PointX="16.75" PointY="16.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Tipos_Factura" Width="1.5" PointX="4.75" PointY="17.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Tipos_Jornada" Width="1.5" PointX="6.75" PointY="17.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Tipos_Moneda" Width="1.5" PointX="18.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Tipos_Permiso" Width="1.5" PointX="0.75" PointY="18.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Tipos_Persona" Width="1.5" PointX="18.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Tipos_Relacion" Width="1.5" PointX="18.75" PointY="6.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Tipos_Transporte" Width="1.5" PointX="8.75" PointY="18.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Tipos_Ubicacion" Width="1.5" PointX="18.75" PointY="9.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Ubicaciones" Width="1.5" PointX="10.75" PointY="18.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Unidades_Medida" Width="1.5" PointX="18.75" PointY="12.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Unidades_Peso" Width="1.5" PointX="12.75" PointY="18.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Usos_CFDI" Width="1.5" PointX="18.75" PointY="15.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Usuarios" Width="1.5" PointX="18.75" PointY="18.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Variables_Calculo" Width="1.5" PointX="14.75" PointY="19.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Vendedores" Width="1.5" PointX="20.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Archivos_Descarga" Width="1.5" PointX="2.75" PointY="20.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Autotransporte" Width="1.5" PointX="20.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Carta_Porte" Width="1.5" PointX="4.75" PointY="20.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Cfdi_Uuid" Width="1.5" PointX="20.75" PointY="8.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Conceptos_Contenedor_Maritimo" Width="1.5" PointX="20.75" PointY="17.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Conceptos_Factura" Width="1.5" PointX="20.75" PointY="20.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Conceptos_Nota_Venta" Width="1.5" PointX="6.75" PointY="21.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Conceptos_Pre_Factura" Width="1.5" PointX="22.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Detalle_Prepago" Width="1.5" PointX="22.75" PointY="8.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Detalles_Servicio_Recurrentes" Width="1.5" PointX="22.75" PointY="12.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Envios_Correo_Nota" Width="1.5" PointX="22.75" PointY="18.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Facturas" Width="1.5" PointX="22.75" PointY="22.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Figuras" Width="1.5" PointX="24.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Firmas" Width="1.5" PointX="0.75" PointY="24.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Log_Errores" Width="1.5" PointX="24.75" PointY="6.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Pagos_Nota_Venta" Width="1.5" PointX="10.75" PointY="24.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Parte_Transporte_Figura" Width="1.5" PointX="12.75" PointY="24.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Pre_Carta_Porte" Width="1.5" PointX="14.75" PointY="24.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Remolque" Width="1.5" PointX="18.75" PointY="24.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Servicios_Recurrentes" Width="1.5" PointX="24.75" PointY="25.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Solicitudes_Descarga" Width="1.5" PointX="26.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Transporte_Aereo" Width="1.5" PointX="26.75" PointY="6.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Transporte_Maritimo" Width="1.5" PointX="26.75" PointY="12.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Ubicacion_Carta_Porte" Width="1.5" PointX="26.75" PointY="19.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbr_Vendedor_Cliente" Width="1.5" PointX="26.75" PointY="23.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Mercancias" Width="1.5" PointX="19.375" PointY="27.75" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Cancelacion_Factura" Width="1.5" PointX="7.375" PointY="28.75" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Sub_Tipo_Rem" Width="1.5" PointX="29.375" PointY="0.75" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Pre_Factura" Width="1.5" PointX="29.375" PointY="3.75" />
+        <EntityTypeShape EntityType="BD_FFModel.tbc_Clientes" Width="1.5" PointX="9.375" PointY="29.75" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Pre_Pagos" Width="1.5" PointX="27.375" PointY="26.75" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Cobros" Width="1.5" PointX="29.375" PointY="14.75" />
+        <EntityTypeShape EntityType="BD_FFModel.tbd_Notas_Venta" Width="1.5" PointX="11.375" PointY="29.75" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

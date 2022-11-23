@@ -408,24 +408,25 @@
             }
              $("#datetimepicker-dashboard").datepicker({
                  disableTouchKeyboard: true,
-                 locale: 'es-es',
+                 language: 'es',
                  inline: true,
                  sideBySide: false,
                  format: 'dd-mm-yyyy'
              });
+             //Agregar fechas importantes al calendario
              let fca_hoy = new Date();
              let ann = fca_hoy.getFullYear();
              let mes = fca_hoy.getMonth();
              let dia = fca_hoy.getDate();
-
-             $('#datetimepicker-dashboard').datepicker('setDates', [new Date(ann, mes, dia), new Date(2022, 10, 15), new Date(2022, 11, 24)])
-
-             $('div tbody').on('click', 'tr > .active', function () {
-                 //alert($(this).data().day)
-                 var diaSel = $(this).data().day;
-                 notificacionAlert("Hoy celebramos a ." + diaSel, "success");
-                 console.log($(this).data());
-             });
+             $('#datetimepicker-dashboard').datepicker('setDates', [new Date(ann, mes, dia)])
+             //$('#datetimepicker-dashboard').datepicker('setDates', [new Date(ann, mes, dia), new Date(2022, 10, 15), new Date(2022, 10, 24)])
+             //---> Agregar clic de detalle a fechas marcadas   <---
+             //$('div tbody').on('click', 'tr > .active', function () {
+             //    //alert($(this).data().day)
+             //    var diaSel = $(this).data().day;
+             //    notificacionAlert("Hoy celebramos a ." + diaSel, "success");
+             //    console.log($(this).data());
+             //});
         });
     </script>
 
